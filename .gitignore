@@ -1,3 +1,12 @@
+# Emacs Editing
+*.*~
+\#*#
+\#*
+
+# Unit Testing
+staging/
+unittests/
+
 # Prerequisites
 *.d
 
