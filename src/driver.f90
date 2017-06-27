@@ -16,6 +16,10 @@ PROGRAM kpoint_driver
                  1, 3, 0, &
                  0, 0, 1/),(/3,3/)))
 
+ !   H = transpose(reshape((/ 100, 0, 0, &
+ !                0, 100, 0, &
+ !                0, 0, 100/),(/3,3/)))
+
 
   R = transpose(reshape((/-0.5_dp, 0.5_dp, 0.5_dp, &
                  0.5_dp,-0.5_dp, 0.5_dp, &
@@ -35,15 +39,20 @@ PROGRAM kpoint_driver
 
 !  write(*,'(3("PP: ",3(1x,f7.3),/))') matmul(K,(/1,0,0/))
   
-  call generateFullKpointList(K, R, klist)
+  call generateFullKpointList(K, R, (/0._dp,0._dp,0._dp/), klist)
 
-  do i = 1,determinant(H)
-     write(*,'(3(1x,g11.4))') klist(i,:)
-  end do
+!  do i = 1,determinant(H)
+!     write(*,'(3(1x,g11.4))') klist(i,:)
+!  end do
 
   call get_lattice_pointGroup(K, pgOps, eps)
   call symmetryReduceKpointList(K, R, klist, pgOps, rdKlist, weights, eps)
 
+  write(*,'(//)')
+  write(*,'("Unrd kpts: ",i7)') size(klist,1)
+  write(*,'("Rdcd kpts: ",i7)') size(rdKlist,1)
+  write(*,'("Rdn ratio: ",f6.3)') real(size(weights))/size(klist,1)
+  
 
 END PROGRAM kpoint_driver
 

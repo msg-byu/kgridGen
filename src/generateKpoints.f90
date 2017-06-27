@@ -16,10 +16,13 @@ CONTAINS
   !!k-grid</parameter>
   !!<parameter name="R" regular="true">3x3 matrix. Columns are the reciprocal lattice
   !!vectors</parameter>
+  !!<parameter name="shift" regular="true">Fractional shift of the k-grid. Given as fractions
+  !!of the reciprocal lattice vectors. </parameter> 
   !!<parameter name="KpList" regular="true">Full list of (unreduced) kpoints</parameter>  
-  subroutine generateFullKpointList(K, R, KpList, eps_)
+  subroutine generateFullKpointList(K, R, shift, KpList, eps_)
     real(dp), intent(in) :: K(3,3)
     real(dp), intent(in) :: R(3,3)
+    real(dp), intent(in) :: shift(3)
     real(dp), allocatable:: KpList(:,:)
     real(dp), intent(in), optional:: eps_   
 
@@ -77,10 +80,11 @@ CONTAINS
     do iK = 0, a-1
        do jK = 0, c-1
           do kK = 0, f-1
-             !ordinal counter for k-points; converted to base-10 from mixed-radix number of HNF diagonal entries
+             !ordinal counter for k-points;
+             !converted to base-10 from mixed-radix number of HNF diagonal entries
              idx = f*c*iK + f*jK + kK + 1
-!!delete later             write(*,'("idx: ",i5)') idx
-             KpList(idx,:) = matmul(K,(/iK, jK, kK/)) ! compute Cartesian coordinates of k-point
+             ! compute Cartesian coordinates of the k-point
+             KpList(idx,:) = matmul(K,(/iK, jK, kK/))! + matmul(R,shift) 
           enddo
        enddo
     enddo
@@ -94,9 +98,9 @@ end do
        call bring_into_cell(KpList(iKP,:),Rinv,R,eps)
     enddo
 
-!! delete later        do idx = 1,n
-!! delete later       write(*,'("kp (bic): ",3(1x,f8.3))') KpList(idx,:)
-!! delete later    end do
+        do idx = 1,n
+       write(*,'("kp (bic): ",3(1x,f8.3))') KpList(idx,:)
+    end do
 
   END subroutine generateFullKpointList
 
@@ -117,7 +121,7 @@ end do
     integer, pointer     :: weights(:) 
     real(dp), optional   :: eps_
 
-    integer :: iOp, nOps, iRdKpt, nRdKpt, iUnRdKpt, nUR, cOrbit, idx,i
+    integer :: iOp, nOps, iRdKpt, nRdKpt, iUnRdKpt, nUR, cOrbit, idx, i, sum
     integer :: hashTable(size(UnreducedKpList,1))
     real(dp):: InvK(3,3), kpt(3), gpt(3) ! Inverse of kgrid matrix, kpt in Cartesian coords, in g-space 
     integer :: N(3,3) ! Integer transformation that takes K to R
@@ -159,34 +163,47 @@ end do
     call HermiteNormalForm(N,H,L)
     ! Left side of transform will be used later, right side (Ri) will not be.
     call SmithNormalForm(H,L,S,Ri)
-    write(*,'(3(1x,i2))') (H(i,:),i=1,3)
+    write(*,'(3(1x,i3))') (H(i,:),i=1,3)
     write(*,*) 
-    write(*,'(3(1x,i2))') (S(i,:),i=1,3)
+    write(*,'(3(1x,i3))') (S(i,:),i=1,3)
 
     D = (/S(1,1),S(2,2),S(3,3)/)
     
-    cOrbit = 1 ! Count how many unique orbits there are. I.e., the number of unique kpoints
+    cOrbit = 0 ! Count how many unique orbits there are. I.e., the number of unique kpoints
     nOps = size(SymOps,3) ! Number of symmetry operators in the point group
     nUR = size(UnreducedKpList,1) ! Number of unreduced kpoints
     hashTable = 0 ! Use a hash table to keep track of symmetrically-equivalent kpoints
     do iUnRdKpt = 1,nUR ! Loop over each kpoint and mark off its symmetry brothers
        write(*,'(/,"kpt#: ",i4)') iUnRdKpt
+          write(*,'("rkpt: ",3(f6.3,1x))') UnreducedKpList(iUnRdKpt,:)
        idx = findKptIndex(UnreducedKpList(iUnRdKpt,:),InvK,L,D)
        if (hashTable(idx)/=0) cycle ! This kpoint is already on an orbit, skip it
+       cOrbit = cOrbit + 1
        hashTable(idx) = cOrbit        
        do iOp = 1,nOps ! Loop over each symmetry operator, applying it to each kpoint
-       write(*,'("iOp#: ",i4)') iOp
-          !! What about shifts?  I'm not sure we want the integer symops here. Basis vectors for
-          !! K-grid and for recip lattice are not the same...
-
           ! Rotate the kpoint
           kpt = matmul(SymOps(:,:,iOp),UnreducedKpList(iUnRdKpt,:))
           idx = findKptIndex(kpt,InvK,L,D)
+          write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,kpt,idx
           hashTable(idx) = cOrbit
        enddo
-       cOrbit = cOrbit + 1
     enddo                                                  
 
+    ! Now that we have the hash table populated, make a list of the irreducible kpoints and their
+    ! corresponding weights.
+    sum = 0
+    allocate(ReducedList(cOrbit,3),weights(cOrbit))
+    do i = 1, cOrbit
+       weights(i) = count(hashTable==i)
+       sum = sum + weights(i)
+       idx = minloc(hashTable, dim=1, mask=hashTable==i) ! A hack to get the location of the first match
+       print*,"idx",idx
+       ReducedList(i,:) = UnreducedKpList(idx,:)
+    enddo
+    ! Fail safe checks
+    
+   
+    
   CONTAINS
     ! This function takes a k-point in Cartesian coordinates and "hashes" it into a single number,
     ! corresponding to its place in the k-point list.

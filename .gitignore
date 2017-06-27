@@ -3,6 +3,9 @@
 \#*#
 \#*
 
+# executable
+kptgen.x
+
 # Unit Testing
 staging/
 unittests/
