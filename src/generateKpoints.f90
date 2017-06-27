@@ -84,7 +84,7 @@ CONTAINS
              !converted to base-10 from mixed-radix number of HNF diagonal entries
              idx = f*c*iK + f*jK + kK + 1
              ! compute Cartesian coordinates of the k-point
-             KpList(idx,:) = matmul(K,(/iK, jK, kK/))! + matmul(R,shift) 
+             KpList(idx,:) = matmul(K,(/iK, jK, kK/)) + matmul(R,shift) 
           enddo
        enddo
     enddo
@@ -107,13 +107,16 @@ end do
   !!<summary>Reduce k-points to irreducible set. Takes a list of translationally distinct, but not
   !! rotationally distinct, kpoints and reduces them by the given point group. </summary>
   !!<parameter regular="true" name="K">Matrix of grid generating vectors.</parameter>
+  !!<parameter regular="true" name="R">Matrix of reciprocal lattice vectors.</parameter>
+  !!<parameter regular="true" name="shift">Offset (shift) of the k-grid.</parameter>
   !!<parameter regular="true" name="UnreducedKpList">List of unreduced kpoints.</parameter>
   !!<parameter regular="true" name="SymOps">Integer rotation matrices (coordinates of the lattice basis).</parameter>
   !!<parameter regular="true" name="ReducedList">List of symmetry-reduced kpoints.</parameter>
   !!<parameter regular="true" name="weights"> "Weights" of kpoints (length of each orbit).</parameter>
   !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
-  subroutine symmetryReduceKpointList(K, R, UnreducedKpList, SymOps, ReducedList, weights, eps_)
+  subroutine symmetryReduceKpointList(K, R, shift, UnreducedKpList, SymOps, ReducedList, weights, eps_)
     real(dp), intent(in) :: K(3,3), R(3,3) ! basis vectors of the k-point grid, basis vectors of recip. lattice
+    real(dp), intent(in) :: shift(3) ! Offset of the k-point grid
     real(dp), intent(in) :: UnreducedKpList(:,:) ! kpoint number (row); 3 components (columns)
     real(dp), intent(in) :: SymOps(:,:,:) ! Last slot is op # index, first two are 3x3
 !! delete later    integer,  intent(in) :: SymOps(:,:,:) ! Last slot is op # index, first two are 3x3
@@ -183,7 +186,7 @@ end do
        do iOp = 1,nOps ! Loop over each symmetry operator, applying it to each kpoint
           ! Rotate the kpoint
           kpt = matmul(SymOps(:,:,iOp),UnreducedKpList(iUnRdKpt,:))
-          idx = findKptIndex(kpt,InvK,L,D)
+          idx = findKptIndex(kpt-shift,InvK,L,D)
           write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,kpt,idx
           hashTable(idx) = cOrbit
        enddo
@@ -201,7 +204,18 @@ end do
        ReducedList(i,:) = UnreducedKpList(idx,:)
     enddo
     ! Fail safe checks
-    
+    if (any(hashTable==0)) then
+       write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
+       write(*,*) "At least one k-point in the unreduced list was not included in one of the orbits of the &
+            &symmetry group."
+       stop
+    endif
+    if (size(UnreducedKpList,1)/real(size(weights)) > size(SymOps,3)) then
+       write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
+       write(*,*) "The ractio of unreduced to reduced kpoints is larger than the size of the point group."
+       stop
+    endif
+
    
     
   CONTAINS
@@ -215,11 +229,11 @@ end do
     real(dp) :: gpt(3)
     
     gpt = matmul(InvK,kpt) ! kpoint is now in lattice coordinates
-    if (any(gpt-nint(gpt) > eps)) then ! kpt is not a lattice point of K
-       write(*,*) "ERROR: (symmetryReduceKpointList in  kpointGeneration)"
-       write(*,*) "A rotated k-point is not a lattice point of the generating vectors."
-       stop
-    END if
+!!    if (any(gpt-nint(gpt) > eps)) then ! kpt is not a lattice point of K
+!!       write(*,*) "ERROR: (symmetryReduceKpointList in  kpointGeneration)"
+!!       write(*,*) "A rotated k-point is not a lattice point of the generating vectors."
+!!       stop
+!!    END if
     ! Convert the kpoint to group coordinates and bring into first unit cell
     gpt = modulo(matmul(L,nint(gpt)),D)
     ! Convert from group coordinates (3-vector) to single base-10 number between 1 and nUr

@@ -5,20 +5,20 @@ PROGRAM kpoint_driver
   use symmetry, only : get_lattice_pointGroup
   implicit none
   
-  real(dp) K(3,3), R(3,3), Hinv(3,3), eps
+  real(dp) :: K(3,3), R(3,3), Hinv(3,3), eps, shift(3)
   integer H(3,3),i
   real(dp), allocatable :: klist(:,:)
   real(dp), pointer     :: pgOps(:,:,:), rdKlist(:,:)
   integer, pointer  :: weights(:)
   
   eps = 1e-10_dp
-  H = transpose(reshape((/ 2, 0, 0, &
-                 1, 3, 0, &
-                 0, 0, 1/),(/3,3/)))
-
- !   H = transpose(reshape((/ 100, 0, 0, &
- !                0, 100, 0, &
- !                0, 0, 100/),(/3,3/)))
+  H = transpose(reshape((/ 4, 0, 0, &
+                           0, 4, 0, &
+                           0, 0, 4/),(/3,3/)))
+!
+!    H = transpose(reshape((/ 100, 0, 0, &
+!                 0, 100, 0, &
+!                 0, 0, 100/),(/3,3/)))
 
 
   R = transpose(reshape((/-0.5_dp, 0.5_dp, 0.5_dp, &
@@ -38,20 +38,29 @@ PROGRAM kpoint_driver
   write(*,'(3("H: ",3(1x,i3),/))') (H(i,:),i=1,3)
 
 !  write(*,'(3("PP: ",3(1x,f7.3),/))') matmul(K,(/1,0,0/))
-  
-  call generateFullKpointList(K, R, (/0._dp,0._dp,0._dp/), klist)
+
+  shift  =  (/0.25_dp,0.25_dp,0.25_dp/)
+    shift  =  (/0.125_dp,0.125_dp,0.125_dp/)
+    shift  =  (/0.00_dp,0.00_dp,0.00_dp/)
+  call generateFullKpointList(K, R, shift, klist)
 
 !  do i = 1,determinant(H)
 !     write(*,'(3(1x,g11.4))') klist(i,:)
 !  end do
 
   call get_lattice_pointGroup(K, pgOps, eps)
-  call symmetryReduceKpointList(K, R, klist, pgOps, rdKlist, weights, eps)
+  call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
 
+   write(*,'(//"**********")')
+  
+  do i = 1,size(weights)
+     write(*,'(3(1x,f6.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
+  end do
+  
   write(*,'(//)')
   write(*,'("Unrd kpts: ",i7)') size(klist,1)
   write(*,'("Rdcd kpts: ",i7)') size(rdKlist,1)
-  write(*,'("Rdn ratio: ",f6.3)') real(size(weights))/size(klist,1)
+  write(*,'("Rdn ratio: ",f6.3)') size(klist,1)/real(size(weights))
   
 
 END PROGRAM kpoint_driver
