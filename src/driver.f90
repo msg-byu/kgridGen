@@ -41,7 +41,7 @@ PROGRAM kpoint_driver
 
   shift  =  (/0.25_dp,0.25_dp,0.25_dp/)
     shift  =  (/0.125_dp,0.125_dp,0.125_dp/)
-    shift  =  (/0.00_dp,0.00_dp,0.00_dp/)
+!    shift  =  (/0.00_dp,0.00_dp,0.00_dp/)
   call generateFullKpointList(K, R, shift, klist)
 
 !  do i = 1,determinant(H)

@@ -126,7 +126,9 @@ end do
 
     integer :: iOp, nOps, iRdKpt, nRdKpt, iUnRdKpt, nUR, cOrbit, idx, i, sum
     integer :: hashTable(size(UnreducedKpList,1))
-    real(dp):: InvK(3,3), kpt(3), gpt(3) ! Inverse of kgrid matrix, kpt in Cartesian coords, in g-space 
+    real(dp):: InvK(3,3), InvR(3,3)  ! Inverse of kgrid matrix, Inverse of reciprocal lattice
+    real(dp):: urKpt(3), roKpt(3), gpt(3) ! unrotated kpoint, rotated kpoint, kpoint in gspace coords
+    ! coords (unrotated, rotated), in g-space 
     integer :: N(3,3) ! Integer transformation that takes K to R
     integer :: H(3,3), L(3,3), Ri(3,3), S(3,3), D(3) ! HNF, SNF transform matrices, SNF, diag(SNF)
     real(dp):: eps
@@ -141,7 +143,13 @@ end do
     call matrix_inverse(K,InvK,err,eps)
     if (err) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
-       stop "The lattice vectors that were passed in are not linearly dependent."
+       stop "The k-grid  vectors that were passed in are not linearly dependent."
+    END if
+
+    call matrix_inverse(R,InvR,err,eps)
+    if (err) then
+       write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
+       stop "The reciprocal lattice vectors that were passed in are not linearly dependent."
     END if
 
     !! Check for valid inputs
@@ -177,17 +185,23 @@ end do
     nUR = size(UnreducedKpList,1) ! Number of unreduced kpoints
     hashTable = 0 ! Use a hash table to keep track of symmetrically-equivalent kpoints
     do iUnRdKpt = 1,nUR ! Loop over each kpoint and mark off its symmetry brothers
+       urKpt = UnreducedKpList(iUnRdKpt,:)  ! unrotated kpoint (shorter name for clarity's sake)
        write(*,'(/,"kpt#: ",i4)') iUnRdKpt
-          write(*,'("rkpt: ",3(f6.3,1x))') UnreducedKpList(iUnRdKpt,:)
-       idx = findKptIndex(UnreducedKpList(iUnRdKpt,:),InvK,L,D)
+          write(*,'("rkpt: ",3(f6.3,1x))') urKpt
+       idx = findKptIndex(urKpt,InvK,L,D)
        if (hashTable(idx)/=0) cycle ! This kpoint is already on an orbit, skip it
        cOrbit = cOrbit + 1
        hashTable(idx) = cOrbit        
        do iOp = 1,nOps ! Loop over each symmetry operator, applying it to each kpoint
           ! Rotate the kpoint
-          kpt = matmul(SymOps(:,:,iOp),UnreducedKpList(iUnRdKpt,:))
-          idx = findKptIndex(kpt-shift,InvK,L,D)
-          write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,kpt,idx
+          roKpt = matmul(SymOps(:,:,iOp),urKpt)
+          ! Make sure the rotated kpoint is still part of the kgrid. If not, cycle
+          call bring_into_cell(roKpt, InvR, R, eps)
+          roKpt = roKpt - shift
+          if (any(matmul(invK,roKpt) - nint(matmul(invK,roKpt)) > eps)) cycle
+
+          idx = findKptIndex(roKpt,InvK,L,D)
+          write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,roKpt+shift,idx
           hashTable(idx) = cOrbit
        enddo
     enddo                                                  
