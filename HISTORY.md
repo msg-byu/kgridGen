@@ -1,5 +1,9 @@
+0.2.0 Bug fixes, redefinition of shift. Arbitrary shifts seem to do the right thing. If a rotation
+maps a kpoint onto a point not in original list, its skipped (as we want---no expansion of the
+original list). Earlier cases seem to still work with these changes. Time for the unit tests now. 
+
 0.1.1 Included a write-up from Rod that describes how the SNF is used to map points into "group
-coordinates". This is a key idea for the O(N) algorithm, which using the mapping as a hash
+coordinates". This is a key idea for the O(N) algorithm, which uses the mapping as a hash
 function for the kpoint list.
 
 0.1.0 Added functionality for an arbitrary shift. Seems to be working (tried several cases by

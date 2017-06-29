@@ -15,10 +15,10 @@ PROGRAM kpoint_driver
   H = transpose(reshape((/ 4, 0, 0, &
                            0, 4, 0, &
                            0, 0, 4/),(/3,3/)))
-!
-!    H = transpose(reshape((/ 100, 0, 0, &
-!                 0, 100, 0, &
-!                 0, 0, 100/),(/3,3/)))
+
+    H = transpose(reshape((/ 100, 0, 0, &
+                 0, 100, 0, &
+                 0, 0, 100/),(/3,3/)))
 
 
   R = transpose(reshape((/-0.5_dp, 0.5_dp, 0.5_dp, &
@@ -39,9 +39,11 @@ PROGRAM kpoint_driver
 
 !  write(*,'(3("PP: ",3(1x,f7.3),/))') matmul(K,(/1,0,0/))
 
-  shift  =  (/0.25_dp,0.25_dp,0.25_dp/)
-    shift  =  (/0.125_dp,0.125_dp,0.125_dp/)
-!    shift  =  (/0.00_dp,0.00_dp,0.00_dp/)
+  shift  =  (/0.5_dp,0.5_dp,0.5_dp/)
+  shift  =  (/0.0_dp,0.0_dp,0.0_dp/)
+!!    shift  =  (/0.25_dp,0.25_dp,0.25_dp/)
+!!    shift  =  (/0.125_dp,0.125_dp,0.125_dp/)
+!!!    shift  =  (/0.00_dp,0.00_dp,0.00_dp/)
   call generateFullKpointList(K, R, shift, klist)
 
 !  do i = 1,determinant(H)

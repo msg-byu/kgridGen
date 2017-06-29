@@ -17,7 +17,7 @@ CONTAINS
   !!<parameter name="R" regular="true">3x3 matrix. Columns are the reciprocal lattice
   !!vectors</parameter>
   !!<parameter name="shift" regular="true">Fractional shift of the k-grid. Given as fractions
-  !!of the reciprocal lattice vectors. </parameter> 
+  !!of the generating k-lattice vectors. </parameter> 
   !!<parameter name="KpList" regular="true">Full list of (unreduced) kpoints</parameter>  
   subroutine generateFullKpointList(K, R, shift, KpList, eps_)
     real(dp), intent(in) :: K(3,3)
@@ -84,23 +84,23 @@ CONTAINS
              !converted to base-10 from mixed-radix number of HNF diagonal entries
              idx = f*c*iK + f*jK + kK + 1
              ! compute Cartesian coordinates of the k-point
-             KpList(idx,:) = matmul(K,(/iK, jK, kK/)) + matmul(R,shift) 
+             KpList(idx,:) = matmul(K,(/iK, jK, kK/)) + matmul(K,shift) 
           enddo
        enddo
     enddo
 
-do idx = 1,n
-   write(*,'("kp: ",3(1x,f8.3))') KpList(idx,:)
-end do
+!!do idx = 1,n
+!!   write(*,'("kp: ",3(1x,f8.3))') KpList(idx,:)
+!!end do
     
     ! Bring each k-point into the first unit cell
     do iKP = 1,n
        call bring_into_cell(KpList(iKP,:),Rinv,R,eps)
     enddo
 
-        do idx = 1,n
-       write(*,'("kp (bic): ",3(1x,f8.3))') KpList(idx,:)
-    end do
+!!        do idx = 1,n
+!!       write(*,'("kp (bic): ",3(1x,f8.3))') KpList(idx,:)
+!!    end do
 
   END subroutine generateFullKpointList
 
@@ -108,7 +108,7 @@ end do
   !! rotationally distinct, kpoints and reduces them by the given point group. </summary>
   !!<parameter regular="true" name="K">Matrix of grid generating vectors.</parameter>
   !!<parameter regular="true" name="R">Matrix of reciprocal lattice vectors.</parameter>
-  !!<parameter regular="true" name="shift">Offset (shift) of the k-grid.</parameter>
+  !!<parameter regular="true" name="shift">Offset (shift) of the k-grid (fractions of k-grid vectors).</parameter>
   !!<parameter regular="true" name="UnreducedKpList">List of unreduced kpoints.</parameter>
   !!<parameter regular="true" name="SymOps">Integer rotation matrices (coordinates of the lattice basis).</parameter>
   !!<parameter regular="true" name="ReducedList">List of symmetry-reduced kpoints.</parameter>
@@ -186,9 +186,10 @@ end do
     hashTable = 0 ! Use a hash table to keep track of symmetrically-equivalent kpoints
     do iUnRdKpt = 1,nUR ! Loop over each kpoint and mark off its symmetry brothers
        urKpt = UnreducedKpList(iUnRdKpt,:)  ! unrotated kpoint (shorter name for clarity's sake)
-       write(*,'(/,"kpt#: ",i4)') iUnRdKpt
-          write(*,'("rkpt: ",3(f6.3,1x))') urKpt
+!       write(*,'(/,"kpt#: ",i4)') iUnRdKpt
        idx = findKptIndex(urKpt,InvK,L,D)
+!                 write(*,'("urKpt: ",3(f6.3,1x),"idx:",i3)') urKpt, idx
+      
        if (hashTable(idx)/=0) cycle ! This kpoint is already on an orbit, skip it
        cOrbit = cOrbit + 1
        hashTable(idx) = cOrbit        
@@ -197,15 +198,22 @@ end do
           roKpt = matmul(SymOps(:,:,iOp),urKpt)
           ! Make sure the rotated kpoint is still part of the kgrid. If not, cycle
           call bring_into_cell(roKpt, InvR, R, eps)
-          roKpt = roKpt - shift
-          if (any(matmul(invK,roKpt) - nint(matmul(invK,roKpt)) > eps)) cycle
-
+          ! Unshift the k-point temporarily to check if it still is a member of the lattice
+          roKpt = roKpt - matmul(K,shift)
+          if (any(matmul(invK,roKpt) - nint(matmul(invK,roKpt)) > eps)) then
+             cycle
+          endif
+          ! Reshift the kpoint before finding its indx
+          roKpt = roKpt + matmul(K,shift)
           idx = findKptIndex(roKpt,InvK,L,D)
-          write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,roKpt+shift,idx
+!          write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,roKpt+matmul(R,shift),idx
           hashTable(idx) = cOrbit
        enddo
     enddo                                                  
-
+!!    write(*,*) "Hash table:"
+!!    do i = 1, nUr
+!!       write(*,'("kpt#:",i3,3x,"index:",i3)') i, hashTable(i)
+!!    enddo
     ! Now that we have the hash table populated, make a list of the irreducible kpoints and their
     ! corresponding weights.
     sum = 0
@@ -214,7 +222,7 @@ end do
        weights(i) = count(hashTable==i)
        sum = sum + weights(i)
        idx = minloc(hashTable, dim=1, mask=hashTable==i) ! A hack to get the location of the first match
-       print*,"idx",idx
+ !      print*,"idx",idx
        ReducedList(i,:) = UnreducedKpList(idx,:)
     enddo
     ! Fail safe checks
@@ -243,11 +251,11 @@ end do
     real(dp) :: gpt(3)
     
     gpt = matmul(InvK,kpt) ! kpoint is now in lattice coordinates
-!!    if (any(gpt-nint(gpt) > eps)) then ! kpt is not a lattice point of K
-!!       write(*,*) "ERROR: (symmetryReduceKpointList in  kpointGeneration)"
-!!       write(*,*) "A rotated k-point is not a lattice point of the generating vectors."
-!!       stop
-!!    END if
+    if (any(gpt-nint(gpt) > eps)) then ! kpt is not a lattice point of K
+       write(*,*) "ERROR: (symmetryReduceKpointList in  kpointGeneration)"
+       write(*,*) "A rotated k-point is not a lattice point of the generating vectors."
+       stop
+    END if
     ! Convert the kpoint to group coordinates and bring into first unit cell
     gpt = modulo(matmul(L,nint(gpt)),D)
     ! Convert from group coordinates (3-vector) to single base-10 number between 1 and nUr
