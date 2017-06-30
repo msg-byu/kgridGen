@@ -17,9 +17,9 @@ PROGRAM kpoint_driver
                            0, 4, 0, &
                            0, 0, 4/),(/3,3/))) !test 5
 
-    ! H = transpose(reshape((/ 2, 0, 0, &
-    !                          0, 2, 0, &
-    !                          0, 0, 2/),(/3,3/))) !tests 1, 2, 3
+    H = transpose(reshape((/ 2, 0, 0, &
+                             0, 2, 0, &
+                             0, 0, 2/),(/3,3/))) !tests 1, 2, 3
 
     ! H = transpose(reshape((/ 3, 0, 0, &
     !                          0, 3, 0, &
@@ -63,23 +63,22 @@ PROGRAM kpoint_driver
   ! end do
 
   call get_lattice_pointGroup(K, pgOps, eps)
-  
-  call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
-  
-  call pysave(K, "../tests/simple_cubic/K.in.6")
-  call pysave(R, "../tests/simple_cubic/R.in.6")
-  call pysave(shift, "../tests/simple_cubic/shift.in.6")
-  call pysave(klist, "../tests/simple_cubic/unreduced_klist.in.6")
-  call pysave(pgOps, "../tests/simple_cubic/symops.in.6")
-  call pysave(rdKlist, "../tests/simple_cubic/simple_cubic_kpts.out.6")
-  call pysave(weights, "../tests/simple_cubic/simple_cubic_wts.out.6")
 
-  write(*,'(//"**********"//)')
-  
-  do i = 1,size(weights)
-     write(*,'(3(1x,f6.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
-  end do
-  
+  call pysave(K, "K.in.3")
+  call pysave(R, "R.in.3")
+  call pysave(shift, "shift.in.3")
+  call pysave(klist, "unreduced_klist.in.3")
+  call pysave(pgOps, "symops.in.3")
+  call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
+  call pysave(rdKlist, "simple_cubic_kpts.out.3")
+  call pysave(weights, "simple_cubic_wts.out.3")
+
+   write(*,'(//"**********")')
+
+ do i = 1,size(weights)
+    write(*,'(3(1x,f6.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
+ end do
+
   write(*,'(//)')
   write(*,'("Unrd kpts: ",i7)') size(klist,1)
   write(*,'("Rdcd kpts: ",i7)') size(rdKlist,1)
