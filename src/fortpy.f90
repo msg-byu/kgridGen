@@ -15768,16 +15768,16 @@ contains
     if (dims(5) .eq. 0) return
 
     call file_open(filename, len(filename), 'logical')
-    write(fileunit,"(A, 5i15)") "## ", dims
+    write(fileunit, "(A, 5i15)") "## ", dims
     do i1=1, dims(1)
-       do i2=1, dims(2)
-          do i3=1, dims(3)
-             write(fileunit, "(A, 5i15)") "## ", i1, i2, i3, 0, 0
-             do i4=1, dims(4)
-                write(fileunit, *) variable(i1, i2, i3, i4, :)
-             end do
+      do i2=1, dims(2)
+        do i3=1, dims(3)
+          write(fileunit, "(A, 5i15)") "## ", i1, i2, i3, 0, 0
+          do i4=1, dims(4)
+            write(fileunit, *) variable(i1, i2, i3, i4, :)
           end do
-       end do
+        end do
+      end do
     end do
     call file_close()
   end subroutine pysave_logical_5d

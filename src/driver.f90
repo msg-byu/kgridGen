@@ -6,22 +6,28 @@ PROGRAM kpoint_driver
   use fortpy, only : pysave
   implicit none
 
-  
   real(dp) :: K(3,3), R(3,3), Hinv(3,3), eps, shift(3)
   integer H(3,3),i
   real(dp), allocatable :: klist(:,:)
   real(dp), pointer     :: pgOps(:,:,:), rdKlist(:,:)
   integer, pointer  :: weights(:)
-  eps = 1e-10_dp
-  
-  ! H = transpose(reshape((/ 4, 0, 0, &
-  !                          0, 4, 0, &
-  !                          0, 0, 4/),(/3,3/)))
-  
-  H = transpose(reshape((/ 2, 0, 0, &
-                           0, 2, 0, &
-                           0, 0, 2/),(/3,3/)))
 
+  eps = 1e-10_dp
+  H = transpose(reshape((/ 4, 0, 0, &
+                           0, 4, 0, &
+                           0, 0, 4/),(/3,3/))) !test 5
+
+    ! H = transpose(reshape((/ 2, 0, 0, &
+    !                          0, 2, 0, &
+    !                          0, 0, 2/),(/3,3/))) !tests 1, 2, 3
+
+    ! H = transpose(reshape((/ 3, 0, 0, &
+    !                          0, 3, 0, &
+    !                          0, 0, 3/),(/3,3/))) !test 4
+
+  H = transpose(reshape((/ 2, 0, 0, &
+                           1, 2, 0, &
+                           1, 1, 2/),(/3,3/))) !test 11
   ! H = transpose(reshape((/ 100, 0, 0, &
   !                            0, 100, 0, &
   !                            0, 0, 100/),(/3,3/)))
@@ -78,6 +84,5 @@ PROGRAM kpoint_driver
   write(*,'("Unrd kpts: ",i7)') size(klist,1)
   write(*,'("Rdcd kpts: ",i7)') size(rdKlist,1)
   write(*,'("Rdn ratio: ",f6.3)') size(klist,1)/real(size(weights))
-  
 
 END PROGRAM kpoint_driver
