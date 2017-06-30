@@ -17,17 +17,17 @@ PROGRAM kpoint_driver
                            0, 4, 0, &
                            0, 0, 4/),(/3,3/))) !test 5
 
-    ! H = transpose(reshape((/ 2, 0, 0, &
-    !                          0, 2, 0, &
-    !                          0, 0, 2/),(/3,3/))) !tests 1, 2, 3
+    H = transpose(reshape((/ 2, 0, 0, &
+                             0, 2, 0, &
+                             0, 0, 2/),(/3,3/))) !tests 1, 2, 3
 
     ! H = transpose(reshape((/ 3, 0, 0, &
     !                          0, 3, 0, &
     !                          0, 0, 3/),(/3,3/))) !test 4
 
-  H = transpose(reshape((/ 2, 0, 0, &
-                           1, 2, 0, &
-                           1, 1, 2/),(/3,3/))) !test 11
+  ! H = transpose(reshape((/ 2, 0, 0, &
+  !                          1, 2, 0, &
+  !                          1, 1, 2/),(/3,3/))) !test 11
 
 
   R = transpose(reshape((/-0.5_dp, 0.5_dp, 0.5_dp, &
@@ -36,9 +36,9 @@ PROGRAM kpoint_driver
   R = transpose(reshape((/1.0_dp, 0.0_dp, 0.0_dp, &
                  0.0_dp,  1.0_dp, 0.0_dp, &
                  0.0_dp,  0.0_dp, 1.0_dp/),(/3,3/))) !tests 1, 2, 6
-  ! R = transpose(reshape((/2.0_dp, 0.0_dp, 0.0_dp, &
-  !                0.0_dp,  2.0_dp, 0.0_dp, &
-  !                0.0_dp,  0.0_dp, 2.0_dp/),(/3,3/))) !test 3
+  R = transpose(reshape((/2.0_dp, 0.0_dp, 0.0_dp, &
+                 0.0_dp,  2.0_dp, 0.0_dp, &
+                 0.0_dp,  0.0_dp, 2.0_dp/),(/3,3/))) !test 3
   ! R = transpose(reshape((/1.2_dp, 0.0_dp, 0.0_dp, &
   !                0.0_dp,  1.2_dp, 0.0_dp, &
   !                0.0_dp,  0.0_dp, 1.2_dp/),(/3,3/))) !test 4
@@ -63,7 +63,7 @@ PROGRAM kpoint_driver
   shift  =  (/0.5_dp,0.5_dp,0.5_dp/) !test 1
   shift  =  (/0.333333333333333333333333333333333333333333333_dp,0.333333333333333333333333333333333333333333333333333_dp,0.333333333333333333333333333333333333333_dp/) !test 2
   shift  =  (/0.5_dp,0.5_dp,0.0_dp/) !test 3
-  shift  =  (/0.0_dp,0.0_dp,0.0_dp/) !tests 4, 5, 6
+  ! shift  =  (/0.0_dp,0.0_dp,0.0_dp/) !tests 4, 5, 6
 
 !  shift  =  (/0.5_dp,0.5_dp,0.5_dp/)
 !!    shift  =  (/0.25_dp,0.25_dp,0.25_dp/)
@@ -77,14 +77,14 @@ PROGRAM kpoint_driver
 
   call get_lattice_pointGroup(K, pgOps, eps)
 
-  call pysave(K, "K.in.6")
-  call pysave(R, "R.in.6")
-  call pysave(shift, "shift.in.6")
-  call pysave(klist, "unreduced_klist.in.6")
-  call pysave(pgOps, "symops.in.6")
+  call pysave(K, "K.in.3")
+  call pysave(R, "R.in.3")
+  call pysave(shift, "shift.in.3")
+  call pysave(klist, "unreduced_klist.in.3")
+  call pysave(pgOps, "symops.in.3")
   call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
-  call pysave(rdKlist, "simple_cubic_kpts.out.6")
-  call pysave(weights, "simple_cubic_wts.out.6")
+  call pysave(rdKlist, "simple_cubic_kpts.out.3")
+  call pysave(weights, "simple_cubic_wts.out.3")
 
    write(*,'(//"**********")')
 
