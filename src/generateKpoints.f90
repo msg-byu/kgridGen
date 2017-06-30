@@ -178,7 +178,9 @@ CONTAINS
     write(*,'(3(1x,i3))') (H(i,:),i=1,3)
     write(*,*) 
     write(*,'(3(1x,i3))') (S(i,:),i=1,3)
-
+    write(*,'("InvK")')
+    write(*,'(3(1x,f7.3))') (InvK(i,:),i=1,3)
+    
     D = (/S(1,1),S(2,2),S(3,3)/)
     
     cOrbit = 0 ! Count how many unique orbits there are. I.e., the number of unique kpoints
@@ -187,34 +189,42 @@ CONTAINS
     hashTable = 0 ! Use a hash table to keep track of symmetrically-equivalent kpoints
     do iUnRdKpt = 1,nUR ! Loop over each kpoint and mark off its symmetry brothers
        urKpt = UnreducedKpList(iUnRdKpt,:)  ! unrotated kpoint (shorter name for clarity's sake)
-!       write(*,'(/,"kpt#: ",i4)') iUnRdKpt
-       idx = findKptIndex(urKpt,InvK,L,D)
-!                 write(*,'("urKpt: ",3(f6.3,1x),"idx:",i3)') urKpt, idx
-      
-       if (hashTable(idx)/=0) cycle ! This kpoint is already on an orbit, skip it
-       cOrbit = cOrbit + 1
-       hashTable(idx) = cOrbit        
-       do iOp = 1,nOps ! Loop over each symmetry operator, applying it to each kpoint
-          ! Rotate the kpoint
-          roKpt = matmul(SymOps(:,:,iOp),urKpt)
-          ! Make sure the rotated kpoint is still part of the kgrid. If not, cycle
-          call bring_into_cell(roKpt, InvR, R, eps)
-          ! Unshift the k-point temporarily to check if it still is a member of the lattice
+      write(*,'(/,"kpt#: ",i4)') iUnRdKpt
+     idx = findKptIndex(urKpt,InvK,L,D)
+                write(*,'("urKpt: ",3(f6.3,1x),"idx:",i3)') urKpt, idx
+    
+     if (hashTable(idx)/=0) cycle ! This kpoint is already on an orbit, skip it
+     cOrbit = cOrbit + 1
+     hashTable(idx) = cOrbit        
+     do iOp = 1,nOps ! Loop over each symmetry operator, applying it to each kpoint
+        ! Rotate the kpoint
+        roKpt = matmul(SymOps(:,:,iOp),urKpt)
+            write(*,'(/,"Operator:")') 
+    write(*,'(3(1x,f7.3))') (SymOps(i,:,iOp),i=1,3)
+        write(*,'("roKpt: ",3(f6.3,1x),i3)') roKpt
+        ! Make sure the rotated kpoint is still part of the kgrid. If not, cycle
+        call bring_into_cell(roKpt, InvR, R, eps)
+          write(*,'("icKpt: ",3(f6.3,1x),i3)') roKpt
+        ! Unshift the k-point temporarily to check if it still is a member of the lattice
           roKpt = roKpt - matmul(K,shift)
-          if (any(matmul(invK,roKpt) - nint(matmul(invK,roKpt)) > eps)) then
-             cycle
-          endif
-          ! Reshift the kpoint before finding its indx
-          roKpt = roKpt + matmul(K,shift)
-          idx = findKptIndex(roKpt,InvK,L,D)
-!          write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,roKpt+matmul(R,shift),idx
-          hashTable(idx) = cOrbit
-       enddo
-    enddo                                                  
-!!    write(*,*) "Hash table:"
-!!    do i = 1, nUr
-!!       write(*,'("kpt#:",i3,3x,"index:",i3)') i, hashTable(i)
-!!    enddo
+  !        write(*,'(3(1x,i3))') nint(matmul(invK,roKpt))
+   !         write(*,'(3(1x,f7.3))') (matmul(invK,roKpt) - nint(matmul(invK,roKpt))) 
+       if (.not. equal(matmul(invK,roKpt), nint(matmul(invK,roKpt)), eps)) then
+!        if (any((matmul(invK,roKpt) - nint(matmul(invK,roKpt))) > eps)) then
+           cycle
+        endif
+        ! Reshift the kpoint before finding its indx
+        roKpt = roKpt + matmul(K,shift)
+          write(*,'("shKpt: ",3(f6.3,1x),i3)') roKpt
+        idx = findKptIndex(roKpt,InvK,L,D)
+         write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,roKpt,idx
+        hashTable(idx) = cOrbit
+     enddo
+  enddo                                                  
+    write(*,*) "Hash table:"
+    do i = 1, nUr
+       write(*,'("kpt#:",i3,3x,"index:",i3)') i, hashTable(i)
+    enddo
     ! Now that we have the hash table populated, make a list of the irreducible kpoints and their
     ! corresponding weights.
     sum = 0
