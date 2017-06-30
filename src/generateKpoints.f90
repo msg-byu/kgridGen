@@ -89,18 +89,19 @@ CONTAINS
        enddo
     enddo
 
-!!do idx = 1,n
-!!   write(*,'("kp: ",3(1x,f8.3))') KpList(idx,:)
-!!end do
+!do idx = 1,n
+!   write(*,'("kp: ",3(1x,f8.3))') KpList(idx,:)
+!end do
     
     ! Bring each k-point into the first unit cell
     do iKP = 1,n
        call bring_into_cell(KpList(iKP,:),Rinv,R,eps)
     enddo
 
-!!        do idx = 1,n
-!!       write(*,'("kp (bic): ",3(1x,f8.3))') KpList(idx,:)
-!!    end do
+
+    ! do idx = 1,n
+    !    write(*,'("kp (bic): ",3(1x,f8.3))') KpList(idx,:)
+    ! end do
 
   END subroutine generateFullKpointList
 
