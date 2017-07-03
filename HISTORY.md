@@ -1,3 +1,4 @@
+0.2.3 Added new unit tests for body-centered, cubic lattices.
 
 0.2.2 Fixed finite precision issues related to eps. Added a few unit tests for simple cubic
       lattices. Added an additional fail safe test.
