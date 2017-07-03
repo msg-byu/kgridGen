@@ -1,3 +1,6 @@
+0.2.2 Fixed finite precision issues related to eps. Added a few unit tests for simple cubic
+      lattices. Added an additional fail safe test.
+
 0.2.0 Bug fixes, redefinition of shift. Arbitrary shifts seem to do the right thing. If a rotation
 maps a kpoint onto a point not in original list, its skipped (as we want---no expansion of the
 original list). Earlier cases seem to still work with these changes. Time for the unit tests now. 

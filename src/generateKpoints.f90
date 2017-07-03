@@ -89,9 +89,9 @@ CONTAINS
        enddo
     enddo
 
-!do idx = 1,n
-!   write(*,'("kp: ",3(1x,f8.3))') KpList(idx,:)
-!end do
+    !do idx = 1,n
+    !   write(*,'("kp: ",3(1x,f8.3))') KpList(idx,:)
+    !end do
     
     ! Bring each k-point into the first unit cell
     do iKP = 1,n
@@ -131,7 +131,7 @@ CONTAINS
     real(dp):: urKpt(3), roKpt(3), gpt(3) ! unrotated kpoint, rotated kpoint, kpoint in gspace coords
     ! coords (unrotated, rotated), in g-space 
     integer :: N(3,3) ! Integer transformation that takes K to R
-    integer :: H(3,3), L(3,3), Ri(3,3), S(3,3), D(3) ! HNF, SNF transform matrices, SNF, diag(SNF)
+    integer :: H(3,3), B(3,3), L(3,3), Ri(3,3), S(3,3), D(3) ! HNF, HNF transform matrix, SNF transform matrices, SNF, diag(SNF)
     real(dp):: eps
     logical :: err
     
@@ -155,7 +155,8 @@ CONTAINS
 
     !! Check for valid inputs
     ! Make sure kgrid is commensurate with reciprocal cell
-    if (any(matmul(InvK,R) - nint(matmul(InvK,R)) > eps)) then
+    ! if (any(matmul(InvK,R) - nint(matmul(InvK,R)) > eps)) then
+    if (.not. equal(matmul(InvK, R), nint(matmul(InvK, R)), eps)) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90):"
        write(*,*) "The point generating vectors and the reciprocal lattice are incommensurate."
        write(*,*) "The reciprocal cell should be an (matrix) integer multiple of the generating lattice vectors."
@@ -172,7 +173,7 @@ CONTAINS
    ! Integer transformation matrix that takes K to R, not necessarily HNF at the outset
     N = nint(matmul(InvK,R))
     ! Find the HNF of N, store it in H (B is the transformation matrix)
-    call HermiteNormalForm(N,H,L)
+    call HermiteNormalForm(N,H,B)
     ! Left side of transform will be used later, right side (Ri) will not be.
     call SmithNormalForm(H,L,S,Ri)
     write(*,'(3(1x,i3))') (H(i,:),i=1,3)
@@ -188,39 +189,40 @@ CONTAINS
     nUR = size(UnreducedKpList,1) ! Number of unreduced kpoints
     hashTable = 0 ! Use a hash table to keep track of symmetrically-equivalent kpoints
     do iUnRdKpt = 1,nUR ! Loop over each kpoint and mark off its symmetry brothers
+       ! urKpt = UnreducedKpList(iUnRdKpt,:)  ! unrotated kpoint (shorter name for clarity's sake)
        urKpt = UnreducedKpList(iUnRdKpt,:)  ! unrotated kpoint (shorter name for clarity's sake)
-      write(*,'(/,"kpt#: ",i4)') iUnRdKpt
-     idx = findKptIndex(urKpt,InvK,L,D)
-                write(*,'("urKpt: ",3(f6.3,1x),"idx:",i3)') urKpt, idx
-    
-     if (hashTable(idx)/=0) cycle ! This kpoint is already on an orbit, skip it
-     cOrbit = cOrbit + 1
-     hashTable(idx) = cOrbit        
-     do iOp = 1,nOps ! Loop over each symmetry operator, applying it to each kpoint
-        ! Rotate the kpoint
-        roKpt = matmul(SymOps(:,:,iOp),urKpt)
-            write(*,'(/,"Operator:")') 
-    write(*,'(3(1x,f7.3))') (SymOps(i,:,iOp),i=1,3)
-        write(*,'("roKpt: ",3(f6.3,1x),i3)') roKpt
-        ! Make sure the rotated kpoint is still part of the kgrid. If not, cycle
-        call bring_into_cell(roKpt, InvR, R, eps)
+       write(*,'(/,"kpt#: ",i4)') iUnRdKpt
+       idx = findKptIndex(urKpt,InvK,L,D)
+       write(*,'("urKpt: ",3(f6.3,1x),"idx:",i3)') urKpt, idx
+       if (hashTable(idx)/=0) cycle ! This kpoint is already on an orbit, skip it
+       cOrbit = cOrbit + 1
+       hashTable(idx) = cOrbit        
+       do iOp = 1,nOps ! Loop over each symmetry operator, applying it to each kpoint
+          ! Rotate the kpoint
+          roKpt = matmul(SymOps(:,:,iOp),urKpt)
+          write(*,'(/,"Operator:")') 
+          write(*,'(3(1x,f7.3))') (SymOps(i,:,iOp),i=1,3)
+          write(*,'("roKpt: ",3(f6.3,1x),i3)') roKpt
+          ! Make sure the rotated kpoint is still part of the kgrid. If not, cycle
+          call bring_into_cell(roKpt, InvR, R, eps)
           write(*,'("icKpt: ",3(f6.3,1x),i3)') roKpt
-        ! Unshift the k-point temporarily to check if it still is a member of the lattice
+          ! Unshift the k-point temporarily to check if it still is a member of the lattice
           roKpt = roKpt - matmul(K,shift)
-  !        write(*,'(3(1x,i3))') nint(matmul(invK,roKpt))
-   !         write(*,'(3(1x,f7.3))') (matmul(invK,roKpt) - nint(matmul(invK,roKpt))) 
-       if (.not. equal(matmul(invK,roKpt), nint(matmul(invK,roKpt)), eps)) then
-!        if (any((matmul(invK,roKpt) - nint(matmul(invK,roKpt))) > eps)) then
-           cycle
-        endif
-        ! Reshift the kpoint before finding its indx
-        roKpt = roKpt + matmul(K,shift)
+          ! write(*,'(3(1x,i3))') nint(matmul(invK,roKpt))
+          ! write(*,'(3(1x,f7.3))') (matmul(invK,roKpt) - nint(matmul(invK,roKpt))) 
+          ! if (.not. equal(matmul(invK,roKpt), nint(matmul(invK,roKpt)), eps)) then
+          ! if (any((matmul(invK,roKpt) - nint(matmul(invK,roKpt))) > eps)) then
+          if (.not. equal(matmul(invK,roKpt), nint(matmul(invK,roKpt)), eps)) then
+             cycle
+          endif
+          ! Reshift the kpoint before finding its indx
+          roKpt = roKpt + matmul(K,shift)
           write(*,'("shKpt: ",3(f6.3,1x),i3)') roKpt
-        idx = findKptIndex(roKpt,InvK,L,D)
-         write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,roKpt,idx
-        hashTable(idx) = cOrbit
-     enddo
-  enddo                                                  
+          idx = findKptIndex(roKpt,InvK,L,D)
+          write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,roKpt,idx
+          hashTable(idx) = cOrbit
+       enddo
+    enddo
     write(*,*) "Hash table:"
     do i = 1, nUr
        write(*,'("kpt#:",i3,3x,"index:",i3)') i, hashTable(i)
@@ -235,7 +237,7 @@ CONTAINS
        idx = minloc(hashTable, dim=1, mask=hashTable==i) ! A hack to get the location of the first match
  !      print*,"idx",idx
        ReducedList(i,:) = UnreducedKpList(idx,:)
-    enddo
+    enddo    
     ! Fail safe checks
     if (any(hashTable==0)) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
@@ -245,11 +247,13 @@ CONTAINS
     endif
     if (size(UnreducedKpList,1)/real(size(weights)) > size(SymOps,3)) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
-       write(*,*) "The ractio of unreduced to reduced kpoints is larger than the size of the point group."
+       write(*,*) "The ratio of unreduced to reduced k-points is larger than the size of the point group."
        stop
     endif
-
-   
+    if (.not. sum == nUr) then
+       write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
+       write(*,*) "The sum of the weights of the irreducible k-points is not equal to the number of unreduced k-points."
+    endif
     
   CONTAINS
     ! This function takes a k-point in Cartesian coordinates and "hashes" it into a single number,
@@ -258,11 +262,15 @@ CONTAINS
     real(dp), intent(in) :: kpt(3), InvK(3,3) ! The k-point, inverse of the k-grid generating vecs
     integer,  intent(in) :: L(3,3), D(3) ! Left transform for SNF conversion, diagonal of SNF
     integer              :: findKptIndex ! index of the kpoint (base 10, 1..n)
+    real(dp) :: gpt(3) ! k-point in lattice coordinates
     
-    real(dp) :: gpt(3)
-    
-    gpt = matmul(InvK,kpt) ! kpoint is now in lattice coordinates
-    if (any(gpt-nint(gpt) > eps)) then ! kpt is not a lattice point of K
+    gpt = matmul(InvK,kpt)
+    write(*,'("kpt: ",3(f6.3,1x))') kpt
+    write(*,'("gpt: ",3(f6.3,1x))') gpt
+    write(*,'("Shift: ",3(f6.3,1x))') shift
+    write(*,'("KShift: ",3(f6.3,1x))') matmul(K,shift)
+    ! if (any(gpt-nint(gpt) > eps)) then ! kpt is not a lattice point of K
+    if (.not. equal(gpt, nint(gpt), eps)) then   
        write(*,*) "ERROR: (symmetryReduceKpointList in  kpointGeneration)"
        write(*,*) "A rotated k-point is not a lattice point of the generating vectors."
        stop
