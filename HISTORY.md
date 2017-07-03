@@ -1,3 +1,15 @@
+0.2.1 Bug fix: fixed finite precision error when checking if a rotated kpoint is off the k-grid. Was
+using an epsilon check without using abs() and when the values were negative, the check incorrectly
+failed. Replaced the condition with the "equal" function from numerical_utilities module. Should
+have been using that all along anyway---I coded it up so that I wouldn't make these kinds of
+mistakes!
+
+The line:
+        if (any((matmul(invK,roKpt) - nint(matmul(invK,roKpt))) > eps)) then
+
+with
+       if (.not. equal(matmul(invK,roKpt), nint(matmul(invK,roKpt)), eps)) then
+
 0.2.0 Bug fixes, redefinition of shift. Arbitrary shifts seem to do the right thing. If a rotation
 maps a kpoint onto a point not in original list, its skipped (as we want---no expansion of the
 original list). Earlier cases seem to still work with these changes. Time for the unit tests now. 
