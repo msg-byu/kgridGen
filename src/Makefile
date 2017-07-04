@@ -57,7 +57,7 @@ endif
 #     python irevision.py derivative_structure_generator.f90 version.enum	
 # fi
 
-SRC = generateKpoints.f90 # fortpy.f90
+SRC = generateKpoints.f90 fortpy.f90
 
 OBJS = ${SRC:.f90=.o}
 LIBS =  ${LBDR}/libutils.a ${LBDR}/libsym.a ${LBDR}/librational.a 

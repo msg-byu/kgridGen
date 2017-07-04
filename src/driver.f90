@@ -3,7 +3,7 @@ PROGRAM kpoint_driver
   use num_types
   use vector_matrix_utilities
   use symmetry, only : get_lattice_pointGroup
-  ! use fortpy, only : pysave
+  use fortpy, only : pysave
   implicit none
 
   real(dp) :: K(3,3), R(3,3), Hinv(3,3), eps, shift(3)
@@ -14,17 +14,17 @@ PROGRAM kpoint_driver
   eps = 1e-10_dp
 
   H = transpose(reshape((/ 2, 0, 0, &
-                           0, 2, 0, &
-                           0, 0, 2/),(/3,3/))) !test 11
-
-  ! R = transpose(reshape((/-0.5_dp, 0.5_dp, 0.5_dp, &
-  !                0.5_dp,-0.5_dp, 0.5_dp, &
-  !                0.5_dp, 0.5_dp,-0.5_dp/),(/3,3/)))
+                           1, 2, 0, &
+                           1, 0, 2/),(/3,3/))) !test 6  
   
-  R = transpose(reshape((/1.0_dp, 0.0_dp, 0.0_dp, &
-                          0.0_dp,  1.0_dp, 0.0_dp, &
-                          0.0_dp,  0.0_dp, 1.0_dp/),(/3,3/)))
+  ! R = transpose(reshape((/1.0_dp, 0.0_dp, 0.0_dp, &
+  !                         0.0_dp,  1.0_dp, 0.0_dp, &
+  !                         0.0_dp,  0.0_dp, 1.0_dp/),(/3,3/)))
 
+  R = transpose(reshape((/4.0_dp / 3.0_dp, 0.0_dp, 0.0_dp, &
+                          0.0_dp,  4.0_dp / 3.0_dp, 0.0_dp, &
+                          0.0_dp,  0.0_dp, 4.0_dp / 3.0_dp/),(/3,3/))) !test 7
+  
   call matrix_inverse(real(H,dp),Hinv,eps_=1e-12_dp)
 
   K = matmul(R,Hinv)
@@ -35,24 +35,26 @@ PROGRAM kpoint_driver
   write(*,'(3("H: ",3(1x,i3),/))') (H(i,:),i=1,3)
 
   ! write(*,'(3("PP: ",3(1x,f7.3),/))') matmul(K,(/1,0,0/))
-
-  shift  =  (/1.0_dp/3.0_dp, 1.0_dp/3.0_dp, 1.0_dp/3.0_dp/)
+  shift = (/ 2.1_dp, 3.15_dp, 3.15_dp /)
+  ! shift  =  (/1.4_dp,1.4_dp,1.4_dp/) !test 7
+  write(*,'("new shift: ",3(f6.3,1x))') matmul(K,shift)
+  
   call generateFullKpointList(K, R, shift, klist)
 
-  ! do i = 1,determinant(H)
-  !    write(*,'(3(1x,g11.4))') klist(i,:)
-  ! end do
+  do i = 1,determinant(H)
+     write(*,'(3(1x,g11.4))') klist(i,:)
+  end do
 
   call get_lattice_pointGroup(K, pgOps, eps)
 
-  ! call pysave(K, "../tests/simple_cubic/K.in.2")
-  ! call pysave(R, "../tests/simple_cubic/R.in.2")
-  ! call pysave(shift, "../tests/simple_cubic/shift.in.2")
-  ! call pysave(klist, "../tests/simple_cubic/unreduced_klist.in.2")
-  ! call pysave(pgOps, "../tests/simple_cubic/symops.in.2")
+  call pysave(K, "../tests/simple_cubic/K.in.7")
+  call pysave(R, "../tests/simple_cubic/R.in.7")
+  call pysave(shift, "../tests/simple_cubic/shift.in.7")
+  call pysave(klist, "../tests/simple_cubic/unreduced_klist.in.7")
+  call pysave(pgOps, "../tests/simple_cubic/symops.in.7")
   call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
-  ! call pysave(rdKlist, "../tests/simple_cubic/simple_cubic_kpts.out.2")
-  ! call pysave(weights, "../tests/simple_cubic/simple_cubic_wts.out.2")
+  call pysave(rdKlist, "../tests/simple_cubic/simple_cubic_kpts.out.7")
+  call pysave(weights, "../tests/simple_cubic/simple_cubic_wts.out.7")
 
    write(*,'(//"**********")')
 
