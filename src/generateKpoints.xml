@@ -6,7 +6,7 @@
       <test identifier="kpts" description="Unit tests for
 						   simple cubic
 						   Bravais lattice k-points."
-  	    timed="true" cases="[1-10]">
+  	    timed="true" cases="[1-7]">
   	<output identifier="simple_cubic_kpts.out"
 		folder="../tests/simple_cubic" file="simple_cubic_kpts.out.{}"
 		template="float.xml" />
@@ -17,7 +17,7 @@
       <test identifier="wts" description="Unit tests for
 						   simple cubic
 						   Bravais lattice k-points."
-  	    timed="true" cases="[1-10]">
+  	    timed="true" cases="[1-7]">
   	<output identifier="simple_cubic_wts.out"
 		folder="../tests/simple_cubic" file="simple_cubic_wts.out.{}"
 		template="float.xml" />
@@ -36,7 +36,7 @@
   	       folder="../tests/simple_cubic" rename="R.in"/>
       </assignment>
 
-      <assignment name="shift" value="shift_file">
+      <assignment name="kLVshift" value="shift_file">
   	<value identifier="shift_file" file="shift.in.{}"
   	       folder="../tests/simple_cubic" rename="shift.in"/>
       </assignment>
