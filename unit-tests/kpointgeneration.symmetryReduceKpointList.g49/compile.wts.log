@@ -1,12 +1,12 @@
 
 Compile time:
-Thu Jul  6 19:00:06 MDT 2017
+Fri Jul  7 15:30:50 MDT 2017
 ------------------------------------------------------
                      FORTPY
                >>> version 1.7 <<<                    
 ------------------------------------------------------
 Compiling on system  : Darwin
-             machine : Jeremys-MBP.byu.edu
+             machine : Jeremys-MBP-010025082148.byu.edu
 Compiling for module : kpointgeneration
               method : symmetryReduceKpointList
 ------------------------------------------------------

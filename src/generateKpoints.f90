@@ -136,7 +136,6 @@ CONTAINS
   !!<parameter regular="true" name="weights"> "Weights" of k-points (length of each orbit).
   !!</parameter>
   !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
-  
   subroutine symmetryReduceKpointList(K, R, kLVshift, UnreducedKpList, SymOps, &
        ReducedList, weights, eps_)
     real(dp), intent(in) :: K(3,3), R(3,3) 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fortpy mode="docstring">
-  <!--  -->  
   <decorates name="kpointgeneration.symmetryReduceKpointList">
+    <!-- simple cubic -->
     <group name="simple_cubic" purpose="testing" staging="../unit-tests/">
       <test identifier="kpts" description="Unit tests for simple cubic
 					   Bravais lattice k-points."
@@ -51,7 +51,60 @@
       
       <assignment name="eps_" value="const">
 	<value identifier="const" constant="1E-10_dp"/>
-      </assignment>
+      </assignment> 
     </group>
+    
+    <!-- face-centered cubic -->
+    <group name="face-centered_cubic" purpose="testing" staging="../unit-tests/">
+      <test identifier="kpts" description="Unit tests for simple cubic
+					   Bravais lattice k-points."
+  	    timed="true" cases="[1-10]">
+  	<output identifier="face-centered_cubic_kpts.out"
+		folder="../tests/face-centered_cubic" file="face-centered_cubic_kpts.out.{}"
+		template="float.xml" />
+  	<target name="ReducedList" compareto="face-centered_cubic_kpts.out"
+		varfile="face-centered_cubic_kpts.out" when="each" />
+      </test>
+      
+      <test identifier="wts" description="Unit tests for simple cubic
+					  Bravais lattice k-points."
+  	    timed="true" cases="[1-10]">
+  	<output identifier="face-centered_cubic_wts.out"
+		folder="../tests/face-centered_cubic" file="face-centered_cubic_wts.out.{}"
+		template="float.xml" />
+  	<target name="weights" compareto="face-centered_cubic_wts.out"
+		varfile="face-centered_cubic_wts.out" when="each" />
+      </test>
+      
+      <!-- assignments -->
+      <assignment name="K" value="Kfile">
+  	<value identifier="Kfile" file="K.in.{}"
+  	       folder="../tests/face-centered_cubic" rename="K.in"/>
+      </assignment>
+      
+      <assignment name="R" value="Rfile">
+  	<value identifier="Rfile" file="R.in.{}"
+  	       folder="../tests/face-centered_cubic" rename="R.in"/>
+      </assignment>
+
+      <assignment name="kLVshift" value="shift_file">
+  	<value identifier="shift_file" file="shift.in.{}"
+  	       folder="../tests/face-centered_cubic" rename="shift.in"/>
+      </assignment>
+      
+      <assignment name="UnreducedKpList" value="unreduced_klist" allocate="true">
+  	<value identifier="unreduced_klist" file="unreduced_klist.in.{}"
+  	       folder="../tests/face-centered_cubic" rename="unreduced_klist.in"/>
+      </assignment>
+      
+      <assignment name="SymOps" value="symops" allocate="true">
+  	<value identifier="symops" file="symops.in.{}"
+  	       folder="../tests/face-centered_cubic" rename="symops.in"/>
+      </assignment>
+      
+      <assignment name="eps_" value="const">
+	<value identifier="const" constant="1E-10_dp"/>
+      </assignment> 
+    </group>    
   </decorates>  
 </fortpy>

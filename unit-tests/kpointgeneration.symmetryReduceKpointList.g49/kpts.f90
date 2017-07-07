@@ -1,5 +1,5 @@
 !!<summary>Auto-generated unit test for kpointgeneration.symmetryReduceKpointList
-!!using FORTPY. Generated on 2017-07-06 19:00:06.325100.
+!!using FORTPY. Generated on 2017-07-07 15:30:49.127347.
 !!Unit tests for simple cubic         Bravais lattice k-points.</summary>
 PROGRAM UNITTEST_symmetryReduceKpointList
   use kpointgeneration

@@ -1,7 +1,7 @@
 
 ----------------------------------------------------------------------
 FORTPY File Comparison Report
-80.00% (80.00% RAW)
+100.00% (100.00% RAW)
 ----------------------------------------------------------------------
 
 SOURCE: /Users/jeremyjorgensen/Codes/kgridGen/unit-tests/kpointgeneration.symmetryReduceKpointList.g49/tests/kpts.6/simple_cubic_kpts.out
@@ -15,15 +15,7 @@ FILE PREAMBLE COMPARISON DETAILS
 
 ----------------------------------------------------------------------
 FILE BODY COMPARISON DETAILS
-80.00% (80.00% RAW)
+100.00% (100.00% RAW)
 ----------------------------------------------------------------------
 
-BLOCK: index 3
-0.00% (0.00% RAW)
-
-LIST	autovar : 0.00% (0.00% RAW)
-	0/3 matches, 3 items vs. 3 items
-	DIFF: [(0, 0.5, 0.0), (1, 0.75, 0.0), (2, 0.875, 0.5)]
-
---------------------------------------------------
 
