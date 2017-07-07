@@ -13,17 +13,17 @@ PROGRAM kpoint_driver
   integer, pointer  :: weights(:)
   eps = 1e-10_dp
 
-  H = transpose(reshape((/ 2, 0, 0, &
+  H = transpose(reshape((/ 3, 0, 0, &
                            1, 2, 0, &
-                           1, 0, 2/),(/3,3/))) !test 6  
+                           0, 0, 1/),(/3,3/))) !BCC test 6  
   
   ! R = transpose(reshape((/1.0_dp, 0.0_dp, 0.0_dp, &
   !                         0.0_dp,  1.0_dp, 0.0_dp, &
   !                         0.0_dp,  0.0_dp, 1.0_dp/),(/3,3/)))
 
-  R = transpose(reshape((/4.0_dp / 3.0_dp, 0.0_dp, 0.0_dp, &
-                          0.0_dp,  4.0_dp / 3.0_dp, 0.0_dp, &
-                          0.0_dp,  0.0_dp, 4.0_dp / 3.0_dp/),(/3,3/))) !test 7
+  R = transpose(reshape((/-0.4_dp, 0.4_dp, 0.4_dp, &
+                          0.4_dp,  -0.4_dp, 0.4_dp, &
+                          0.4_dp,  0.4_dp, -0.4_dp/),(/3,3/))) !BCC test 6
   
   call matrix_inverse(real(H,dp),Hinv,eps_=1e-12_dp)
 
@@ -35,7 +35,7 @@ PROGRAM kpoint_driver
   write(*,'(3("H: ",3(1x,i3),/))') (H(i,:),i=1,3)
 
   ! write(*,'(3("PP: ",3(1x,f7.3),/))') matmul(K,(/1,0,0/))
-  shift = (/ 2.1_dp, 3.15_dp, 3.15_dp /)
+  shift = (/ 0.00001_dp, 0.00001_dp, 0.00001_dp /) !BCC test 6
   ! shift  =  (/1.4_dp,1.4_dp,1.4_dp/) !test 7
   write(*,'("new shift: ",3(f6.3,1x))') matmul(K,shift)
   
@@ -45,16 +45,16 @@ PROGRAM kpoint_driver
      write(*,'(3(1x,g11.4))') klist(i,:)
   end do
 
-  call get_lattice_pointGroup(K, pgOps, eps)
+  call get_lattice_pointGroup(R, pgOps, eps)
 
-  call pysave(K, "../tests/simple_cubic/K.in.7")
-  call pysave(R, "../tests/simple_cubic/R.in.7")
-  call pysave(shift, "../tests/simple_cubic/shift.in.7")
-  call pysave(klist, "../tests/simple_cubic/unreduced_klist.in.7")
-  call pysave(pgOps, "../tests/simple_cubic/symops.in.7")
+  call pysave(K, "../tests/body_centered_cubic/K.in.6")
+  call pysave(R, "../tests/body_centered_cubic/R.in.6")
+  call pysave(shift, "../tests/body_centered_cubic/shift.in.6")
+  call pysave(klist, "../tests/body_centered_cubic/unreduced_klist.in.6")
+  call pysave(pgOps, "../tests/body_centered_cubic/symops.in.6")
   call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
-  call pysave(rdKlist, "../tests/simple_cubic/simple_cubic_kpts.out.7")
-  call pysave(weights, "../tests/simple_cubic/simple_cubic_wts.out.7")
+  call pysave(rdKlist, "../tests/body_centered_cubic/simple_cubic_kpts.out.6")
+  call pysave(weights, "../tests/body_centered_cubic/simple_cubic_wts.out.6")
 
    write(*,'(//"**********")')
 
