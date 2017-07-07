@@ -1,3 +1,23 @@
+.0.2.6
+* The warning associated with a shift outside the first k-point cell had
+  the arguments of bring_into_cell in the wrong order.
+* Changed a few error messages from 'the k-grid vectors are not linearly
+  dependent' to 'the k-grid vectors are linearly dependent'.
+* The k-point index of the unreduced k-point and the rotated k-point were
+  different when the rotation operator was the identity. The shift was
+  removed from the unreduced k-point whereas it wasn't for the rotated
+  k-point. This was fixed by calculating the rotated k-point's index
+  before adding the shift back on.
+* Removed repeated code found in symmetryReduceKpointList.
+* Fixed an issue where the k-point that represented an orbit was wrong. Instead
+  of having iFirst point from cOrbit to the index of the k-point that represented
+  the orbit, changed it so that cOrbit pointed to the index of the point in
+  UnreducedKpList.
+  ```
+  ! iFirst(cOrbit) = idx
+  iFirst(cOrbit) = iUnRdKpt
+  ```
+  
 0.2.5
 * Enforced line breaks at 90 characters to help readability
 * Fixed the O(N^2) problem that Martijn pointed out (fortran intrinsics
@@ -15,6 +35,7 @@ copy (0.0.2 or so).
 * Tidied up HISTORY.md and findKptIndex.
 * Made it so the offset in generateFullKpointList always lies
  within the first unit cell.
+ 
 * Added a few more unit tests for simple cubic lattices.
 
 0.2.3 
@@ -61,13 +82,18 @@ strange shifts---which we should avoid, but it would be nice for the
 code to do the right thing anyhow. >>> 
 
 0.0.3
-*Somehow, and old, incomplete copy got pushed and v. 0.0.2, if it was
- complete, got lost. This version seems to be working again,
- with the same functionality.
+
+* Somehow, and old, incomplete copy got pushed and v. 0.0.2, if it was
+  complete, got lost. This version seems to be working again,
+  with the same functionality.
 
 0.0.2
-*Added files from laptop. First working copy.
+* Added files from laptop. First working copy.
 
 0.0.1
 * Initial import of rough, working copy of the folding code. Relies
- on routines in symlib (getPointGroup, SNF, HNF, etc.)
+  on routines in symlib (getPointGroup, SNF, HNF, etc.)
+
+*Somehow, an old, incomplete copy got pushed and v. 0.0.2, if it was
+ complete, got lost. This version seems to be working again,
+ with the same functionality.

@@ -3,34 +3,32 @@
   <!--  -->  
   <decorates name="kpointgeneration.symmetryReduceKpointList">
     <group name="simple_cubic" purpose="testing" staging="../unit-tests/">
-      <test identifier="kpts" description="Unit tests for
-						   simple cubic
-						   Bravais lattice k-points."
-  	    timed="true" cases="[1-7]">
+      <test identifier="kpts" description="Unit tests for simple cubic
+					   Bravais lattice k-points."
+  	    timed="true" cases="[1-10]">
   	<output identifier="simple_cubic_kpts.out"
 		folder="../tests/simple_cubic" file="simple_cubic_kpts.out.{}"
 		template="float.xml" />
   	<target name="ReducedList" compareto="simple_cubic_kpts.out"
 		varfile="simple_cubic_kpts.out" when="each" />
       </test>
-
-      <test identifier="wts" description="Unit tests for
-						   simple cubic
-						   Bravais lattice k-points."
-  	    timed="true" cases="[1-7]">
+      
+      <test identifier="wts" description="Unit tests for simple cubic
+					  Bravais lattice k-points."
+  	    timed="true" cases="[1-10]">
   	<output identifier="simple_cubic_wts.out"
 		folder="../tests/simple_cubic" file="simple_cubic_wts.out.{}"
 		template="float.xml" />
   	<target name="weights" compareto="simple_cubic_wts.out"
 		varfile="simple_cubic_wts.out" when="each" />
       </test>
-
+      
       <!-- assignments -->
       <assignment name="K" value="Kfile">
   	<value identifier="Kfile" file="K.in.{}"
   	       folder="../tests/simple_cubic" rename="K.in"/>
       </assignment>
-
+      
       <assignment name="R" value="Rfile">
   	<value identifier="Rfile" file="R.in.{}"
   	       folder="../tests/simple_cubic" rename="R.in"/>
@@ -40,7 +38,7 @@
   	<value identifier="shift_file" file="shift.in.{}"
   	       folder="../tests/simple_cubic" rename="shift.in"/>
       </assignment>
-
+      
       <assignment name="UnreducedKpList" value="unreduced_klist" allocate="true">
   	<value identifier="unreduced_klist" file="unreduced_klist.in.{}"
   	       folder="../tests/simple_cubic" rename="unreduced_klist.in"/>
@@ -49,6 +47,10 @@
       <assignment name="SymOps" value="symops" allocate="true">
   	<value identifier="symops" file="symops.in.{}"
   	       folder="../tests/simple_cubic" rename="symops.in"/>
+      </assignment>
+      
+      <assignment name="eps_" value="const">
+	<value identifier="const" constant="1E-10_dp"/>
       </assignment>
     </group>
   </decorates>  

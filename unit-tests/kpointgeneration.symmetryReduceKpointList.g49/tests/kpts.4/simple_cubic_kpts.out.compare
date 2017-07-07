@@ -1,0 +1,21 @@
+
+----------------------------------------------------------------------
+FORTPY File Comparison Report
+100.00% (100.00% RAW)
+----------------------------------------------------------------------
+
+SOURCE: /Users/jeremyjorgensen/Codes/kgridGen/unit-tests/kpointgeneration.symmetryReduceKpointList.g49/tests/kpts.4/simple_cubic_kpts.out
+TARGET: /Users/jeremyjorgensen/Codes/kgridGen/tests/simple_cubic/simple_cubic_kpts.out.4
+
+----------------------------------------------------------------------
+FILE PREAMBLE COMPARISON DETAILS
+ No Preamble Defined in Template
+----------------------------------------------------------------------
+
+
+----------------------------------------------------------------------
+FILE BODY COMPARISON DETAILS
+100.00% (100.00% RAW)
+----------------------------------------------------------------------
+
+

@@ -1,14 +1,14 @@
 !!<summary>Auto-generated unit test for kpointgeneration.symmetryReduceKpointList
-!!using FORTPY. Generated on 2017-06-29 16:39:53.596880.
-!!Unit tests for          simple cubic          Bravais lattice k-points.</summary>
+!!using FORTPY. Generated on 2017-07-06 19:00:06.325100.
+!!Unit tests for simple cubic         Bravais lattice k-points.</summary>
 PROGRAM UNITTEST_symmetryReduceKpointList
   use kpointgeneration
   use num_types, only: dp
   use fortpy
   implicit none
 
+  real(dp) :: kLVshift(3)
   real(dp), pointer :: ReducedList(:,:)
-  real(dp) :: shift(3)
   real(dp) :: K(3, 3)
   real(dp), allocatable :: SymOps(:,:,:)
   real(dp) :: eps_
@@ -20,12 +20,13 @@ PROGRAM UNITTEST_symmetryReduceKpointList
 
   call fpy_read_f('K.in', '#', K)
   call fpy_read_f('R.in', '#', R)
-  call fpy_read_f('shift.in', '#', shift)
+  call fpy_read_f('shift.in', '#', kLVshift)
   call fpy_read('unreduced_klist.in', '#', UnreducedKpList)
   call fpy_read('symops.in', '#', SymOps)
+  eps_ = 1E-10_dp
 
   call cpu_time(fpy_start)
-  call symmetryReduceKpointList(K, R, shift, UnreducedKpList, SymOps, ReducedList, &
+  call symmetryReduceKpointList(K, R, kLVshift, UnreducedKpList, SymOps, ReducedList, &
                                  weights, eps_=eps_)
   call cpu_time(fpy_end)
   fpy_elapsed = fpy_elapsed + fpy_end - fpy_start
