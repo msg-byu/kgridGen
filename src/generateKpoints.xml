@@ -33,7 +33,7 @@
   	<value identifier="Rfile" file="R.in.{}"
   	       folder="../tests/simple_cubic" rename="R.in"/>
       </assignment>
-      
+
       <assignment name="kLVshift" value="shift_file">
   	<value identifier="shift_file" file="shift.in.{}"
   	       folder="../tests/simple_cubic" rename="shift.in"/>
