@@ -75,7 +75,9 @@ CONTAINS
     cartShift = matmul(K,kLVshift)
     bicCartShift = cartShift ! The k-grid shift, but bring into cell
     call bring_into_cell(bicCartShift, Kinv, K, eps)
+    
     if (.not. equal(cartShift, bicCartShift, eps)) then
+       
        write(*,*) "WARNING: (generateFullKpointList in generateKpoints.f90)"
        write(*,*) "The given shift was outside the first k-grid cell. By translation"
        write(*,*) "symmetry, this is always equivalent to a shift inside the cell."
@@ -85,7 +87,7 @@ CONTAINS
     S = nint(matmul(Kinv,R))
     ! Find the HNF of S, store it in H (B is the transformation matrix)
     call HermiteNormalForm(S,H,B)
-    
+
     ! This the volume ratio between R and K, i.e., the number of unreduced k-points
     n = determinant(H) 
     a = H(1,1); c = H(2,2); f = H(3,3)
@@ -104,9 +106,9 @@ CONTAINS
        enddo
     enddo
 
-    ! do idx = 1,n
-    !    write(*,'("kp: ",3(1x,f8.3))') KpList(idx,:)
-    ! end do
+!!do idx = 1,n
+!!   write(*,'("kp: ",3(1x,f8.3))') KpList(idx,:)
+!!end do
     
     ! Bring each k-point into the first unit cell
     do iKP = 1,n
@@ -308,6 +310,7 @@ CONTAINS
     weights = iWt(1:cOrbit)
     do i = 1, cOrbit
        sum = sum + weights(i)
+
        write(*,'("corbit: ", i3)') i
        write(*,'("ifirst: ", i3)') iFirst(i)
        write(*,'("rep kpt: ",3(f6.3,1x))') UnreducedKpList(iFirst(i),:)
