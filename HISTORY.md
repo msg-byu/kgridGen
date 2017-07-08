@@ -1,26 +1,27 @@
+0.2.9
+* Added 10 unit tests for base-centered orthorhombic, body-centered orthorhombic
+
 0.2.8
 * Added unit tests for body-centered tetragonal and orthorhombic lattices.
 
 0.2.7
 * Added unit tests for face-centered cubic lattices.
-* Fixed small bug associated with space between xml documentation and
-  subroutine declaration introduced in 0.2.6.
+* Fixed small bug associated with space between xml documentation and subroutine
+  declaration introduced in 0.2.6.
 
 0.2.6
-* The warning associated with a shift outside the first k-point cell had
-  the arguments of bring_into_cell in the wrong order.
-* Changed a few error messages from 'the k-grid vectors are not linearly
-  dependent' to 'the k-grid vectors are linearly dependent'.
-* The k-point index of the unreduced k-point and the rotated k-point were
-  different when the rotation operator was the identity. The shift was
-  removed from the unreduced k-point whereas it wasn't for the rotated
-  k-point. This was fixed by calculating the rotated k-point's index
-  before adding the shift back on.
+* The warning associated with a shift outside the first k-point cell had the arguments of
+  bring_into_cell in the wrong order.
+* Changed a few error messages from 'the k-grid vectors are not linearly dependent' to
+  'the k-grid vectors are linearly dependent'.
+* The k-point index of the unreduced k-point and the rotated k-point were different when
+  the rotation operator was the identity. The shift was removed from the unreduced k-point
+  whereas it wasn't for the rotated k-point. This was fixed by calculating the rotated
+  k-point's index before adding the shift back on.
 * Removed repeated code found in symmetryReduceKpointList.
-* Fixed an issue where the k-point that represented an orbit was wrong. Instead
-  of having iFirst point from cOrbit to the index of the k-point that represented
-  the orbit, changed it so that cOrbit pointed to the index of the point in
-  UnreducedKpList.
+* Fixed an issue where the k-point that represented an orbit was wrong. Instead of having
+  iFirst point from cOrbit to the index of the k-point that represented the orbit, changed
+  it so that cOrbit pointed to the index of the point in UnreducedKpList.
   ```
   ! iFirst(cOrbit) = idx
   iFirst(cOrbit) = iUnRdKpt
