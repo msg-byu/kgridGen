@@ -19,8 +19,7 @@ PROGRAM kpoint_driver
   ! Reciprocal lattice vectors
   R = transpose(reshape((/ 2.0_dp/3.0_dp, 0.0_dp, 0.0_dp, &
                            0.0_dp, 4.0_dp/3.0_dp, 0.0_dp, &
-                           0.0_dp, 0.0_dp, 17.0_dp/12.0_dp  /),(/3,3/)))
-  
+                           0.0_dp, 0.0_dp, 17.0_dp/12.0_dp  /),(/3,3/)))  
   ! HNF Matrix
   H = transpose(reshape((/ 3, 0, 0, &
                            2, 3, 0, &
@@ -39,8 +38,7 @@ PROGRAM kpoint_driver
   write(*,'("shift: ",3(f6.3,1x))') shift
   write(*,'("cart shift: ",3(f6.3,1x))') matmul(K,shift)  
 
-  ! write(*,'(3("PP: ",3(1x,f7.3),/))') matmul(K,(/1,0,0/))
-  
+  ! write(*,'(3("PP: ",3(1x,f7.3),/))') matmul(K,(/1,0,0/))  
   call generateFullKpointList(K, R, shift, klist)
   do i = 1,determinant(H)
      write(*,'(3(1x,g11.4))') klist(i,:)
