@@ -1,0 +1,21 @@
+
+Compile time:
+Fri Jul  7 15:52:14 MDT 2017
+------------------------------------------------------
+                     FORTPY
+               >>> version 1.7 <<<                    
+------------------------------------------------------
+Compiling on system  : Darwin
+             machine : Jeremys-MBP.app.byu.edu
+Compiling for module : kpointgeneration
+              method : symmetryReduceKpointList
+------------------------------------------------------
+DEBUG mode	:	true
+GPROF mode	:	
+------------------------------------------------------
+F90    : /usr/local/bin/gfortran
+FFLAGS : -O3 -ffree-line-length-none -std=f2008 -fall-intrinsics -g -fbacktrace -fbounds-check -ffree-line-length-none -ftrapv
+LDFLAGS: 
+MKLpath:
+------------------------------------------------------
+

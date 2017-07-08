@@ -1,0 +1,105 @@
+EXENAME		= wts-fc.x
+SHELL		= /bin/bash
+UNAME		= $(shell uname)
+HOSTNAME	= $(shell hostname)
+LOG		= compile.wts-fc.log
+
+ifeq ($(FAM),ifort)
+  include /Users/jeremyjorgensen/Envs/BZI/lib/python2.7/site-packages/fortpy/templates/Makefile.ifort
+else
+ifeq ($(FAM),gfortran)
+  include /Users/jeremyjorgensen/Envs/BZI/lib/python2.7/site-packages/fortpy/templates/Makefile.gfortran
+else
+  include Makefile.error
+endif
+endif
+.SILENT:
+
+LIBMODULESF90	= \
+		num_types.f90 \
+		numerical_utilities.f90 \
+		utilities.f90 \
+		vector_matrix_utilities.f90 \
+		symmetry.f90 \
+		rational_mathematics.f90 \
+		generateKpoints.f90 \
+
+MAINF90		= wts-fc.f90
+SRCF90		= $(LIBMODULESF90) $(MAINF90)
+OBJSF90		= $(SRCF90:.f90=.o)
+SLIBF90		= $(LIBMODULESF90:.f90=.o)
+
+LIBS		= \
+		/Users/jeremyjorgensen/Codes/uncle/src/timing.o \
+		fortpy.o \
+
+
+# Error handling
+NEWFILE		= \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+ERR		= ******************************* ERROR *******************************
+SHOW_LOG	= ( perl -pi -e 's/ [Ee]rror \#/\n\n\n$(ERR)\n*** error \#/' $(LOG); perl -pi -e 's/^\# 1 "/\n\n$(NEWFILE)\n\n\n/' $(LOG); grep -n -A3 -E "$(ERR)|$(NEWFILE)" $(LOG) )
+
+
+all:	info $(EXENAME)
+
+info: 
+	echo -e "\nCompile time:" > $(LOG)
+	date >> $(LOG)
+	echo "------------------------------------------------------" >> $(LOG)
+	echo "                     FORTPY"                            >> $(LOG)
+	echo "               >>> version 1.7 <<<                    " >> $(LOG)         
+	echo "------------------------------------------------------" >> $(LOG)
+	echo -e "Compiling on system  : $(UNAME)"                     >> $(LOG)
+	echo -e "             machine : $(HOSTNAME)"                  >> $(LOG)
+	echo "Compiling for module : kpointgeneration"                             >> $(LOG)         
+	echo "              method : symmetryReduceKpointList"                             >> $(LOG)         
+	echo "------------------------------------------------------" >> $(LOG)
+	echo -e "DEBUG mode\t:\t$(DEBUG)"                           >> $(LOG)
+	echo -e "GPROF mode\t:\t$(GPROF)"                           >> $(LOG)
+	echo "------------------------------------------------------" >> $(LOG)
+	echo "F90    : $(F90)"                                        >> $(LOG)
+	echo "FFLAGS : $(FFLAGS)"                                     >> $(LOG)
+	echo "LDFLAGS: $(LDFLAGS)"                                    >> $(LOG)
+	echo "MKLpath:$(MKL)"                                         >> $(LOG)
+	echo "------------------------------------------------------" >> $(LOG)
+	echo ""                                                       >> $(LOG)
+
+
+
+$(EXENAME): $(OBJSF90)
+	-rm $(EXENAME) 2> /dev/null
+	echo -n "Linking... " > /dev/null
+	-$(F90) $(LDFLAGS) -o $(EXENAME) $(OBJSF90) $(LIBS) >> $(LOG) 2>> $(LOG)
+	echo "done." > /dev/null
+	if test -e $(EXENAME); then echo "Produced executable: $(EXENAME)" > /dev/null; else $(SHOW_LOG); echo "Error."; fi
+
+$(OBJSF90): %.o: %.f90
+	echo -n "Compiling: $^... " > /dev/null
+	-$(F90) -c $(FFLAGS) $^ >> $(LOG) 2>> $(LOG)
+	echo "done." > /dev/null
+
+wts-fc.so: $(SLIBF90)
+	-rm wts-fc.so 2> /dev/null
+	echo -n "Creating shared library..." > /dev/null
+	-$(F90) -shared -fPIC $(FFLAGS) -o wts-fc.so $(LIBS) $(SLIBF90) >> $(LOG) 2>> $(LOG)
+	echo "done." > /dev/null
+
+wts-fc.a: $(SLIBF90)
+	echo -n "Creating linked library..." > /dev/null
+	ar ru $@ $?
+	ranlib $@
+	echo "done." > /dev/null
+
+clean:
+	-mv fpy_auxiliary.mod fpy_auxiliary.modt 2> /dev/null
+	-mv fpy_auxiliary.o fpy_auxiliary.ot 2> /dev/null
+	-mv fortpy.o fortpy.ot
+	-mv fortpy.mod fortpy.modt
+	-rm *.o *.mod *.i90 $(EXENAME) initializeTree.so 2> /dev/null
+	-mv fpy_auxiliary.modt fpy_auxiliary.mod 2> /dev/null
+	-mv fpy_auxiliary.ot fpy_auxiliary.o 2> /dev/null
+	-mv fortpy.ot fortpy.o
+	-mv fortpy.modt fortpy.mod
+remake: clean
+	-rm *.o *.mod *.i90 $(EXENAME) wts-fc.so
+	make -f 'Makefile.wts-fc'

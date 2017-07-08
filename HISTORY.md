@@ -1,3 +1,6 @@
+0.2.8
+* Added unit tests for body-centered tetragonal and orthorhombic lattices.
+
 0.2.7
 * Added unit tests for face-centered cubic lattices.
 * Fixed small bug associated with space between xml documentation and
