@@ -1,5 +1,10 @@
+0.2.10
+* Added 10 unit tests for monoclinic, base-centered monoclinic, hexagonal, rhombohedral,
+  and triclinic lattices.
+
 0.2.9
-* Added 10 unit tests for base-centered orthorhombic, body-centered orthorhombic
+* Added 10 unit tests for base-centered orthorhombic, body-centered orthorhombic, and
+  face-centered orthorhombic.
 
 0.2.8
 * Added unit tests for body-centered tetragonal and orthorhombic lattices.
