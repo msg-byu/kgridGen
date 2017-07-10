@@ -8,8 +8,43 @@ MODULE kpointGeneration
   implicit none
 
   private
-  public generateFullKpointList, symmetryReduceKpointList
+  public generateIrredKpointList, generateFullKpointList, symmetryReduceKpointList
 CONTAINS
+
+  !!<summary>Reduce k-points to irreducible set. Takes a list of translationally distinct,
+  !! but not rotationally distinct, k-points and reduces them by the given point group.
+  !! </summary>
+  !!<parameter regular="true" name="K">Matrix of grid generating vectors.</parameter>
+  !!<parameter regular="true" name="R">Matrix of reciprocal lattice vectors.</parameter>
+  !!<parameter regular="true" name="kLVshift">Offset (shift) of the k-grid
+  !! (fractions of k-grid vectors).</parameter>
+  !!<parameter regular="true" name="IrrKpList">List of symmetry-reduced k-points.
+  !!</parameter>
+  !!<parameter regular="true" name="weights"> "Weights" of k-points (length of each orbit).
+  !!</parameter>
+  !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
+  subroutine generateIrredKpointList(K, R, kLVshift, IrrKpList, weights, eps_)
+    real(dp), intent(in) :: K(3,3)
+    real(dp), intent(in) :: R(3,3)
+    real(dp), intent(in) :: kLVshift(3)
+    real(dp), pointer    :: IrrKpList(:,:)
+    integer, pointer     :: weights(:)
+    real(dp), intent(in), optional:: eps_
+
+    real(dp), allocatable:: KpList(:,:)
+    real(dp), pointer     :: pgOps(:,:,:)
+    real(dp)             :: eps
+
+    if(.not. present(eps_)) then
+       eps = 1e-10_dp
+    else
+       eps =  eps_
+    endif
+    
+    call get_lattice_pointGroup(R, pgOps, eps)
+    call generateFullKpointList(K, R, kLVshift, KpList, eps)
+    call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, eps)
+  endsubroutine generateIrredKpointList
 
   !!<summary>Takes two lattices, a generating lattice (K) and the reciprocal lattice (R),
   !! and generates all the points of K that are inside one unit cell of R. </summary>
@@ -323,7 +358,6 @@ CONTAINS
             &one of the orbits of the symmetry group."
        stop
     endif
-    write(*,'(/,"kpt#: ",i4)') iUnRdKpt
     
     if (size(UnreducedKpList,1)/real(size(weights)) > size(SymOps,3)) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
@@ -335,8 +369,7 @@ CONTAINS
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
        write(*,*) "The weighted sum of reduced k-points is not equal to the number of&
             & unreduced k-points."
-       print*,sum,nuR
-       print*,weights
+       write(*,'("Sum of irr kpoints: ",i7," # of Unred. points:",i7)') sum, nUR
        stop
     endif
   CONTAINS
@@ -362,7 +395,7 @@ CONTAINS
       gpt = modulo(matmul(L,nint(gpt)),D)
       ! Convert from "group" coordinates (a 3-vector) to single base-10 number
       ! between 1 and nUr
-      findKptIndex = gpt(1)*D(2)*D(3) + gpt(2)*D(3) + gpt(3) + 1  ! Hash of the kpt
+      findKptIndex = int(gpt(1)*D(2)*D(3) + gpt(2)*D(3) + gpt(3) + 1)  ! Hash of the kpt
     END function findKptIndex
 
   END subroutine symmetryReduceKpointList
