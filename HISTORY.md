@@ -1,3 +1,7 @@
+0.3.1
+* Added an additional routine, one that combines the "generateFullKpointList" and
+"symmetryReduceKpointList" into a single call. This is the use case most users would want.
+
 0.2.9
 * Added 10 unit tests for base-centered orthorhombic, body-centered orthorhombic
 
