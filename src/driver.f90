@@ -17,15 +17,15 @@ PROGRAM kpoint_driver
   eps = 1e-10_dp
   
   ! Reciprocal lattice vectors
-  R = transpose(reshape((/ 2.0_dp/3.0_dp, 0.0_dp, 0.0_dp, &
-                           0.0_dp, 4.0_dp/3.0_dp, 0.0_dp, &
-                           0.0_dp, 0.0_dp, 17.0_dp/12.0_dp  /),(/3,3/)))  
+  R = transpose(reshape((/ -987654321.0_dp, 987654321.0_dp, 987654321.0_dp, &
+                           987654321.0_dp, -987654321.0_dp, 987654321.0_dp, &  
+                           987654321.0_dp, 987654321.0_dp, -987654321.0_dp /),(/3,3/)))
   ! HNF Matrix
   H = transpose(reshape((/ 3, 0, 0, &
-                           2, 3, 0, &
-                           2, 2, 3/),(/3,3/)))
+                           0, 3, 0, &
+                           0, 0, 3/),(/3,3/)))
   
-  shift = (/ 1.5_dp, 1.5_dp, 0.5_dp /)
+  shift = (/ .5_dp, .5_dp, .5_dp /)
   ! shift = (/ 2.0_dp/3.0_dp, 2.0_dp/3.0_dp, 2.0_dp/3.0_dp /)
   
   call matrix_inverse(real(H,dp), Hinv, eps_=1e-12_dp)
@@ -46,19 +46,19 @@ PROGRAM kpoint_driver
   
   call get_lattice_pointGroup(R, pgOps, eps)
   
-  call pysave(K, "../tests/orthorhombic/K.in.10")
-  call pysave(R, "../tests/orthorhombic/R.in.10")
-  call pysave(shift, "../tests/orthorhombic/shift.in.10")
-  call pysave(klist, "../tests/orthorhombic/unreduced_klist.in.10")
-  call pysave(pgOps, "../tests/orthorhombic/symops.in.10")
+  call pysave(K, "../tests/body_centered_cubic/K.in.10")
+  call pysave(R, "../tests/body_centered_cubic/R.in.10")
+  call pysave(shift, "../tests/body_centered_cubic/shift.in.10")
+  call pysave(klist, "../tests/body_centered_cubic/unreduced_klist.in.10")
+  call pysave(pgOps, "../tests/body_centered_cubic/symops.in.10")
   call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
-  call pysave(rdKlist, "../tests/orthorhombic/orthorhombic_kpts.out.10")
-  call pysave(weights, "../tests/orthorhombic/orthorhombic_wts.out.10")
+  call pysave(rdKlist, "../tests/body_centered_cubic/body-centered_cubic_kpts.out.10")
+  call pysave(weights, "../tests/body_centered_cubic/body-centered_cubic_wts.out.10")
 
   write(*,'(//"**********")')
   
   do i = 1,size(weights)
-     write(*,'(3(1x,f6.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
+     write(*,'(3(1x,f20.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
   end do
 
   write(*,'(//)')
