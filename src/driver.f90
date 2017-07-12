@@ -77,11 +77,10 @@ PROGRAM kpoint_driver
        nirrkpts=nirrkpts, eps_=eps)
   call pysave(nirrkpts, "../tests/face-centered_cubic/face-centered_cubic.out.vasp9")
            
-
   write(*,'(//"**********")')
   
   do i = 1,size(weights)
-     write(*,'(3(1x,f6.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
+     write(*,'(3(1x,f20.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
   end do
 
   write(*,'(//)')
