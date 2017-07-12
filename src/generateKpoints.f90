@@ -81,7 +81,7 @@ CONTAINS
     endif
 
     ! Check for valid inputs
-    if (determinant(K) > determinant(R)+eps) then
+    if (ABS(determinant(K)) > ABS(determinant(R))+eps) then
        write(*,*) "ERROR (generateFullKpointList in generateKpoints.f90):"
        write(*,*) "The k-point generating lattice vectors have a unit cell &
             &larger than the reciprocal lattice."
@@ -273,7 +273,7 @@ CONTAINS
        stop
     endif
     ! Make sure that kgrid is no bigger than reciprocal cell
-    if (determinant(K) > determinant(R)+eps) then
+    if (ABS(determinant(K)) > ABS(determinant(R))+eps) then
        write(*,*) "ERROR (symmetryReduceKpointList in generateKpoints.f90):"
        write(*,*) "The kpoint generating lattice vectors define a unit cell larger than the reciprocal lattice."
        write(*,*) "This doesn't make sense. There should be at least 1 kpoint per reciprocal cell."
