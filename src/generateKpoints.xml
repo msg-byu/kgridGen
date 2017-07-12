@@ -24,17 +24,6 @@
 		varfile="simple_cubic_wts.out" when="each" />
 
       </test>
-      <test identifier="vasp-sc" description="Unit tests for simple cubic
-					   Bravais lattice k-points
-					   compared to VASP."
-  	    timed="true" cases="vasp[1-2]">
-  	<output identifier="simple_cubic_vasp.out"
-		folder="../tests/simple_cubic" file="simple_cubic.out.{}"
-		template="float.xml" />
-  	<target name="nirrkpts" compareto="simple_cubic_vasp.out"
-		varfile="simple_cubic_vasp.out" when="each" />
-
-      </test>
     	<assignment name="SymOps" value="symops" allocate="true">
   	  <value identifier="symops" file="symops.in.{}"
   		 folder="../tests/simple_cubic" rename="symops.in"/>

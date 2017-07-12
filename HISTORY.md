@@ -1,3 +1,9 @@
+0.3.4
+* Reverted subroutine 'symmetryReduceKpointList' to Revision 0.3.2 (removed optional
+  output 'nirrkpts'). Unit tests that compare symmetry reduction to VASP will manually
+  be verified to ensure the correct reduction before creating the irreducible k-points to
+  compare.
+
 0.3.3
 * Added an optional output 'nirrkpts' for 'symmetryReduceKpointList' that gives the
   number of irreducible k-points. The motivation was to be able to create unit tests
