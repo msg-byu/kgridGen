@@ -18,10 +18,21 @@
 					  Bravais lattice k-points."
   	    timed="true" cases="[1-10]">
   	<output identifier="simple_cubic_wts.out"
-		folder="../tests/simple_cubic" file="simple_cubic_wts.out.{}"
+		folder="../tests/simple_cubic" file="simple-cubic_wts.out.{}"
 		template="float.xml" />
   	<target name="weights" compareto="simple_cubic_wts.out"
 		varfile="simple_cubic_wts.out" when="each" />
+
+      </test>
+      <test identifier="vasp-sc" description="Unit tests for simple cubic
+					   Bravais lattice k-points
+					   compared to VASP."
+  	    timed="true" cases="vasp[1-2]">
+  	<output identifier="simple_cubic_vasp.out"
+		folder="../tests/simple_cubic" file="simple_cubic.out.{}"
+		template="float.xml" />
+  	<target name="nirrkpts" compareto="simple_cubic_vasp.out"
+		varfile="simple_cubic_vasp.out" when="each" />
 
       </test>
     	<assignment name="SymOps" value="symops" allocate="true">
@@ -112,7 +123,7 @@
       
 	<assignment name="eps_" value="const">
 	  <value identifier="const" constant="1E-10_dp"/>
-	</assignment>     
-    </group>
+	</assignment>
+    </group>    
   </decorates>  
 </fortpy>

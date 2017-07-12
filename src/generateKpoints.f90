@@ -22,6 +22,8 @@ CONTAINS
   !!</parameter>
   !!<parameter regular="true" name="weights"> "Weights" of k-points (length of each orbit).
   !!</parameter>
+  !!<parameter regular="true" name="nirrkpts">The number of irreducible k-points.
+  !!(optional)</parameter>
   !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
   subroutine generateIrredKpointList(K, R, kLVshift, IrrKpList, weights, eps_)
     real(dp), intent(in) :: K(3,3)
@@ -43,7 +45,8 @@ CONTAINS
     
     call get_lattice_pointGroup(R, pgOps, eps)
     call generateFullKpointList(K, R, kLVshift, KpList, eps)
-    call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, eps)
+    call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, &
+         eps_=eps)
   endsubroutine generateIrredKpointList
 
   !!<summary>Takes two lattices, a generating lattice (K) and the reciprocal lattice (R),
@@ -172,14 +175,15 @@ CONTAINS
   !!</parameter>
   !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
   subroutine symmetryReduceKpointList(K, R, kLVshift, UnreducedKpList, SymOps, &
-       ReducedList, weights, eps_)
-    real(dp), intent(in) :: K(3,3), R(3,3) 
-    real(dp), intent(in) :: kLVshift(3) 
-    real(dp), intent(in) :: UnreducedKpList(:,:) 
-    real(dp), intent(in) :: SymOps(:,:,:) ! Last slot is op # index, first two are 3x3
-    real(dp), pointer    :: ReducedList(:,:)
-    integer, pointer     :: weights(:) 
-    real(dp), optional   :: eps_
+       ReducedList, weights, nirrkpts, eps_)
+    real(dp), intent(in)           :: K(3,3), R(3,3) 
+    real(dp), intent(in)           :: kLVshift(3) 
+    real(dp), intent(in)           :: UnreducedKpList(:,:) 
+    real(dp), intent(in)           :: SymOps(:,:,:) ! Last slot is op # index, first two are 3x3
+    real(dp), pointer              :: ReducedList(:,:)
+    integer, pointer               :: weights(:) 
+    real(dp), optional             :: eps_
+    integer, optional, intent(out) :: nirrkpts
 
     integer :: iOp, nOps, iRdKpt, nRdKpt, iUnRdKpt, nUR, cOrbit, idx, i, sum
     integer :: hashTable(size(UnreducedKpList,1))
@@ -372,6 +376,9 @@ CONTAINS
        write(*,'("Sum of irr kpoints: ",i7," # of Unred. points:",i7)') sum, nUR
        stop
     endif
+    if(present(nirrkpts)) then
+       nirrkpts = cOrbit
+    endif
   CONTAINS
     ! This function takes a k-point in Cartesian coordinates and "hashes" it into a
     ! single number, corresponding to its place in the k-point list.
@@ -382,10 +389,9 @@ CONTAINS
       ! Left transform for SNF conversion, diagonal of SNF
       integer,  intent(in) :: L(3,3), D(3) 
 
-
       real(dp) :: gpt(3)
 
-      gpt = matmul(InvK,kpt) ! k-point is now in lattice coordinates
+      gpt = matmul(InvK,kpt) ! k-point is now in lattice (grid) coordinates.
 !!      if (.not. equal(gpt, nint(gpt), eps)) then ! kpt is not a lattice point of K
 !!         write(*,*) "ERROR: (findKptIndex in kpointGeneration)"
 !!         write(*,*) "The k-point is not a lattice point of the generating vectors."
@@ -397,7 +403,6 @@ CONTAINS
       ! between 1 and nUr
       findKptIndex = int(gpt(1)*D(2)*D(3) + gpt(2)*D(3) + gpt(3) + 1)  ! Hash of the kpt
     END function findKptIndex
-
   END subroutine symmetryReduceKpointList
   
 END MODULE kpointGeneration

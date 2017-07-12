@@ -1,3 +1,10 @@
+0.3.3
+* Added an optional output 'nirrkpts' for 'symmetryReduceKpointList' that gives the
+  number of irreducible k-points. The motivation was to be able to create unit tests
+  that would compare our k-point reduction to that obtained in VASP.
+* Added unit tests that compare k-point reduction to that obtain in VASP for simple
+  cubic and face-centered cubic lattices.
+
 0.3.2
 * Added 10 unit tests for monoclinic, base-centered monoclinic, hexagonal, rhombohedral,
   and triclinic lattices.
