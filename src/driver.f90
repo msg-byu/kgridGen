@@ -11,32 +11,43 @@ PROGRAM kpoint_driver
   real(dp), allocatable :: klist(:,:)
   real(dp), pointer     :: pgOps(:,:,:), rdKlist(:,:)
   integer, pointer      :: weights(:)
-  integer H(3,3), i
+  integer H(3,3), i, nirrkpts
   
   ! Finite precision tolerance (same as default value)
   eps = 1e-10_dp
   
   ! Reciprocal lattice vectors
-  R = transpose(reshape((/ 2.0_dp/3.0_dp, 0.0_dp, 0.0_dp, &
-                           0.0_dp, 4.0_dp/3.0_dp, 0.0_dp, &
-                           0.0_dp, 0.0_dp, 17.0_dp/12.0_dp  /),(/3,3/)))  
-  ! HNF Matrix
-  H = transpose(reshape((/ 3, 0, 0, &
-                           2, 3, 0, &
-                           2, 2, 3/),(/3,3/)))
+  ! R = transpose(reshape((/ 1.98520863_dp,    0.00000000_dp,   0.00000000_dp, &
+  !                          0.0_dp,           1.44640546_dp,   0.00000000_dp, &
+  !                          0.0575324872_dp,  0.0_dp,          1.42600347_dp /),(/3,3/)))
+
+  ! R = transpose(reshape((/     /),(/3,3/)))
+
+  R = transpose(reshape((/ -0.96717033_dp,  0.96717033_dp,  0.96717033_dp, &
+                            0.96717033_dp, -0.96717033_dp,  0.96717033_dp, &
+                            0.96717033_dp,  0.96717033_dp, -0.96717033_dp  /),(/3,3/)))
   
-  shift = (/ 1.5_dp, 1.5_dp, 0.5_dp /)
-  ! shift = (/ 2.0_dp/3.0_dp, 2.0_dp/3.0_dp, 2.0_dp/3.0_dp /)
+  ! R = transpose(reshape((/  0.0_dp,  0.8_dp,  0.8_dp, &
+  !                           1.35_dp,  0.0_dp, 1.35_dp, &
+  !                           1.7_dp,  1.7_dp,  0.0_dp  /),(/3,3/)))
+  
+  ! HNF Matrix
+  H = transpose(reshape((/ 43, 0, 0, &
+                           0, 25, 0, &
+                           0, 0, 25/),(/3,3/)))
+  
+  shift = (/ 0.0_dp, 0.0_dp, 0.0_dp /)
+  ! shift = (/  2.0_dp/3.0_dp, 2.0_dp/3.0_dp, 2.0_dp/3.0_dp /)
   
   call matrix_inverse(real(H,dp), Hinv, eps_=1e-12_dp)
   K = matmul(R,Hinv)
   
   write(*,'(3("R: ",3(1x,f7.3),/))') (R(i,:),i=1,3)
   write(*,'(3("H: ",3(1x,i3),/))') (H(i,:),i=1,3)
-  write(*,'(3("Hinv: ",3(1x,f7.3),/))') (Hinv(i,:),i=1,3)
+  Write(*,'(3("Hinv: ",3(1x,f7.3),/))') (Hinv(i,:),i=1,3)
   write(*,'(3("K: ",3(1x,f7.3),/))') (K(i,:),i=1,3)
   write(*,'("shift: ",3(f6.3,1x))') shift
-  write(*,'("cart shift: ",3(f6.3,1x))') matmul(K,shift)  
+  write(*,'("cart shift: ",3(f6.3,1x))') matmul(K,shift)
 
   ! write(*,'(3("PP: ",3(1x,f7.3),/))') matmul(K,(/1,0,0/))  
   call generateFullKpointList(K, R, shift, klist)
@@ -45,15 +56,27 @@ PROGRAM kpoint_driver
   end do
   
   call get_lattice_pointGroup(R, pgOps, eps)
-  
-  call pysave(K, "../tests/orthorhombic/K.in.10")
-  call pysave(R, "../tests/orthorhombic/R.in.10")
-  call pysave(shift, "../tests/orthorhombic/shift.in.10")
-  call pysave(klist, "../tests/orthorhombic/unreduced_klist.in.10")
-  call pysave(pgOps, "../tests/orthorhombic/symops.in.10")
-  call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
-  call pysave(rdKlist, "../tests/orthorhombic/orthorhombic_kpts.out.10")
-  call pysave(weights, "../tests/orthorhombic/orthorhombic_wts.out.10")
+
+  ! Normal tests
+  ! call pysave(K, "../tests/simple-cubic/K.in.1")
+  ! call pysave(R, "../tests/simple-cubic/R.in.1")
+  ! call pysave(shift, "../tests/simple-cubic/shift.in.1")
+  ! call pysave(klist, "../tests/simple-cubic/unreduced_klist.in.1")
+  ! call pysave(pgOps, "../tests/simple-cubic/symops.in.1")  
+  ! call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
+  ! call pysave(rdKlist, "../tests/simple-cubic/simple_cubic_kpts.out.1")
+  ! call pysave(weights, "../tests/simple-cubic/simple_cubic_wts.out.1")
+
+  ! VASP tests
+  call pysave(K, "../tests/face-centered_cubic/K.in.vasp9")
+  call pysave(R, "../tests/face-centered_cubic/R.in.vasp9")
+  call pysave(shift, "../tests/face-centered_cubic/shift.in.vasp9")
+  call pysave(klist, "../tests/face-centered_cubic/unreduced_klist.in.vasp9")
+  call pysave(pgOps, "../tests/face-centered_cubic/symops.in.vasp9")
+  call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, &
+       nirrkpts=nirrkpts, eps_=eps)
+  call pysave(nirrkpts, "../tests/face-centered_cubic/face-centered_cubic.out.vasp9")
+           
 
   write(*,'(//"**********")')
   
