@@ -1,3 +1,6 @@
+0.3.6 (K.L.)
+* Added more unit tests for tetragonal lattices.
+
 0.3.5 (K.L.)
 * Removed nirrkpts from 'driver.f90'.
 * Added unit tests for tetragonal lattices.
