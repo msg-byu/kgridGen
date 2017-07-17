@@ -1,3 +1,15 @@
+0.3.6 (K.L.)
+* Added more unit tests for tetragonal lattices.
+
+0.3.5 (K.L.)
+* Removed nirrkpts from 'driver.f90'.
+* Added unit tests for tetragonal lattices.
+* The error for the grid generating vectors being larger than the reciprocal unit cell
+  occurred when it shouldn't have when the determinant of the matrix K was negative. This
+  same error also didn't occur when it should have when the determinant of the matrix R was
+  negative. I fixed this by taking the absolute value of each determinant when this error
+  was tested for in each subroutine of 'generatekpoints.f90'.
+
 0.3.4
 * Reverted subroutine 'symmetryReduceKpointList' to Revision 0.3.2 (removed optional
   output 'nirrkpts'). Unit tests that compare symmetry reduction to VASP will manually
