@@ -1,6 +1,10 @@
+0.3.8 (JJ)
+* Added unit tests that compare k-point reduction to that obtain in VASP for primitive,
+  base-centered, body-centered, and face-centered, orthorhombic lattices.
+
 0.3.7 (JJ)
 * Added unit tests that compare k-point reduction to that obtain in VASP for simple,
-  body-centered, and face-centered cubic lattices.
+  body-centered, and face-centered, cubic lattices.
 
 0.3.6 (K.L.)
 * Added more unit tests for tetragonal lattices.
