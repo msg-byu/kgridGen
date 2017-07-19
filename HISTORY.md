@@ -1,5 +1,9 @@
+0.3.10 (JJ)
+* Added unit tests that compare k-point reduction to that obtain in VASP for the tetragonal
+  crystal classes.
+  
 0.3.9 (JJ)
-* Had to redo the orthorhombic unit tests since the lattice vector in VASP are on the rows
+* Had to redo the orthorhombic unit tests since the lattice vectors in VASP are on the rows
   instead of the columns. Added unit tests that compare k-point reduction to that obtain in
   VASP for the monoclinic crystal classes.
 
