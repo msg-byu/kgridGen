@@ -1,3 +1,9 @@
+0.3.11 (KL)
+* Made epsilon bigger in the driver because epsilon was not sufficiently large to correctly 
+  identify the symmetry operators for hexagonal lattices.
+* Added unit tests that compare k-point reduction to that obtained in VASP for the hexagonal
+  crystal class.
+
 0.3.10 (JJ)
 * Added unit tests that compare k-point reduction to that obtain in VASP for the tetragonal
   crystal classes.
