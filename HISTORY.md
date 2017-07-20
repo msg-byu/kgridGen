@@ -1,4 +1,8 @@
-0.3.11 (KL)
+0.3.12 (K.L.)
+* Added unit tests that compare k-point reduction to the results obtained from VASP for the
+  rhombohedral and triclinic lattices.
+
+0.3.11 (K.L.)
 * Made epsilon bigger in the driver because epsilon was not sufficiently large to correctly 
   identify the symmetry operators for hexagonal lattices.
 * Added unit tests that compare k-point reduction to that obtained in VASP for the hexagonal

@@ -23,20 +23,20 @@ PROGRAM kpoint_driver
 
   ! R = transpose(reshape((/     /),(/3,3/)))
 
-  R = transpose(reshape((/  1.89138631_dp, 1.89138631_dp, 0.0_dp, &
-                            -1.09199239_dp, 1.09199239_dp, 0.0_dp, &
-                            0.0_dp, 0.0_dp, 1.21814372_dp /),(/3,3/)))
+  R = transpose(reshape((/ 2.0943951_dp, 0.0_dp, 0.0_dp, &
+                           0.27211944_dp, 1.26719941_dp, 0.0_dp, &
+                           0.04289322_dp, -0.08581667_dp, 0.9000376_dp /),(/3,3/)))
   
   ! R = transpose(reshape((/  0.0_dp,  0.8_dp,  0.8_dp, &
   !                           1.35_dp,  0.0_dp, 1.35_dp, &
   !                           1.7_dp,  1.7_dp,  0.0_dp  /),(/3,3/)))
   
   ! HNF Matrix
-  H = transpose(reshape((/ 32, 0, 0, &
-                           0, 32, 0, &
-                           0, 0, 32 /),(/3,3/)))
+  H = transpose(reshape((/ 42, 0, 0, &
+                           0, 28, 0, &
+                           0, 0, 14 /),(/3,3/)))
   
-  shift = (/ 0.0_dp, 0.0_dp, 0.0_dp /)
+  shift = (/ 0.5_dp, 0.5_dp, 0.5_dp /)
   ! shift = (/  2.0_dp/3.0_dp, 2.0_dp/3.0_dp, 2.0_dp/3.0_dp /)
   
   call matrix_inverse(real(H,dp), Hinv, eps_=1e-12_dp)
@@ -58,14 +58,14 @@ PROGRAM kpoint_driver
   call get_lattice_pointGroup(R, pgOps, eps)
   
   ! Normal tests
-  call pysave(K, "../tests/rhombohedral/K.in.vasp1")
-  call pysave(R, "../tests/rhombohedral/R.in.vasp1")
-  call pysave(shift, "../tests/rhombohedral/shift.in.vasp1")
-  call pysave(klist, "../tests/rhombohedral/unreduced_klist.in.vasp1")
-  call pysave(pgOps, "../tests/rhombohedral/symops.in.vasp1")  
+  call pysave(K, "../tests/triclinic/K.in.vasp10")
+  call pysave(R, "../tests/triclinic/R.in.vasp10")
+  call pysave(shift, "../tests/triclinic/shift.in.vasp10")
+  call pysave(klist, "../tests/triclinic/unreduced_klist.in.vasp10")
+  call pysave(pgOps, "../tests/triclinic/symops.in.vasp10")
   call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
-  call pysave(rdKlist, "../tests/rhombohedral/rhombohedral_kpts.out.vasp1")
-  call pysave(weights, "../tests/rhombohedral/rhombohedral_wts.out.vasp1")
+  call pysave(rdKlist, "../tests/triclinic/triclinic_kpts.out.vasp10")
+  call pysave(weights, "../tests/triclinic/triclinic_wts.out.vasp10")
 
   ! VASP
   ! call pysave(K, "../tests/tetragonal/K.in.1")
