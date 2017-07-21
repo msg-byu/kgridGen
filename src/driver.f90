@@ -8,7 +8,7 @@ PROGRAM kpoint_driver
   implicit none
 
   real(dp)              :: K(3,3), R(3,3), Hinv(3,3), eps, shift(3)
-  real(dp), allocatable :: klist(:,:)
+  real(dp), pointer     :: klist(:,:)
   real(dp), pointer     :: pgOps(:,:,:), rdKlist(:,:)
   integer, pointer      :: weights(:)
   integer H(3,3), i
@@ -23,18 +23,18 @@ PROGRAM kpoint_driver
 
   ! R = transpose(reshape((/     /),(/3,3/)))
 
-  R = transpose(reshape((/ sqrt(5.0_dp), 0.0_dp, 0.0_dp, &
-                           0.0_dp, sqrt(5.0_dp), 0.0_dp, &
-                           0.0_dp, 0.0_dp, sqrt(2.0_dp)/sqrt(3.0_dp) /),(/3,3/)))
+  R = transpose(reshape((/ 1.0_dp, 0.0_dp, 0.0_dp, &
+                           0.0_dp, 1.0_dp, 0.0_dp, &
+                           0.0_dp, 0.0_dp,  1.0_dp/),(/3,3/)))
   
   ! R = transpose(reshape((/  0.0_dp,  0.8_dp,  0.8_dp, &
   !                           1.35_dp,  0.0_dp, 1.35_dp, &
   !                           1.7_dp,  1.7_dp,  0.0_dp  /),(/3,3/)))
   
   ! HNF Matrix
-  H = transpose(reshape((/ 1, 0, 0, &
-                           4, 5, 0, &
-                           3, 0, 4 /),(/3,3/)))
+  H = transpose(reshape((/ 2, 0, 0, &
+                           0, 2, 0, &
+                           0, 0, 1 /),(/3,3/)))
   
   shift = (/ 0.5_dp, 0.5_dp, 0.0_dp /)
   ! shift = (/  2.0_dp/3.0_dp, 2.0_dp/3.0_dp, 2.0_dp/3.0_dp /)
@@ -56,16 +56,16 @@ PROGRAM kpoint_driver
   end do
   
   call get_lattice_pointGroup(R, pgOps, eps)
-  
-  ! Normal tests
-  call pysave(K, "../tests/tetragonal/K.in.10")
-  call pysave(R, "../tests/tetragonal/R.in.10")
-  call pysave(shift, "../tests/tetragonal/shift.in.10")
-  call pysave(klist, "../tests/tetragonal/unreduced_klist.in.10")
-  call pysave(pgOps, "../tests/tetragonal/symops.in.10")  
-  call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
-  call pysave(rdKlist, "../tests/tetragonal/tetragonal_kpts.out.10")
-  call pysave(weights, "../tests/tetragonal/tetragonal_wts.out.10")
+!  
+!  ! Normal tests
+!  call pysave(K, "../tests/tetragonal/K.in.10")
+!  call pysave(R, "../tests/tetragonal/R.in.10")
+!  call pysave(shift, "../tests/tetragonal/shift.in.10")
+!  call pysave(klist, "../tests/tetragonal/unreduced_klist.in.10")
+!  call pysave(pgOps, "../tests/tetragonal/symops.in.10")  
+!  call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
+!  call pysave(rdKlist, "../tests/tetragonal/tetragonal_kpts.out.10")
+!  call pysave(weights, "../tests/tetragonal/tetragonal_wts.out.10")
 
   ! VASP
   ! call pysave(K, "../tests/tetragonal/K.in.1")
@@ -75,16 +75,18 @@ PROGRAM kpoint_driver
   ! call pysave(pgOps, "../tests/tetragonal/symops.in.1")
   ! call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, &
   !      , eps_=eps)
-           
+
+!  call generateIrredKpointList(K, R, shift, klist, weights, eps)
+  call mapKptsIntoFirstBZ(R, klist, eps)
   write(*,'(//"**********")')
   
-  do i = 1,size(weights)
-     write(*,'(3(1x,f20.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
+  do i = 1,size(klist,1)
+     write(*,'(3(1x,f7.3),3x,"w:",i5)') klist(i,:)!,weights(i)
   end do
-
-  write(*,'(//)')
-  write(*,'("Unrd kpts: ",i7)') size(klist,1)
-  write(*,'("Rdcd kpts: ",i7)') size(rdKlist,1)
-  write(*,'("Rdn ratio: ",f6.3)') size(klist,1)/real(size(weights))
+!
+!  write(*,'(//)')
+!  write(*,'("Unrd kpts: ",i7)') size(klist,1)
+!  write(*,'("Rdcd kpts: ",i7)') size(rdKlist,1)
+!  write(*,'("Rdn ratio: ",3x,f4.1)') size(klist,1)/real(size(weights))
 
 END PROGRAM kpoint_driver

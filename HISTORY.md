@@ -1,3 +1,8 @@
+0.4.0 (GLWH)
+* Added a new routine that maps a list of k-points (reduced or not) into the first BZ.
+  Needs to be unit tested.
+  (Jeremy suggests mapping any k-point into the first unit cell before doing check.)
+
 0.3.7 (JJ)
 * Added unit tests that compare k-point reduction to that obtain in VASP for simple,
   body-centered, and face-centered cubic lattices.
