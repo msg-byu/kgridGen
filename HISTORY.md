@@ -1,3 +1,19 @@
+<<<<<<< HEAD
+0.4.0 (GLWH)
+* Added a new routine that maps a list of k-points (reduced or not) into the first BZ.
+  Needs to be unit tested.
+  (Jeremy suggests mapping any k-point into the first unit cell before doing check.)
+=======
+0.3.12 (K.L.)
+* Added unit tests that compare k-point reduction to the results obtained from VASP for the
+  rhombohedral and triclinic lattices.
+
+0.3.11 (K.L.)
+* Made epsilon bigger in the driver because epsilon was not sufficiently large to correctly 
+  identify the symmetry operators for hexagonal lattices.
+* Added unit tests that compare k-point reduction to that obtained in VASP for the hexagonal
+  crystal class.
+
 0.3.10 (JJ)
 * Added unit tests that compare k-point reduction to that obtain in VASP for the tetragonal
   crystal classes.
@@ -10,6 +26,7 @@
 0.3.8 (JJ)
 * Added unit tests that compare k-point reduction to that obtain in VASP for primitive,
   base-centered, body-centered, and face-centered, orthorhombic lattices.
+>>>>>>> 2398da8fc81efa82d5842a2248b05000ada6e941
 
 0.3.7 (JJ)
 * Added unit tests that compare k-point reduction to that obtain in VASP for simple,
@@ -134,27 +151,20 @@ off the k-grid lattice. This can happen for strange shifts---which we should avo
 would be nice for the code to do the right thing anyhow. >>> 
 
 0.0.3
-<<<<<<< HEAD
+
 
 * Somehow, and old, incomplete copy got pushed and v. 0.0.2, if it was complete, got lost.
   This version seems to be working again, with the same functionality.
-=======
-* Somehow, and old, incomplete copy got pushed and v. 0.0.2, if it was
-  complete, got lost. This version seems to be working again,
-  with the same functionality.
->>>>>>> ff2e3fa686db555283a0a33391bc85f6dd5bfbe3
+
 
 0.0.2
 * Added files from laptop. First working copy.
 
 0.0.1
-<<<<<<< HEAD
+
 * Initial import of rough, working copy of the folding code. Relies on routines in symlib
   (getPointGroup, SNF, HNF, etc.)
 
 *Somehow, an old, incomplete copy got pushed and v. 0.0.2, if it was complete, got lost.
  This version seems to be working again, with the same functionality.
-=======
-* Initial import of rough, working copy of the folding code. Relies
-  on routines in symlib (getPointGroup, SNF, HNF, etc.)
->>>>>>> ff2e3fa686db555283a0a33391bc85f6dd5bfbe3
+

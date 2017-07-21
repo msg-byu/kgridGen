@@ -1,16 +1,83 @@
 MODULE kpointGeneration
   use num_types
   use numerical_utilities, only: equal
-  use vector_matrix_utilities, only: matrix_inverse, norm, cross_product, volume, &
-       determinant
+  use vector_matrix_utilities
   use rational_mathematics, only: HermiteNormalForm, SmithNormalForm
   use symmetry
   implicit none
 
   private
-  public generateIrredKpointList, generateFullKpointList, symmetryReduceKpointList
+  public generateIrredKpointList, generateFullKpointList, symmetryReduceKpointList, mapKptsIntoFirstBZ
 CONTAINS
+  !!<summary>Move a list of k-points into the first Brillioun zone. That is applying
+  !! translational symmetry, find the set of k-points equivalent to the input set, that
+  !! is closer to the origin than any other equivalent set. The input set is modified by
+  !! this routine. </summary>
+  !!<parameter regular="true" name="R">Matrix of reciprocal lattice vectors.</parameter>
+  !!<parameter regular="true" name="KpList">List of k-points.</parameter>
+  !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
+  subroutine mapKptsIntoFirstBZ(R, KpList, eps_)
+    real(dp), intent(in)   :: R(3,3)
+    real(dp), intent(inout):: KpList(:,:) ! First index is over k-points, second coordinates
+    real(dp), intent(in), optional :: eps_
 
+    real(dp)   :: minkedR(3,3), kpt(3), this_vector(3)
+    real(dp)   :: minLength, cell_volume, max_norm, length, eps
+    integer :: ik, nk, i, j, k, num_Rs, n1, n2, n3
+    if(.not. present(eps_)) then
+       eps = 1e-10_dp
+    else
+       eps =  eps_
+    endif
+
+    ! General idea of algorithm: 
+    ! For efficiency's sake, first do a Minkowski reduction on the reciprocal vectors (R)
+    ! to get the most compact cell possible. This will limit the search over possible
+    ! translations to the smallest set possible.
+    ! For each k-point, check each equivalent translation and select the one that is
+    ! closest to the origin. By defintion, the closest point is the translationally
+    ! equivalent "brother" that is in the first Brillioun zone.
+
+    call minkowski_reduce_basis(R, minkedR, eps)
+
+    nk = size(KpList, 1)
+    ! For efficiency's sake, first do a Minkowski reduction on the reciprocal vectors (R)
+    ! to get the most compact cell possible. This will limit the search over possible
+    ! translations to the smallest set possible.
+    ! For each k-point, check each equivalent translations and select the one that is
+    ! closest to the origin. By defintion, the closest point is the translationally
+    ! equivalent "brother" that is in the first Brillioun zone.
+    do ik = 1, nk
+       kpt = KpList(ik,:)
+       ! Find all translationally equivalent k-points, keep the closest:
+       !
+       ! (the next 15 lines or so are adapted from get_lattice_pointgroup in symmetry.f90)
+       !
+       ! Decide how many lattice points to look in each direction to get all the 
+       ! points in a sphere that contains all of the longest _primitive_ vectors
+       cell_volume = abs(dot_product(R(:,1),cross_product(R(:,2),R(:,3))))
+       max_norm = max(norm(R(:,1)),norm(R(:,2)),norm(R(:,3)))
+       n1 = ceiling(max_norm*norm(cross_product(R(:,2),R(:,3))/cell_volume)+eps)
+       n2 = ceiling(max_norm*norm(cross_product(R(:,3),R(:,1))/cell_volume)+eps)
+       n3 = ceiling(max_norm*norm(cross_product(R(:,1),R(:,2))/cell_volume)+eps)
+
+       minLength = norm(kpt)
+       ! Loop over all translationally equivalent points that possibly could be closer
+       do i = -n1, n1
+          do j = -n2, n2
+             do k = -n3, n3
+                this_vector = i*R(:,1) + j*R(:,2) + k*R(:,3) + kpt
+                length = norm(this_vector)
+                if(length + eps < minLength) then
+                   minLength = length
+                   KpList(ik,:) = this_vector
+                endif
+             enddo
+          enddo
+       enddo
+    enddo
+  endsubroutine mapKptsIntoFirstBZ
+  
   !!<summary>Reduce k-points to irreducible set. Takes a list of translationally distinct,
   !! but not rotationally distinct, k-points and reduces them by the given point group.
   !! </summary>
@@ -31,8 +98,8 @@ CONTAINS
     integer, pointer     :: weights(:)
     real(dp), intent(in), optional:: eps_
 
-    real(dp), allocatable:: KpList(:,:)
-    real(dp), pointer     :: pgOps(:,:,:)
+    real(dp), pointer    :: KpList(:,:)
+    real(dp), pointer    :: pgOps(:,:,:)
     real(dp)             :: eps
 
     if(.not. present(eps_)) then
@@ -59,7 +126,7 @@ CONTAINS
     real(dp), intent(in) :: K(3,3)
     real(dp), intent(in) :: R(3,3)
     real(dp), intent(in) :: kLVshift(3)
-    real(dp), allocatable:: KpList(:,:)
+    real(dp), pointer    :: KpList(:,:)
     real(dp), intent(in), optional:: eps_   
 
     real(dp) :: Kinv(3,3) ! Inverse of the k-grid cell 
@@ -81,7 +148,7 @@ CONTAINS
     endif
 
     ! Check for valid inputs
-    if (ABS(determinant(K)) > ABS(determinant(R))+eps) then
+    if (determinant(K) > determinant(R)+eps) then
        write(*,*) "ERROR (generateFullKpointList in generateKpoints.f90):"
        write(*,*) "The k-point generating lattice vectors have a unit cell &
             &larger than the reciprocal lattice."
@@ -103,16 +170,11 @@ CONTAINS
        write(*,*) "The reciprocal lattice vectors are linearly dependent."
        stop
     endif
-    if (any(matmul(Kinv,R) -  nint(matmul(Kinv,R)) > eps)) then
-       write(*,*) "ERROR: (generateFullKpointList in generateKpoints.f90):"
-       stop "The point generating vectors and the reciprocal lattice are incommensurate."
-    endif
     cartShift = matmul(K,kLVshift)
     bicCartShift = cartShift ! The k-grid shift, but bring into cell
     call bring_into_cell(bicCartShift, Kinv, K, eps)
     
     if (.not. equal(cartShift, bicCartShift, eps)) then
-       
        write(*,*) "WARNING: (generateFullKpointList in generateKpoints.f90)"
        write(*,*) "The given shift was outside the first k-grid cell. By translation"
        write(*,*) "symmetry, this is always equivalent to a shift inside the cell."
@@ -140,19 +202,11 @@ CONTAINS
           enddo
        enddo
     enddo
-
-!!do idx = 1,n
-!!   write(*,'("kp: ",3(1x,f8.3))') KpList(idx,:)
-!!end do
     
     ! Bring each k-point into the first unit cell
     do iKP = 1,n
        call bring_into_cell(KpList(iKP,:),Rinv,R,eps)
     enddo
-
-    ! do idx = 1,n
-    !    write(*,'("kp (bic): ",3(1x,f8.3))') KpList(idx,:)
-    ! end do
 
   END subroutine generateFullKpointList
 
@@ -273,7 +327,7 @@ CONTAINS
        stop
     endif
     ! Make sure that kgrid is no bigger than reciprocal cell
-    if (ABS(determinant(K)) > ABS(determinant(R))+eps) then
+    if (determinant(K) > determinant(R)+eps) then
        write(*,*) "ERROR (symmetryReduceKpointList in generateKpoints.f90):"
        write(*,*) "The kpoint generating lattice vectors define a unit cell larger than the reciprocal lattice."
        write(*,*) "This doesn't make sense. There should be at least 1 kpoint per reciprocal cell."
