@@ -22,22 +22,16 @@ PROGRAM kpoint_driver
   !                          0.0575324872_dp,  0.0_dp,          1.42600347_dp /),(/3,3/)))
 
   ! R = transpose(reshape((/     /),(/3,3/)))
-
-  R = transpose(reshape((/ sqrt(5.0_dp), 0.0_dp, 0.0_dp, &
-                           0.0_dp, sqrt(5.0_dp), 0.0_dp, &
-                           0.0_dp, 0.0_dp, sqrt(2.0_dp)/sqrt(3.0_dp) /),(/3,3/)))
-  
-  ! R = transpose(reshape((/  0.0_dp,  0.8_dp,  0.8_dp, &
-  !                           1.35_dp,  0.0_dp, 1.35_dp, &
-  !                           1.7_dp,  1.7_dp,  0.0_dp  /),(/3,3/)))
+  R = transpose(reshape((/ 2.222_dp, 0.0_dp, 0.0_dp, &
+                           0.0_dp, 2.8222_dp, 0.0_dp, &
+                           0.0_dp, 0.0_dp, 2.222o_dp  /),(/3,3/)))
   
   ! HNF Matrix
-  H = transpose(reshape((/ 1, 0, 0, &
-                           4, 5, 0, &
-                           3, 0, 4 /),(/3,3/)))
+  H = transpose(reshape((/ 41,  0,  0, &
+                            0,   21,  0, &
+                            0,   0,   41 /),(/3,3/)))
   
-  shift = (/ 0.5_dp, 0.5_dp, 0.0_dp /)
-  ! shift = (/  2.0_dp/3.0_dp, 2.0_dp/3.0_dp, 2.0_dp/3.0_dp /)
+  shift = (/ 0.0_dp, 0.0_dp, 0.0_dp /)
   
   call matrix_inverse(real(H,dp), Hinv, eps_=1e-12_dp)
   K = matmul(R,Hinv)
@@ -58,23 +52,25 @@ PROGRAM kpoint_driver
   call get_lattice_pointGroup(R, pgOps, eps)
   
   ! Normal tests
-  call pysave(K, "../tests/tetragonal/K.in.10")
-  call pysave(R, "../tests/tetragonal/R.in.10")
-  call pysave(shift, "../tests/tetragonal/shift.in.10")
-  call pysave(klist, "../tests/tetragonal/unreduced_klist.in.10")
-  call pysave(pgOps, "../tests/tetragonal/symops.in.10")  
-  call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
-  call pysave(rdKlist, "../tests/tetragonal/tetragonal_kpts.out.10")
-  call pysave(weights, "../tests/tetragonal/tetragonal_wts.out.10")
+  ! call pysave(K, "../tests/simple_cubic/K.in.10")
+  ! call pysave(R, "../tests/simple_cubic/R.in.10")
+  ! call pysave(shift, "../tests/simple_cubic/shift.in.10")
+  ! call pysave(klist, "../tests/simple_cubic/unreduced_klist.in.10")
+  ! call pysave(pgOps, "../tests/simple_cubic/symops.in.10")  
+  ! call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
+  ! call pysave(rdKlist, "../tests/simple_cubic/simple_cubic_kpts.out.10")
+  ! call pysave(weights, "../tests/simple_cubic/tetragonal_wts.out.10")
 
   ! VASP
-  ! call pysave(K, "../tests/tetragonal/K.in.1")
-  ! call pysave(R, "../tests/tetragonal/R.in.1")
-  ! call pysave(shift, "../tests/tetragonal/shift.in.1")
-  ! call pysave(klist, "../tests/tetragonal/unreduced_klist.in.1")
-  ! call pysave(pgOps, "../tests/tetragonal/symops.in.1")
-  ! call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, &
-  !      , eps_=eps)
+  ! call pysave(K, "../tests/body-centered_tetragonal/K.in.vasp10")
+  ! call pysave(R, "../tests/body-centered_tetragonal/R.in.vasp10")
+  ! call pysave(shift, "../tests/body-centered_tetragonal/shift.in.vasp10")
+  ! call pysave(klist, "../tests/body-centered_tetragonal/unreduced_klist.in.vasp10")
+  ! call pysave(pgOps, "../tests/body-centered_tetragonal/symops.in.vasp10")
+  call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, &
+       eps_=eps)
+  ! call pysave(rdKlist, "../tests/body-centered_tetragonal/body-centered_tetragonal_kpts.out.vasp10")
+  ! call pysave(weights, "../tests/body-centered_tetragonal/body-centered_tetragonal_wts.out.vasp10")
            
   write(*,'(//"**********")')
   
