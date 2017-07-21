@@ -14,7 +14,7 @@ PROGRAM kpoint_driver
   integer H(3,3), i
   
   ! Finite precision tolerance (same as default value)
-  eps = 1e-10_dp
+  eps = 1e-6_dp
   
   ! Reciprocal lattice vectors
   ! R = transpose(reshape((/ 1.98520863_dp,    0.00000000_dp,   0.00000000_dp, &
@@ -23,20 +23,23 @@ PROGRAM kpoint_driver
 
   ! R = transpose(reshape((/     /),(/3,3/)))
 
-  R = transpose(reshape((/ 1.0_dp, 0.0_dp, 0.0_dp, &
-                           0.0_dp, 1.0_dp, 0.0_dp, &
-                           0.0_dp, 0.0_dp,  1.0_dp/),(/3,3/)))
+
+  R = transpose(reshape((/ 2.0943951_dp, 0.0_dp, 0.0_dp, &
+                           0.27211944_dp, 1.26719941_dp, 0.0_dp, &
+                           0.04289322_dp, -0.08581667_dp, 0.9000376_dp /),(/3,3/)))
+
   
   ! R = transpose(reshape((/  0.0_dp,  0.8_dp,  0.8_dp, &
   !                           1.35_dp,  0.0_dp, 1.35_dp, &
   !                           1.7_dp,  1.7_dp,  0.0_dp  /),(/3,3/)))
   
   ! HNF Matrix
+
   H = transpose(reshape((/ 2, 0, 0, &
                            0, 2, 0, &
                            0, 0, 1 /),(/3,3/)))
   
-  shift = (/ 0.5_dp, 0.5_dp, 0.0_dp /)
+  shift = (/ 0.5_dp, 0.5_dp, 0.5_dp /)
   ! shift = (/  2.0_dp/3.0_dp, 2.0_dp/3.0_dp, 2.0_dp/3.0_dp /)
   
   call matrix_inverse(real(H,dp), Hinv, eps_=1e-12_dp)
@@ -56,6 +59,7 @@ PROGRAM kpoint_driver
   end do
   
   call get_lattice_pointGroup(R, pgOps, eps)
+
 !  
 !  ! Normal tests
 !  call pysave(K, "../tests/tetragonal/K.in.10")
@@ -66,6 +70,9 @@ PROGRAM kpoint_driver
 !  call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, eps)
 !  call pysave(rdKlist, "../tests/tetragonal/tetragonal_kpts.out.10")
 !  call pysave(weights, "../tests/tetragonal/tetragonal_wts.out.10")
+
+
+
 
   ! VASP
   ! call pysave(K, "../tests/tetragonal/K.in.1")
