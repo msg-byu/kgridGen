@@ -21,9 +21,11 @@ CONTAINS
     real(dp), intent(inout):: KpList(:,:) ! First index is over k-points, second coordinates
     real(dp), intent(in), optional :: eps_
 
-    real(dp)   :: minkedR(3,3), kpt(3), this_vector(3)
+    real(dp)   :: minkedR(3,3), kpt(3), this_vector(3), minkedRinv(3,3), Rinv(3,3)
     real(dp)   :: minLength, cell_volume, max_norm, length, eps
     integer :: ik, nk, i, j, k, num_Rs, n1, n2, n3
+    logical  :: err ! flag for catching errors
+        
     if(.not. present(eps_)) then
        eps = 1e-10_dp
     else
@@ -38,7 +40,23 @@ CONTAINS
     ! closest to the origin. By defintion, the closest point is the translationally
     ! equivalent "brother" that is in the first Brillioun zone.
 
+    call matrix_inverse(R, Rinv, err)
+    if (err) then
+       write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
+       write(*,*) "The reciprocal lattice vectors are linearly dependent."
+       stop
+    endif
+
+
     call minkowski_reduce_basis(R, minkedR, eps)
+    write(*,'(3("minkedR: ",3(1x,f7.3),/))') (minkedR(i,:),i=1,3)
+    call matrix_inverse(minkedR, minkedRinv, err)
+    write(*,'(3("minkedRinv: ",3(1x,f7.3),/))') (minkedRinv(i,:),i=1,3)
+    if (err) then
+       write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
+       write(*,*) "The Minkowski reduced lattice vectors are linearly dependent."
+       stop
+    endif
 
     nk = size(KpList, 1)
     ! For efficiency's sake, first do a Minkowski reduction on the reciprocal vectors (R)
@@ -49,24 +67,30 @@ CONTAINS
     ! equivalent "brother" that is in the first Brillioun zone.
     do ik = 1, nk
        kpt = KpList(ik,:)
+       ! Move the k-point into the first unit cell.
+       call bring_into_cell(kpt, minkedRinv, minkedR, eps)
+
        ! Find all translationally equivalent k-points, keep the closest:
        !
        ! (the next 15 lines or so are adapted from get_lattice_pointgroup in symmetry.f90)
        !
        ! Decide how many lattice points to look in each direction to get all the 
        ! points in a sphere that contains all of the longest _primitive_ vectors
-       cell_volume = abs(dot_product(R(:,1),cross_product(R(:,2),R(:,3))))
-       max_norm = max(norm(R(:,1)),norm(R(:,2)),norm(R(:,3)))
-       n1 = ceiling(max_norm*norm(cross_product(R(:,2),R(:,3))/cell_volume)+eps)
-       n2 = ceiling(max_norm*norm(cross_product(R(:,3),R(:,1))/cell_volume)+eps)
-       n3 = ceiling(max_norm*norm(cross_product(R(:,1),R(:,2))/cell_volume)+eps)
+       cell_volume = abs(dot_product(minkedR(:,1),cross_product(minkedR(:,2),minkedR(:,3))))
+       max_norm = max(norm(minkedR(:,1)),norm(minkedR(:,2)),norm(minkedR(:,3)))
+       n1 = ceiling(max_norm*norm(cross_product(minkedR(:,2),minkedR(:,3)) &
+            /cell_volume)+eps)
+       n2 = ceiling(max_norm*norm(cross_product(minkedR(:,3),minkedR(:,1)) &
+            /cell_volume)+eps)
+       n3 = ceiling(max_norm*norm(cross_product(minkedR(:,1),minkedR(:,2)) &
+            /cell_volume)+eps)
 
        minLength = norm(kpt)
        ! Loop over all translationally equivalent points that possibly could be closer
        do i = -n1, n1
           do j = -n2, n2
              do k = -n3, n3
-                this_vector = i*R(:,1) + j*R(:,2) + k*R(:,3) + kpt
+                this_vector = i*minkedR(:,1) + j*minkedR(:,2) + k*minkedR(:,3) + kpt
                 length = norm(this_vector)
                 if(length + eps < minLength) then
                    minLength = length
@@ -198,7 +222,7 @@ CONTAINS
              !converted to base-10 from mixed-radix number of HNF diagonal entries
              idx = f*c*iK + f*jK + kK + 1
              ! compute Cartesian coordinates of the k-point
-             KpList(idx,:) = matmul(K,(/iK, jK, kK/)) + matmul(K,kLVshift) 
+             KpList(idx,:) = matmul(K,(/iK, jK, kK/)) + cartShift
           enddo
        enddo
     enddo
@@ -300,11 +324,11 @@ CONTAINS
     D = (/S(1,1),S(2,2),S(3,3)/)
     call matrix_inverse(K,InvK,err,eps)
 
-    write(*,'(3(1x,i3))') (H(i,:),i=1,3)
-    write(*,*) 
-    write(*,'(3(1x,i3))') (S(i,:),i=1,3)
-    write(*,'("InvK")')
-    write(*,'(3(1x,f7.3))') (InvK(i,:),i=1,3)
+    ! write(*,'(3(1x,i3))') (H(i,:),i=1,3)
+    ! write(*,*) 
+    ! write(*,'(3(1x,i3))') (S(i,:),i=1,3)
+    ! write(*,'("InvK")')
+    ! write(*,'(3(1x,f7.3))') (InvK(i,:),i=1,3)
 
     
     if (err) then
@@ -342,9 +366,9 @@ CONTAINS
     iWt = 0 ! count the number of members of each orbit
     do iUnRdKpt = 1,nUR ! Loop over each k-point and mark off its symmetry brothers
        urKpt = UnreducedKpList(iUnRdKpt,:) ! unrotated k-point (shorter name for clarity)
-       write(*,'(/,"kpt#: ",i4)') iUnRdKpt
+       ! write(*,'(/,"kpt#: ",i4)') iUnRdKpt
        idx = findKptIndex(urKpt-shift, InvK, L, D)
-       write(*,'("urKpt: ",3(f6.3,1x),"idx:",i3)') urKpt, idx
+       ! write(*,'("urKpt: ",3(f6.3,1x),"idx:",i3)') urKpt, idx
        
        if (hashTable(idx)/=0) cycle ! This k-point is already on an orbit, skip it
        cOrbit = cOrbit + 1
@@ -375,22 +399,22 @@ CONTAINS
           ! write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,roKpt,idx
           ! Is this a new addition to the orbit?
           if (hashTable(idx)==0) then
-             write(*,'(/,"Operator:",i3)') iOp 
-             write(*,'(3(1x,f7.3))') (SymOps(i,:,iOp),i=1,3)
-             write(*,'("roKpt: ",3(f6.3,1x),i3)') roKpt
-             write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,roKpt,idx
+             ! write(*,'(/,"Operator:",i3)') iOp 
+             ! write(*,'(3(1x,f7.3))') (SymOps(i,:,iOp),i=1,3)
+             ! write(*,'("roKpt: ",3(f6.3,1x),i3)') roKpt
+             ! write(*,'("Op#",1x,i2,5x,"rkpt: ",3(f6.3,1x),5x,"idx: ",i4)') iOp,roKpt,idx
              
-             print *,"point added"
+             ! print *,"point added"
              hashTable(idx) = cOrbit
              ! if so increase the number of members of this orbit by 1
              iWt(cOrbit)=iWt(cOrbit)+1
           endif
        enddo
-       write(*,'(/,"iWt: ",i4)') iWt(cOrbit)
+       ! write(*,'(/,"iWt: ",i4)') iWt(cOrbit)
     enddo
-    write(*,*) "Hash table:"
+    ! write(*,*) "Hash table:"
     do i = 1, nUr
-       write(*,'("kpt#:",i3,3x,"index:",i3)') i, hashTable(i)
+       ! write(*,'("kpt#:",i3,3x,"index:",i3)') i, hashTable(i)
     enddo
     ! Now that we have the hash table populated, make a list of the irreducible k-points
     ! and their corresponding weights.
@@ -400,9 +424,9 @@ CONTAINS
     do i = 1, cOrbit
        sum = sum + weights(i)
 
-       write(*,'("corbit: ", i3)') i
-       write(*,'("ifirst: ", i3)') iFirst(i)
-       write(*,'("rep kpt: ",3(f6.3,1x))') UnreducedKpList(iFirst(i),:)
+       ! write(*,'("corbit: ", i3)') i
+       ! write(*,'("ifirst: ", i3)') iFirst(i)
+       ! write(*,'("rep kpt: ",3(f6.3,1x))') UnreducedKpList(iFirst(i),:)
        ReducedList(i,:) = UnreducedKpList(iFirst(i),:)
     enddo
     ! Fail safe checks

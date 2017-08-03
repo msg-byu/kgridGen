@@ -1,9 +1,28 @@
-<<<<<<< HEAD
+0.4.1 (JJ)
+* Mapped points into the unit cell before mapping into the first Brillouin zone in
+  `mapKptsIntoFirstBZ`.
+* The lattice vectors and not the Minkowski reduced lattice vectors were being implemented
+  in `mapKptsIntoFirstBZ`. Replaced `R` with `minkedR` in this routine.
+* Fixed descriptions of unit tests in generateKpoints.xml.
+* It seemed redundant, for example, to have a unit test file named simple_cubic_kpts.in1
+  inside the folder simple_cubic. I renamed the files
+  
+  simple_cubic/unreduced_klist.in.* -> simple_cubic/klist.in.*
+  simple_cubic/unreduced_klist.in.vasp.* -> simple_cubic/klist.in.vasp*
+  
+  simple_cubic/simple_cubic_kpts.out.* -> simple_cubic/klist.out.*
+  simple_cubic/simple_cubic_kpts.out.vasp.* -> simple_cubic/klist.out.vasp*
+
+  simple_cubic/simple_cubic_wts.out.* -> simple_cubic/weights.out.*  
+  simple_cubic/simple_cubic_wts.out.vasp* -> simple_cubic/weights.in.vasp*
+  
+  This was applied to all the Bravais lattices.
+  
 0.4.0 (GLWH)
 * Added a new routine that maps a list of k-points (reduced or not) into the first BZ.
   Needs to be unit tested.
   (Jeremy suggests mapping any k-point into the first unit cell before doing check.)
-=======
+
 0.3.12 (K.L.)
 * Added unit tests that compare k-point reduction to the results obtained from VASP for the
   rhombohedral and triclinic lattices.
@@ -26,7 +45,6 @@
 0.3.8 (JJ)
 * Added unit tests that compare k-point reduction to that obtain in VASP for primitive,
   base-centered, body-centered, and face-centered, orthorhombic lattices.
->>>>>>> 2398da8fc81efa82d5842a2248b05000ada6e941
 
 0.3.7 (JJ)
 * Added unit tests that compare k-point reduction to that obtain in VASP for simple,
