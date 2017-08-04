@@ -1,3 +1,7 @@
+0.4.2 (K.L.)
+* The body-centered_cubic unit tests folder had somehow been removed, so I readded it from
+  a previous commit.
+
 0.4.1 (JJ)
 * Mapped points into the unit cell before mapping into the first Brillouin zone in
   `mapKptsIntoFirstBZ`.
