@@ -1,3 +1,17 @@
+0.4.3 (JJ)
+* Moved the code inside `mapKptsIntoFirstBZ` that determines how many lattice points
+  to look in each direction outside the main for loop since it has no k-point
+  dependence.
+* Made many changes to `mapKptsIntoFirstBZ`: the k-points are placed in the unit cell,
+  transformed to Minkowski space, and then moved to the first Brillouin zone in
+  Minkowski space.
+* The portion of the code in `mapKptsIntoFirstBZ` that searches for the translationally
+  equivalent point nearest the origin was removed. The search is always performed within
+  the 8 unit cells that surround the origin.
+* All that checks in generateKpoints.f90 that verified two lattices were commensurate
+  were made consistent by using the function `equal`.
+* Added unit tests for the `mapKptsIntoFirstBZ` for a simple cubic lattice.
+
 0.4.1 (JJ)
 * Mapped points into the unit cell before mapping into the first Brillouin zone in
   `mapKptsIntoFirstBZ`.

@@ -21,7 +21,7 @@ CONTAINS
     real(dp), intent(inout):: KpList(:,:) ! First index is over k-points, second coordinates
     real(dp), intent(in), optional :: eps_
 
-    real(dp)   :: minkedR(3,3), kpt(3), this_vector(3), minkedRinv(3,3), Rinv(3,3)
+    real(dp)   :: minkedR(3,3), kpt(3), this_vector(3), minkedRinv(3,3), Rinv(3,3), M(3,3)
     real(dp)   :: minLength, cell_volume, max_norm, length, eps
     integer :: ik, nk, i, j, k, num_Rs, n1, n2, n3
     logical  :: err ! flag for catching errors
@@ -47,7 +47,6 @@ CONTAINS
        stop
     endif
 
-
     call minkowski_reduce_basis(R, minkedR, eps)
     write(*,'(3("minkedR: ",3(1x,f7.3),/))') (minkedR(i,:),i=1,3)
     call matrix_inverse(minkedR, minkedRinv, err)
@@ -65,41 +64,78 @@ CONTAINS
     ! For each k-point, check each equivalent translations and select the one that is
     ! closest to the origin. By defintion, the closest point is the translationally
     ! equivalent "brother" that is in the first Brillioun zone.
+
+
+    ! Find all translationally equivalent k-points, keep the closest:
+    !
+    ! (the next 15 lines or so are adapted from get_lattice_pointgroup in symmetry.f90)
+    !
+    ! Decide how many lattice points to look in each direction to get all the 
+    ! points in a sphere that contains all of the longest _primitive_ vectors
+    cell_volume = abs(dot_product(minkedR(:,1),cross_product(minkedR(:,2),minkedR(:,3))))
+    max_norm = max(norm(minkedR(:,1)),norm(minkedR(:,2)),norm(minkedR(:,3)))
+    n1 = ceiling(max_norm*norm(cross_product(minkedR(:,2),minkedR(:,3)) &
+         /cell_volume)+eps)
+    n2 = ceiling(max_norm*norm(cross_product(minkedR(:,3),minkedR(:,1)) &
+         /cell_volume)+eps)
+    n3 = ceiling(max_norm*norm(cross_product(minkedR(:,1),minkedR(:,2)) &
+         /cell_volume)+eps)
+    
+    write(*,'("n1: ",3x,i4.1)') n1
+    write(*,'("n2: ",3x,i4.1)') n2
+    write(*,'("n3: ",3x,i4.1)') n3
+    
+    write(*,'(//"**********")')
+    ! Find the transformation matrix that takes the k-point to Minkowski space.
+    M = matmul(minkedR, Rinv)
+  write(*,'(3("M: ",3(1x,f11.7),/))') (M(i,:),i=1,3)
+    
     do ik = 1, nk
        kpt = KpList(ik,:)
        ! Move the k-point into the first unit cell.
+       write(*,'("before k-point: ",3(f6.3,1x))') kpt
        call bring_into_cell(kpt, minkedRinv, minkedR, eps)
-
-       ! Find all translationally equivalent k-points, keep the closest:
-       !
-       ! (the next 15 lines or so are adapted from get_lattice_pointgroup in symmetry.f90)
-       !
-       ! Decide how many lattice points to look in each direction to get all the 
-       ! points in a sphere that contains all of the longest _primitive_ vectors
-       cell_volume = abs(dot_product(minkedR(:,1),cross_product(minkedR(:,2),minkedR(:,3))))
-       max_norm = max(norm(minkedR(:,1)),norm(minkedR(:,2)),norm(minkedR(:,3)))
-       n1 = ceiling(max_norm*norm(cross_product(minkedR(:,2),minkedR(:,3)) &
-            /cell_volume)+eps)
-       n2 = ceiling(max_norm*norm(cross_product(minkedR(:,3),minkedR(:,1)) &
-            /cell_volume)+eps)
-       n3 = ceiling(max_norm*norm(cross_product(minkedR(:,1),minkedR(:,2)) &
-            /cell_volume)+eps)
-
+       ! KpList(ik,:) = kpt
+       
+       write(*,'("k-point: ",3(f6.3,1x))') kpt
+       kpt = matmul(M, kpt)
+       write(*,'("Mkpt: ",3(f6.3,1x))') kpt
+       KpList(ik,:) = kpt
        minLength = norm(kpt)
+       write(*,'("norm: ",3x,f4.1)') minLength
+
+       ! Can't get any shorter than the origin.
+       if (equal(minLength, 0.0_dp, eps)) then
+             cycle
+       endif
+       
        ! Loop over all translationally equivalent points that possibly could be closer
-       do i = -n1, n1
-          do j = -n2, n2
-             do k = -n3, n3
+       do i = -1, 1
+          do j = -1, 1
+             do k = -1, 1
                 this_vector = i*minkedR(:,1) + j*minkedR(:,2) + k*minkedR(:,3) + kpt
                 length = norm(this_vector)
-                if(length + eps < minLength) then
+                if((length + eps) < minLength) then
+                   ! write(*,'("n: ",3x,f4.1)') length
                    minLength = length
                    KpList(ik,:) = this_vector
+
+       ! Loop over all translationally equivalent points that possibly could be closer
+       ! do i = -n1, n1
+       !    do j = -n2, n2
+       !       do k = -n3, n3
+       !          this_vector = i*minkedR(:,1) + j*minkedR(:,2) + k*minkedR(:,3) + kpt
+       !          length = norm(this_vector)
+       !          if((length + eps) < minLength) then
+       !             write(*,'("n: ",3x,f4.1)') length
+       !             minLength = length
+       !             KpList(ik,:) = this_vector
                 endif
              enddo
           enddo
        enddo
     enddo
+    write(*,'(//"**********")')
   endsubroutine mapKptsIntoFirstBZ
   
   !!<summary>Reduce k-points to irreducible set. Takes a list of translationally distinct,
@@ -153,6 +189,7 @@ CONTAINS
     real(dp), pointer    :: KpList(:,:)
     real(dp), intent(in), optional:: eps_   
 
+    real(dp) :: tmpM1(3,3), tmpM2(3,3)    
     real(dp) :: Kinv(3,3) ! Inverse of the k-grid cell 
     real(dp) :: Rinv(3,3) ! Inverse of reciprocal cell
     real(dp) :: eps ! Finite precision parameter
@@ -162,7 +199,7 @@ CONTAINS
     integer  :: a, c, f ! Diagonal entries of the HNF matrix
     integer  :: iK, jK, kK ! loop counters of k-point generating vectors
     integer  :: iKP ! loop over k-points
-    integer  :: idx ! index (ordinal number) of k-point
+    integer  :: idx,i ! index (ordinal number) of k-point
     logical  :: err ! flag for catching errors
     
     if(.not. present(eps_)) then
@@ -184,7 +221,15 @@ CONTAINS
        write(*,*) "The kgrid generating vectors are linearly dependent."
        stop
     endif
-    if (any(matmul(Kinv,R) -  nint(matmul(Kinv,R)) > eps)) then
+
+
+
+    write(*,'(3("M1: ",3(1x,f50.30),/))') (tmpM1(i,:),i=1,3)
+    write(*,'(3("M2: ",3(1x,f50.30),/))') (tmpM2(i,:),i=1,3)
+    write(*, *) equal(matmul(Kinv,R), nint(matmul(Kinv,R)), eps)
+
+    if (.not. equal(matmul(Kinv,R), nint(matmul(Kinv,R)), eps)) then
+    ! if (any(matmul(Kinv,R) -  nint(matmul(Kinv,R)) > eps)) then
        write(*,*) "ERROR: (generateFullKpointList in generateKpoints.f90):"
        stop "The point generating vectors and the reciprocal lattice are incommensurate."
     endif
@@ -279,7 +324,7 @@ CONTAINS
        eps =  eps_
     endif
 
-    call matrix_inverse(K,InvK,err,eps)
+    call matrix_inverse(K,InvK,err, eps)
     if (err) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
        stop "The k-grid vectors that were passed in are linearly dependent."
@@ -289,15 +334,16 @@ CONTAINS
     if (err) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
        stop "The reciprocal lattice vectors are linearly dependent."
-    END if
-
+    END if    
+    
     !! Check for valid inputs
     ! Make sure kgrid is commensurate with reciprocal cell
+    ! if (any(matmul(InvK,R) -  nint(matmul(InvK,R)) > eps)) then
     if (.not. equal(matmul(InvK,R), nint(matmul(InvK,R)), eps)) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90):"
        write(*,*) "The point generating vectors and the reciprocal lattice are &
             &incommensurate."
-       write(*,*) "The reciprocal cell should be an (matrix) integer multiple of &
+       write(*,*) "The reciprocal lattice should be an integer multiple of&
             & the generating lattice vectors."
        stop
     endif
@@ -329,34 +375,6 @@ CONTAINS
     ! write(*,'(3(1x,i3))') (S(i,:),i=1,3)
     ! write(*,'("InvK")')
     ! write(*,'(3(1x,f7.3))') (InvK(i,:),i=1,3)
-
-    
-    if (err) then
-       write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
-       stop "The k-grid  vectors that were passed in are linearly dependent."
-    END if
-
-    call matrix_inverse(R,InvR,err,eps)
-    if (err) then
-       write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
-       stop "The reciprocal lattice vectors that were passed in are linearly dependent."
-    END if
-
-    !! Check for valid inputs
-    ! Make sure kgrid is commensurate with reciprocal cell
-    if (any(matmul(InvK,R) - nint(matmul(InvK,R)) > eps)) then
-       write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90):"
-       write(*,*) "The point generating vectors and the reciprocal lattice are incommensurate."
-       write(*,*) "The reciprocal cell should be an (matrix) integer multiple of the generating lattice vectors."
-       stop
-    endif
-    ! Make sure that kgrid is no bigger than reciprocal cell
-    if (determinant(K) > determinant(R)+eps) then
-       write(*,*) "ERROR (symmetryReduceKpointList in generateKpoints.f90):"
-       write(*,*) "The kpoint generating lattice vectors define a unit cell larger than the reciprocal lattice."
-       write(*,*) "This doesn't make sense. There should be at least 1 kpoint per reciprocal cell."
-       stop
-    endif
     
     cOrbit = 0 ! Count how many unique orbits there are. I.e., the number of unique kpoints
     nOps = size(SymOps,3) ! Number of symmetry operators in the point group
@@ -429,6 +447,7 @@ CONTAINS
        ! write(*,'("rep kpt: ",3(f6.3,1x))') UnreducedKpList(iFirst(i),:)
        ReducedList(i,:) = UnreducedKpList(iFirst(i),:)
     enddo
+    
     ! Fail safe checks
     if (any(hashTable==0)) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
