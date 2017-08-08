@@ -12,6 +12,10 @@
   were made consistent by using the function `equal`.
 * Added unit tests for the `mapKptsIntoFirstBZ` for a simple cubic lattice.
 
+0.4.2 (K.L.)
+* The body-centered_cubic unit tests folder had somehow been removed, so I readded it from
+  a previous commit.
+
 0.4.1 (JJ)
 * Mapped points into the unit cell before mapping into the first Brillouin zone in
   `mapKptsIntoFirstBZ`.
@@ -22,12 +26,15 @@
   inside the folder simple_cubic. I renamed the files
   
   simple_cubic/unreduced_klist.in.* -> simple_cubic/klist.in.*
+  
   simple_cubic/unreduced_klist.in.vasp.* -> simple_cubic/klist.in.vasp*
   
   simple_cubic/simple_cubic_kpts.out.* -> simple_cubic/klist.out.*
+  
   simple_cubic/simple_cubic_kpts.out.vasp.* -> simple_cubic/klist.out.vasp*
 
   simple_cubic/simple_cubic_wts.out.* -> simple_cubic/weights.out.*  
+  
   simple_cubic/simple_cubic_wts.out.vasp* -> simple_cubic/weights.in.vasp*
   
   This was applied to all the Bravais lattices.
