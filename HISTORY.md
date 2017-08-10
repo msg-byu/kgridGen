@@ -1,3 +1,7 @@
+0.5.1 (K.L.)
+* Changed the driver so that it correctly maps the shift into the Minkowski unit cell.
+* Added the first simple cubic unit test for the routine 'mapKptsIntoFirstBZ'.
+
 0.5.0 (K.L.)
 * Added a new routine that maps a point into the minkowski unit cell. Mapping the grid into
   the Minkowski unit cell is required before symmetry reduction and moving k-points into
