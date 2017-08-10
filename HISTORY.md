@@ -1,3 +1,23 @@
+0.5.0 (K.L.)
+* Added a new routine that maps a point into the minkowski unit cell. Mapping the grid into
+  the Minkowski unit cell is required before symmetry reduction and moving k-points into
+  the first Brillouin zone since different points in the grid are in the same orbitals
+  after the grid is mapped into the Minkowski unit cell than were in the same orbitals in
+  the original grid in the reciprocal unit cell.
+* Rearranged the order of steps in the driver. The driver now maps the k-points into the
+  Minkowski unit cell, finds the point group of the Minkowski-reduced basis, symmetry
+  reduces the grid, and then moves the k-ponts into the first Brillouin zone. This yields
+  an accurate list of k-point orbitals in the Brillouin zone.
+* Changed the routine 'mapKptsIntoFirstBZ' so that it takes the k-points into the unit cell
+  before mapping the grid into Minkowski space. This fixed some issues with incorrect
+  mapping.
+* Removed the simple cubic and body-centered cubic unit tests for the routine
+  'mapKptsIntoFirstBZ' since fixing the routine made these unit tests void.
+* Added error checks in 'mapKptsIntoFirstBZ' to ensure that the Minkowski-reduced basis
+  vectors and the reciprocal lattice vectors define equivalent lattices.
+* Added error check in 'mapKptsIntoFirstBZ' to ensure that the k-points are mapped into the
+  Minkowski unit cell.
+
 0.4.3 (JJ)
 * Moved the code inside `mapKptsIntoFirstBZ` that determines how many lattice points
   to look in each direction outside the main for loop since it has no k-point

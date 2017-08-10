@@ -7,8 +7,166 @@ MODULE kpointGeneration
   implicit none
 
   private
-  public generateIrredKpointList, generateFullKpointList, symmetryReduceKpointList, mapKptsIntoFirstBZ
+  public generateIrredKpointList, generateFullKpointList, symmetryReduceKpointList, mapKptsIntoFirstBZ, mapKptsIntoMinkowskiUnitCell
 CONTAINS
+  !!<summary>Move a list of k-points into the first unit cell in Minkowski-reduced space.
+  !!The input set is modified by this routine. </summary>
+  !!<parameter regular="true" name="R">Matrix of reciprocal lattice vectors.</parameter>
+  !!<parameter regular="true" name="KpList">List of k-points.</parameter>
+  !!<parameter regular="true" name="M">Matrix mapping k-points into Minkowski space.</parameter>
+  !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
+  subroutine mapKptsIntoMinkowskiUnitCell(R, KpList, M, eps_)
+    real(dp), intent(in)   :: R(3,3)
+    real(dp), intent(inout):: KpList(:,:) ! First index is over k-points, second coordinates
+    real(dp), intent(out) :: M(3,3)
+    real(dp), intent(in), optional :: eps_
+
+    real(dp)   :: minkedR(3,3), kpt(3), this_vector(3), minkedRinv(3,3), Rinv(3,3), Minv(3,3)
+    real(dp)   :: minLength, cell_volume, max_norm, length, eps
+    integer :: ik, nk, i, j, k, num_Rs, n1, n2, n3
+    logical  :: err ! flag for catching errors
+        
+    if(.not. present(eps_)) then
+       eps = 1e-10_dp
+    else
+       eps =  eps_
+    endif
+
+    ! General idea of algorithm: 
+    ! For efficiency's sake, first do a Minkowski reduction on the reciprocal vectors (R)
+    ! to get the most compact cell possible. The k-points will then be mapped into the unit
+    ! cell defined by the resulting Minkowski-reduced basis vectors.
+
+    call matrix_inverse(R, Rinv, err)
+    if (err) then
+       write(*,*) "ERROR: (mapKptsIntoMinkowskiUnitCell in generateKpoints.f90):"
+       write(*,*) "The reciprocal lattice vectors are linearly dependent."
+       stop
+    endif
+
+    call minkowski_reduce_basis(R, minkedR, eps)
+    write(*,'(3("minkedR: ",3(1x,f7.3),/))') (minkedR(i,:),i=1,3)
+    call matrix_inverse(minkedR, minkedRinv, err)
+    write(*,'(3("minkedRinv: ",3(1x,f7.3),/))') (minkedRinv(i,:),i=1,3)
+    if (err) then
+       write(*,*) "ERROR: (mapKptsIntoMinkowskiUnitCell in generateKpoints.f90):"
+       write(*,*) "The Minkowski reduced lattice vectors are linearly dependent."
+       stop
+    endif
+
+    nk = size(KpList, 1)
+    ! For efficiency's sake, first do a Minkowski reduction on the reciprocal vectors (R)
+    ! to get the most compact cell possible. The k-points will then be mapped into the unit
+    ! cell defined by the resulting Minkowski-reduced basis vectors.
+
+    ! cell_volume = abs(dot_product(minkedR(:,1),cross_product(minkedR(:,2),minkedR(:,3))))
+    ! max_norm = max(norm(minkedR(:,1)),norm(minkedR(:,2)),norm(minkedR(:,3)))
+    ! n1 = ceiling(max_norm*norm(cross_product(minkedR(:,2),minkedR(:,3)) &
+    !      /cell_volume)+eps)
+    ! n2 = ceiling(max_norm*norm(cross_product(minkedR(:,3),minkedR(:,1)) &
+    !      /cell_volume)+eps)
+    ! n3 = ceiling(max_norm*norm(cross_product(minkedR(:,1),minkedR(:,2)) &
+    !      /cell_volume)+eps)
+    
+    ! write(*,'("n1: ",3x,i4.1)') n1
+    ! write(*,'("n2: ",3x,i4.1)') n2
+    ! write(*,'("n3: ",3x,i4.1)') n3
+    
+    write(*,'(//"**********")')
+    ! Find the transformation matrix that takes the k-point to Minkowski space.
+    M = matmul(minkedR, Rinv)
+
+    if (.not. equal(M, nint(M), eps)) then
+       write(*,*) "ERROR: (mapKptsIntoMinkowskiUnitCell in generateKpoints.f90):"
+       write(*,*) "The Minkowski-reduced basis vectors and the reciprocal& 
+            & lattice vectors define different lattices."
+       write(*,*) "The Minkowski-reduced basis vectors should be integer& 
+            & combinations of the reciprocal lattice vectors."
+       stop
+    endif
+
+    call matrix_inverse(M, Minv, err)
+    if (err) then
+       write(*,*) "ERROR: (mapKptsIntoMinkowskiUnitCell in generateKpoints.f90):"
+       write(*,*) "The matrix that takes k-points into Minkowski space is&
+            & linearly dependent."
+       stop
+    endif
+    
+    if (.not. equal(Minv, nint(Minv), eps)) then
+       write(*,*) "ERROR: (mapKptsIntoMinkowskiUnitCell in generateKpoints.f90):"
+       write(*,*) "The Minkowski-reduced basis vectors and the reciprocal& 
+            & lattice vectors define different lattices."
+       write(*,*) "The reciprocal lattice vectors should be integer& 
+            & combinations of the Minkowski-reduced basis vectors."
+       stop
+    endif
+    
+    write(*,'(3("M: ",3(1x,f11.7),/))') (M(i,:),i=1,3)
+    
+    do ik = 1, nk
+       kpt = KpList(ik,:)
+       ! Move the k-point into the first unit cell.
+       write(*,'("before k-point: ",3(f6.3,1x))') kpt
+       !call bring_into_cell(kpt, minkedRinv, minkedR, eps)
+       call bring_into_cell(kpt, Rinv, R, eps)
+       ! KpList(ik,:) = kpt
+
+       write(*,'("k-point: ",3(f6.3,1x))') kpt
+       kpt = matmul(M, kpt)
+       !call bring_into_cell(kpt, minkedRinv, minkedR, eps)
+       write(*,'("Mkpt: ",3(f6.3,1x))') kpt
+
+       
+       if (any(kpt >= 1.0_dp - eps) .or. any(kpt < 0.0_dp - eps)) then
+          write(*,*) "ERROR: (mapKptsIntoMinkowskiUnitCell in generateKpoints.f90):"
+          write(*,*) "A k-point was not mapped into the Minkowski unit&
+               & cell when it should have been."
+          write(*,*) "When k-points are mapped from the reciprocal unit&
+               & cell to Minkowski space, all elements of the k-point&
+               & should be between 0 and 1."
+          stop
+       endif
+
+       KpList(ik,:) = kpt
+       ! minLength = norm(kpt)
+       ! write(*,'("norm: ",3x,f4.1)') minLength
+
+       ! ! Can't get any shorter than the origin.
+       ! if (equal(minLength, 0.0_dp, eps)) then
+       !       cycle
+       ! endif
+       
+       ! ! Loop over all translationally equivalent points that possibly could be closer
+       ! do i = -1, 1
+       !    do j = -1, 1
+       !       do k = -1, 1
+       !          this_vector = i*minkedR(:,1) + j*minkedR(:,2) + k*minkedR(:,3) + kpt
+       !          length = norm(this_vector)
+       !          if((length + eps) < minLength) then
+       !             ! write(*,'("n: ",3x,f4.1)') length
+       !             minLength = length
+       !             KpList(ik,:) = this_vector
+
+       ! ! Loop over all translationally equivalent points that possibly could be closer
+       ! ! do i = -n1, n1
+       ! !    do j = -n2, n2
+       ! !       do k = -n3, n3
+       ! !          this_vector = i*minkedR(:,1) + j*minkedR(:,2) + k*minkedR(:,3) + kpt
+       ! !          length = norm(this_vector)
+       ! !          if((length + eps) < minLength) then
+       ! !             write(*,'("n: ",3x,f4.1)') length
+       ! !             minLength = length
+       ! !             KpList(ik,:) = this_vector
+       !          endif
+       !       enddo
+       !    enddo
+       ! enddo
+    enddo
+    write(*,'(//"**********")')
+  endsubroutine mapKptsIntoMinkowskiUnitCell
+
+
   !!<summary>Move a list of k-points into the first Brillioun zone. That is applying
   !! translational symmetry, find the set of k-points equivalent to the input set, that
   !! is closer to the origin than any other equivalent set. The input set is modified by
@@ -21,7 +179,7 @@ CONTAINS
     real(dp), intent(inout):: KpList(:,:) ! First index is over k-points, second coordinates
     real(dp), intent(in), optional :: eps_
 
-    real(dp)   :: minkedR(3,3), kpt(3), this_vector(3), minkedRinv(3,3), Rinv(3,3), M(3,3)
+    real(dp)   :: minkedR(3,3), kpt(3), this_vector(3), minkedRinv(3,3), Rinv(3,3), M(3,3), Minv(3,3)
     real(dp)   :: minLength, cell_volume, max_norm, length, eps
     integer :: ik, nk, i, j, k, num_Rs, n1, n2, n3
     logical  :: err ! flag for catching errors
@@ -88,18 +246,62 @@ CONTAINS
     write(*,'(//"**********")')
     ! Find the transformation matrix that takes the k-point to Minkowski space.
     M = matmul(minkedR, Rinv)
-  write(*,'(3("M: ",3(1x,f11.7),/))') (M(i,:),i=1,3)
+
+    if (.not. equal(M, nint(M), eps)) then
+       write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
+       write(*,*) "The Minkowski-reduced basis vectors and the reciprocal& 
+            & lattice vectors define different lattices."
+       write(*,*) "The Minkowski-reduced basis vectors should be integer& 
+            & combinations of the reciprocal lattice vectors."
+       stop
+    endif
+
+    call matrix_inverse(M, Minv, err)
+    if (err) then
+       write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
+       write(*,*) "The matrix that takes k-points into Minkowski space is&
+            & linearly dependent."
+       stop
+    endif
+    
+    if (.not. equal(Minv, nint(Minv), eps)) then
+       write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
+       write(*,*) "The Minkowski-reduced basis vectors and the reciprocal& 
+            & lattice vectors define different lattices."
+       write(*,*) "The reciprocal lattice vectors should be integer& 
+            & combinations of the Minkowski-reduced basis vectors."
+       stop
+    endif
+    
+    write(*,'(3("M: ",3(1x,f11.7),/))') (M(i,:),i=1,3)
     
     do ik = 1, nk
        kpt = KpList(ik,:)
        ! Move the k-point into the first unit cell.
        write(*,'("before k-point: ",3(f6.3,1x))') kpt
-       call bring_into_cell(kpt, minkedRinv, minkedR, eps)
+       !call bring_into_cell(kpt, minkedRinv, minkedR, eps)
+       call bring_into_cell(kpt, Rinv, R, eps)
        ! KpList(ik,:) = kpt
+       !call bring_into_cell(kpt, minkedRinv, minkedR, eps)
+
+       ! write(*,'(3("R: ",3(1x,f7.3),/))') (R(i,:),i=1,3)
+       ! write(*,'(3("Rinv: ",3(1x,f7.3),/))') (Rinv(i,:),i=1,3)
+       ! write(*,'("k-point_lat: ",3(f6.3,1x))') matmul(Rinv,kpt)
        
        write(*,'("k-point: ",3(f6.3,1x))') kpt
        kpt = matmul(M, kpt)
        write(*,'("Mkpt: ",3(f6.3,1x))') kpt
+
+       if (any(kpt >= 1.0_dp - eps) .or. any(kpt < 0.0_dp - eps)) then
+          write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
+          write(*,*) "A k-point was not mapped into the Minkowski unit&
+               & cell when it should have been."
+          write(*,*) "When k-points are mapped from the reciprocal unit&
+               & cell to Minkowski space, all elements of the k-point&
+               & should be between 0 and 1."
+          stop
+       endif
+       
        KpList(ik,:) = kpt
        minLength = norm(kpt)
        write(*,'("norm: ",3x,f4.1)') minLength
@@ -115,12 +317,13 @@ CONTAINS
              do k = -1, 1
                 this_vector = i*minkedR(:,1) + j*minkedR(:,2) + k*minkedR(:,3) + kpt
                 length = norm(this_vector)
+                ! write(*,'("this_vector: ",3(f6.3,1x))') this_vector
                 if((length + eps) < minLength) then
                    ! write(*,'("n: ",3x,f4.1)') length
                    minLength = length
                    KpList(ik,:) = this_vector
 
-       ! Loop over all translationally equivalent points that possibly could be closer
+       ! ! Loop over all translationally equivalent points that possibly could be closer
        ! do i = -n1, n1
        !    do j = -n2, n2
        !       do k = -n3, n3
