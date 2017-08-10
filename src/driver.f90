@@ -7,7 +7,7 @@ PROGRAM kpoint_driver
   use fortpy, only : pysave
   implicit none
 
-  real(dp)              :: K(3,3), R(3,3), Hinv(3,3), eps, shift(3), M(3,3), minkedR(3,3), minkedK(3,3), minked_shift(3)
+  real(dp)              :: K(3,3), R(3,3), Hinv(3,3), eps, shift(3), M(3,3), minkedR(3,3), minkedK(3,3), minkedKinv(3,3), minked_shift(3)
   real(dp), pointer     :: klist(:,:)
   real(dp), pointer     :: pgOps(:,:,:), rdKlist(:,:)
   integer, pointer      :: weights(:)
@@ -76,24 +76,29 @@ PROGRAM kpoint_driver
   !      eps_=eps)
   ! call pysave(rdKlist, "../tests/body-centered_tetragonal/klist.out.vasp10")
   ! call pysave(weights, "../tests/body-centered_tetragonal/weights.out.vasp10")
-  
-  ! call pysave(R, "../tests/simple_cubic/rlatvecs.in.BZM1")
-  ! call pysave(klist, "../tests/simple_cubic/klist.in.BZM1")
+
   
   ! Map into first Brillouin zone tests.
   call mapKptsIntoMinkowskiUnitCell(R, klist, M, eps)
 
   minkedK = matmul(M,K)
   minkedR = matmul(M,R)
-  minked_shift = matmul(M,shift)
+  call matrix_inverse(minkedK, minkedKinv, eps_=1e-12_dp)
+  minked_shift = matmul(minkedKinv,matmul(M,matmul(K,shift)))
   
   call get_lattice_pointGroup(minkedR, pgOps, eps)
   
   call symmetryReduceKpointList(minkedK, minkedR, minked_shift, klist, pgOps, &
        rdKlist, weights, eps_=.0001_dp)
 
+  call pysave(minkedR, "../tests/simple_cubic/rlatvecs.in.BZM1")
+  call pysave(rdKlist, "../tests/simple_cubic/klist.in.BZM1")
+
   call mapKptsIntoFirstBZ(minkedR, rdKlist, eps)
 
+  call pysave(rdKlist, "../tests/simple_cubic/klist.out.BZM1")
+
+  
   ! call symmetryReduceKpointList(K, R, shift, klist, pgOps, rdKlist, weights, &
   !      eps_=eps)
 
@@ -105,7 +110,6 @@ PROGRAM kpoint_driver
      write(*,'(3(1x,f7.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
   end do
 
-  ! call pysave(klist, "../tests/simple_cubic/klist.out.BZM1")
   ! write(*,'(3("minkedR: ",3(1x,f7.3),/))') (minkedR(i,:),i=1,3)
 !
 !  write(*,'(//)')

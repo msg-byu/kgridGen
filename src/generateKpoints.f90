@@ -197,7 +197,7 @@ CONTAINS
     ! For each k-point, check each equivalent translation and select the one that is
     ! closest to the origin. By defintion, the closest point is the translationally
     ! equivalent "brother" that is in the first Brillioun zone.
-
+ 
     call matrix_inverse(R, Rinv, err)
     if (err) then
        write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
