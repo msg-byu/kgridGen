@@ -1,3 +1,10 @@
+0.5.2 (JJ)
+* Fixed `mapKptsIntoFirstBZ`. The function now takes a list of k-points, maps them to the
+  first unit cell in the Minkowski basis, then looks at the translationally equivalent
+  k-points in the eight unit cells that have a vertex at the origin to see if any them lie
+  closer to the origin.
+* Removed previous unit tests and added a few for body-centered cubic.
+
 0.5.1 (K.L.)
 * Changed the driver so that it correctly maps the shift into the Minkowski unit cell.
 * Added the first simple cubic unit test for the routine 'mapKptsIntoFirstBZ'.
