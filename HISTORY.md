@@ -1,3 +1,6 @@
+0.5.3 (KL)
+* Added a unit test for 'mapKptsIntoFirstBZ' for body-centered_cubic.
+
 0.5.2 (JJ)
 * Fixed `mapKptsIntoFirstBZ`. The function now takes a list of k-points, maps them to the
   first unit cell in the Minkowski basis, then looks at the translationally equivalent
