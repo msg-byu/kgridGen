@@ -23,8 +23,8 @@ CONTAINS
     real(dp), intent(in), optional :: eps_
 
     real(dp)   :: minkedR(3,3), kpt(3), this_vector(3), minkedRinv(3,3), Rinv(3,3), M(3,3), Minv(3,3)
-    real(dp)   :: minLength, cell_volume, max_norm, length, eps
-    integer :: ik, nk, i, j, k, num_Rs, n1, n2, n3
+    real(dp)   :: minLength, length, eps
+    integer :: ik, nk, i, j, k
     logical  :: err ! flag for catching errors
      
     if(.not. present(eps_)) then
@@ -162,7 +162,6 @@ CONTAINS
     real(dp), pointer    :: KpList(:,:)
     real(dp), intent(in), optional:: eps_   
 
-    real(dp) :: tmpM1(3,3), tmpM2(3,3)    
     real(dp) :: Kinv(3,3) ! Inverse of the k-grid cell 
     real(dp) :: Rinv(3,3) ! Inverse of reciprocal cell
     real(dp) :: eps ! Finite precision parameter
@@ -172,7 +171,7 @@ CONTAINS
     integer  :: a, c, f ! Diagonal entries of the HNF matrix
     integer  :: iK, jK, kK ! loop counters of k-point generating vectors
     integer  :: iKP ! loop over k-points
-    integer  :: idx,i ! index (ordinal number) of k-point
+    integer  :: idx ! index (ordinal number) of k-point
     logical  :: err ! flag for catching errors
     
     if(.not. present(eps_)) then
@@ -277,14 +276,13 @@ CONTAINS
     integer, pointer     :: weights(:) 
     real(dp), optional   :: eps_
 
-    integer :: iOp, nOps, iRdKpt, nRdKpt, iUnRdKpt, nUR, cOrbit, idx, i, sum
+    integer :: iOp, nOps, iUnRdKpt, nUR, cOrbit, idx, i, sum
     integer :: hashTable(size(UnreducedKpList,1))
     integer :: iFirst(size(UnreducedKpList,1)), iWt(size(UnreducedKpList,1))
     real(dp):: InvK(3,3) ! Inverse of kgrid matrix
     real(dp):: InvR(3,3) ! Inverse of reciprocal lattice
     real(dp):: urKpt(3), roKpt(3) ! unrotated k-point, rotated k-point
     real(dp):: shift(3) ! Shift of k-grid lattice in Cartesian coordinates
-    real(dp):: gpt(3) ! k-point in gspace coords  
     integer :: N(3,3) ! Integer transformation that takes K to R
     ! HNF, SNF transform matrices, SNF, diag(SNF)
     integer :: H(3,3), L(3,3), Ri(3,3), S(3,3), D(3) 
