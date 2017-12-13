@@ -4,7 +4,6 @@ PROGRAM kpoint_driver
   use vector_matrix_utilities
   use symmetry, only : get_lattice_pointGroup
   use rational_mathematics, only: HermiteNormalForm
-  use fortpy, only : pysave
   implicit none  
   real(dp)              :: K(3,3), R(3,3), Hinv(3,3), eps, shift(3), H(3,3)
   real(dp), pointer     :: klist(:,:)
@@ -115,10 +114,7 @@ PROGRAM kpoint_driver
   write(*,'("Rdcd kpts: ",i7)') size(rdKlist,1)
   write(*,'("Rdn ratio: ",3x,f4.1)') size(klist,1)/real(size(weights))
   
-  call pysave(R, "../tests/body-centered_cubic/rlatvecs.in.BZM11")
-  call pysave(rdKlist, "../tests/body-centered_cubic/klist.in.BZM11")
   call mapKptsIntoFirstBZ(R, rdKlist, eps)
-  call pysave(rdKlist, "../tests/body-centered_cubic/klist.out.BZM11")
    
   write(*,'(//"**********")')  
   do i = 1,size(rdKlist,1)
