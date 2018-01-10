@@ -41,9 +41,7 @@ CONTAINS
     endif
 
     call minkowski_reduce_basis(R, minkedR, eps)
-    write(*,'(3("minkedR: ",3(1x,f7.3),/))') (minkedR(i,:),i=1,3)
     call matrix_inverse(minkedR, minkedRinv, err)
-    write(*,'(3("minkedRinv: ",3(1x,f7.3),/))') (minkedRinv(i,:),i=1,3)
     if (err) then
        write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
        write(*,*) "The Minkowski reduced lattice vectors are linearly dependent."
@@ -78,17 +76,12 @@ CONTAINS
        stop
     endif
     
-    write(*,'(3("M: ",3(1x,f11.7),/))') (M(i,:),i=1,3)
-    
     do ik = 1, nk
        kpt = KpList(ik,:)
        ! Move the k-point into the first unit cell in the Minkowski basis.
-       write(*,'("k-point: ",3(f6.3,1x))') kpt
        call bring_into_cell(kpt, minkedRinv, minkedR, eps)
-       write(*,'("unit cell k-point: ",3(f6.3,1x))') kpt
        KpList(ik,:) = kpt
        minLength = norm(kpt)
-       write(*,'("norm: ",3x,f4.1)') minLength
        
        ! Look at the eight translationally equivalent k-points in the unit cells that
        ! have a vertex at the origin to see if one of them is closer.
@@ -106,9 +99,7 @@ CONTAINS
              enddo
           enddo
        enddo
-       write(*,'("BZ k-point: ",3(f6.3,1x))') KpList(ik,:)
     enddo
-    write(*,'(//"**********")')
   endsubroutine mapKptsIntoFirstBZ
   
   !!<summary>Reduce k-points to irreducible set. Takes a list of translationally distinct,
