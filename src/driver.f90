@@ -4,7 +4,6 @@ PROGRAM kpoint_driver
   use vector_matrix_utilities
   use symmetry, only : get_lattice_pointGroup
   use rational_mathematics, only: HermiteNormalForm
-  use fortpy, only : pysave
   implicit none  
   real(dp)              :: K(3,3), R(3,3), Hinv(3,3), eps, shift(3), H(3,3)
   real(dp), pointer     :: klist(:,:)
@@ -86,13 +85,13 @@ PROGRAM kpoint_driver
   ! Map into first Brillouin zone tests
   eps = 1e-10_dp
 
-  shift = (/ 0.98_dp, 0.23_dp, 0.77_dp /)
-  R = transpose(reshape((/ -0.0_dp, 0.666666666667_dp, 0.666666666667_dp, &
-                            0.666666666667_dp, 0.0_dp, 0.666666666667_dp, &
-                            0.666666666667_dp, 0.666666666667_dp, 0.0_dp /),(/3,3/)))
-  H = transpose(reshape((/ 1, 0, 0, &
-                            0, 2, 0, &
-                            1, 2, 3 /),(/3,3/)))
+  shift = (/ 0.0_dp, -1.5_dp, 0.5_dp /)
+  R = transpose(reshape((/ 0.0_dp, 0.86172861889_dp, 0.86172861889_dp, &
+                          0.86172861889_dp, 0.0_dp, 0.86172861889_dp, &
+                          0.86172861889_dp, 0.86172861889_dp, 0.0_dp /),(/3,3/)))
+  H = transpose(reshape((/ 2, 0, 0, &
+                          2, 3, 0, &
+                          3, 1, 4 /),(/3,3/)))
   
   call matrix_inverse(real(H,dp), Hinv, eps_=eps)  
   ! Columns of K are the grid generating vectors.
@@ -115,11 +114,8 @@ PROGRAM kpoint_driver
   write(*,'("Rdcd kpts: ",i7)') size(rdKlist,1)
   write(*,'("Rdn ratio: ",3x,f4.1)') size(klist,1)/real(size(weights))
   
-  call pysave(R, "../tests/body-centered_cubic/rlatvecs.in.BZM3")
-  call pysave(rdKlist, "../tests/body-centered_cubic/klist.in.BZM3")
   call mapKptsIntoFirstBZ(R, rdKlist, eps)
-  call pysave(rdKlist, "../tests/body-centered_cubic/klist.out.BZM3")
-  
+   
   write(*,'(//"**********")')  
   do i = 1,size(rdKlist,1)
      write(*,'(3(1x,f9.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
