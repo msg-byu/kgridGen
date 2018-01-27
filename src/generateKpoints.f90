@@ -448,8 +448,6 @@ CONTAINS
       real(dp), intent(in) :: kpt(3), InvK(3,3) 
       ! Left transform for SNF conversion, diagonal of SNF
       integer,  intent(in) :: L(3,3), D(3) 
-
-
       real(dp) :: gpt(3)
 
       gpt = matmul(InvK,kpt) ! k-point is now in lattice coordinates
