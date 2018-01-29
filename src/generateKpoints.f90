@@ -10,22 +10,24 @@
   public generateIrredKpointList, generateFullKpointList, symmetryReduceKpointList, &
        & mapKptsIntoFirstBZ
 CONTAINS
-  !!<summary>Move a list of k-points into the first Brillioun zone. That is applying
-  !! translational symmetry, find the set of k-points equivalent to the input set, that
+  !!<summary> Move a list of k-points into the first Brillioun zone: by applying
+  !! translational symmetry, find the set of k-points equivalent to the input set that
   !! is closer to the origin than any other equivalent set. The input set is modified by
   !! this routine. </summary>
-  !!<parameter regular="true" name="R">Matrix of reciprocal lattice vectors.</parameter>
-  !!<parameter regular="true" name="KpList">List of k-points.</parameter>
-  !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
+  !!<parameter regular="true" name="R"> Matrix of reciprocal lattice vectors as columns of
+  !! a 3x3 array. </parameter>
+  !!<parameter regular="true" name="KpList"> The list of k-points. </parameter>
+  !!<parameter regular="true" name="eps_"> A finite precision parameter. (optional)
+  !! </parameter>
   subroutine mapKptsIntoFirstBZ(R, KpList, eps_)
     real(dp), intent(in)   :: R(3,3)
-    real(dp), intent(inout):: KpList(:,:) ! First index is over k-points, second coordinates
+    real(dp), intent(inout):: KpList(:,:) ! First index over k-points, second coordinates
     real(dp), intent(in), optional :: eps_
-
-    real(dp)   :: minkedR(3,3), kpt(3), this_vector(3), minkedRinv(3,3), Rinv(3,3), M(3,3), Minv(3,3)
-    real(dp)   :: minLength, length, eps
-    integer :: ik, nk, i, j, k
-    logical  :: err ! flag for catching errors
+    real(dp)  :: minkedR(3,3), kpt(3), shift_kpt(3), minkedRinv(3,3), Rinv(3,3), M(3,3)
+    real(dp)  :: Minv(3,3)
+    real(dp)  :: minLength, length, eps
+    integer   :: ik, nk, i, j, k
+    logical   :: err ! flag for catching errors
      
     if(.not. present(eps_)) then
        eps = 1e-10_dp
@@ -88,13 +90,13 @@ CONTAINS
        do i = -1, 0
           do j = -1, 0
              do k = -1, 0
-                this_vector = i*minkedR(:,1) + j*minkedR(:,2) + k*minkedR(:,3) + kpt
-                length = norm(this_vector)
-                ! write(*,'("this_vector: ",3(f6.3,1x))') this_vector
+                shift_kpt = i*minkedR(:,1) + j*minkedR(:,2) + k*minkedR(:,3) + kpt
+                length = norm(shift_kpt)
+                ! write(*,'("shift_kpt: ",3(f6.3,1x))') shift_kpt
                 if((length + eps) < minLength) then
                    ! write(*,'("n: ",3x,f4.1)') length
                    minLength = length
-                   KpList(ik,:) = this_vector
+                   KpList(ik,:) = shift_kpt
                 endif
              enddo
           enddo
@@ -105,15 +107,18 @@ CONTAINS
   !!<summary>Reduce k-points to irreducible set. Takes a list of translationally distinct,
   !! but not rotationally distinct, k-points and reduces them by the given point group.
   !! </summary>
-  !!<parameter regular="true" name="K">Matrix of grid generating vectors.</parameter>
-  !!<parameter regular="true" name="R">Matrix of reciprocal lattice vectors.</parameter>
-  !!<parameter regular="true" name="kLVshift">Offset (shift) of the k-grid
-  !! (fractions of k-grid vectors).</parameter>
-  !!<parameter regular="true" name="IrrKpList">List of symmetry-reduced k-points.
-  !!</parameter>
+  !!<parameter regular="true" name="K"> Matrix of grid generating vectors as columns of a
+  !! 3x3 array. </parameter>
+  !!<parameter regular="true" name="R"> Matrix of reciprocal lattice vectors as columns of
+  !! a 3x3 array. </parameter>
+  !!<parameter regular="true" name="kLVshift"> Offset (shift) of the k-grid in fractions
+  !! of k-grid vectors. </parameter>
+  !!<parameter regular="true" name="IrrKpList"> List of symmetry-reduced k-points in
+  !! Cartesian coordinates. </parameter>
   !!<parameter regular="true" name="weights"> "Weights" of k-points (length of each orbit).
-  !!</parameter>
-  !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
+  !! </parameter>
+  !!<parameter regular="true" name="eps_"> Finite precision parameter (optional).
+  !! </parameter>
   subroutine generateIrredKpointList(K, R, kLVshift, IrrKpList, weights, eps_)
     real(dp), intent(in) :: K(3,3)
     real(dp), intent(in) :: R(3,3)
@@ -121,7 +126,6 @@ CONTAINS
     real(dp), pointer    :: IrrKpList(:,:)
     integer, pointer     :: weights(:)
     real(dp), intent(in), optional:: eps_
-
     real(dp), pointer    :: KpList(:,:)
     real(dp), pointer    :: pgOps(:,:,:)
     real(dp)             :: eps
@@ -137,15 +141,16 @@ CONTAINS
     call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, eps)
   endsubroutine generateIrredKpointList
 
-  !!<summary>Takes two lattices, a generating lattice (K) and the reciprocal lattice (R),
+  !!<summary> Takes two lattices, a generating lattice (K) and the reciprocal lattice (R),
   !! and generates all the points of K that are inside one unit cell of R. </summary>
-  !!<parameter name="K" regular="true">3x3 matrix. Columns are the generating vectors of
-  !! the k-grid</parameter>
-  !!<parameter name="R" regular="true">3x3 matrix. Columns are the reciprocal lattice
-  !! vectors</parameter>
-  !!<parameter name="kLVshift" regular="true">Fractional shift of the k-grid. Given as
-  !! fractions of the generating k-lattice vectors. </parameter> 
-  !!<parameter name="KpList" regular="true">Full list of (unreduced) k-points</parameter>  
+  !!<parameter name="K" regular="true"> 3x3 matrix. Columns are the generating vectors of
+  !! the k-grid </parameter>
+  !!<parameter name="R" regular="true"> 3x3 matrix. Columns are the reciprocal lattice
+  !! vectors </parameter>
+  !!<parameter name="kLVshift" regular="true"> Fractional shift of the k-grid. Given as
+  !! fractions of the generating k-grid vectors. </parameter> 
+  !!<parameter name="KpList" regular="true"> List of unreduced k-points in Cartesian
+  !! coordinates. </parameter>
   subroutine generateFullKpointList(K, R, kLVshift, KpList, eps_)
     real(dp), intent(in) :: K(3,3)
     real(dp), intent(in) :: R(3,3)
@@ -164,6 +169,10 @@ CONTAINS
     integer  :: iKP ! loop over k-points
     integer  :: idx ! index (ordinal number) of k-point
     logical  :: err ! flag for catching errors
+
+    real(dp) :: test1(3,3) ! Inverse of the k-grid cell
+    real(dp) :: test2(3,3) ! Inverse of the k-grid cell
+    integer  :: i
     
     if(.not. present(eps_)) then
        eps = 1e-10_dp
@@ -185,12 +194,15 @@ CONTAINS
        stop
     endif
 
-
-
     ! write(*,'(3("M1: ",3(1x,f50.30),/))') (tmpM1(i,:),i=1,3)
     ! write(*,'(3("M2: ",3(1x,f50.30),/))') (tmpM2(i,:),i=1,3)
     ! write(*, *) equal(matmul(Kinv,R), nint(matmul(Kinv,R)), eps)
-
+    ! write(*,'(3("K: ",3(1x,f11.7),/))') (K(i,:),i=1,3)
+    test1 = matmul(Kinv,R)
+    test2 = nint(matmul(Kinv,R))
+    write(*,'(3("test1: ",3(1x,f11.7),/))') (test1(i,:),i=1,3)
+    write(*,'(3("test2: ",3(1x,f11.7),/))') (test2(i,:),i=1,3)
+        
     if (.not. equal(matmul(Kinv,R), nint(matmul(Kinv,R)), eps)) then
     ! if (any(matmul(Kinv,R) -  nint(matmul(Kinv,R)) > eps)) then
        write(*,*) "ERROR: (generateFullKpointList in generateKpoints.f90):"
@@ -242,21 +254,25 @@ CONTAINS
 
   END subroutine generateFullKpointList
 
-  !!<summary>Reduce k-points to irreducible set. Takes a list of translationally distinct,
+  !!<summary> Reduce k-points to irreducible set. Takes a list of translationally distinct,
   !! but not rotationally distinct, k-points and reduces them by the given point group.
-  !! </summary>
-  !!<parameter regular="true" name="K">Matrix of grid generating vectors.</parameter>
-  !!<parameter regular="true" name="R">Matrix of reciprocal lattice vectors.</parameter>
-  !!<parameter regular="true" name="kLVshift">Offset (shift) of the k-grid
-  !! (fractions of k-grid vectors).</parameter>
-  !!<parameter regular="true" name="UnreducedKpList">Unreduced k-point list.</parameter>
-  !!<parameter regular="true" name="SymOps">Integer rotation matrices (coordinates of
-  !! the lattice basis).</parameter>
-  !!<parameter regular="true" name="ReducedList">List of symmetry-reduced k-points.
-  !!</parameter>
+  !!</summary>
+  !!<parameter regular="true" name="K"> Matrix of grid generating vectors as columns of a
+  !! 3x3 array. </parameter>
+  !!<parameter regular="true" name="R"> Matrix of reciprocal lattice vectors as columns of
+  !! a 3x3 array. </parameter>
+  !!<parameter regular="true" name="kLVshift"> Offset (shift) of the k-grid in fractions
+  !! of k-grid vectors. </parameter>
+  !!<parameter regular="true" name="UnreducedKpList"> Unreduced k-point list in Cartesian
+  !! coordinates. </parameter>
+  !!<parameter regular="true" name="SymOps"> Integer rotation matrices in the coordinates
+  !! of the lattice basis). </parameter>
+  !!<parameter regular="true" name="ReducedList"> List of symmetry-reduced k-points in
+  !! Cartesian coordinates. </parameter>
   !!<parameter regular="true" name="weights"> "Weights" of k-points (length of each orbit).
-  !!</parameter>
-  !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
+  !! </parameter>
+  !!<parameter regular="true" name="eps_"> Finite precision parameter (optional).
+  !! </parameter>
   subroutine symmetryReduceKpointList(K, R, kLVshift, UnreducedKpList, SymOps, &
        ReducedList, weights, eps_)
     real(dp), intent(in) :: K(3,3), R(3,3) 
@@ -310,7 +326,7 @@ CONTAINS
     endif
         
     ! Make sure that kgrid is no bigger than reciprocal cell
-    if (abs(determinant(K)) > abs(determinant(R))+eps) then
+    If (abs(determinant(K)) > abs(determinant(R))+eps) then
        write(*,*) "ERROR (symmetryReduceKpointList in generateKpoints.f90):"
        write(*,*) "The k-point generating lattice vectors define a unit cell larger&
             & than the reciprocal lattice."

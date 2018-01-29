@@ -1,3 +1,9 @@
+0.5.5 (JJ)
+* Made doc strings clearer by specifying the coordinate system of the
+  k-points and clarifying that the lattice vector or grid generating
+  vectors are the columns of matrices.
+* Added a unit test for 'mapKptsIntoFirstBZ' for body-centered_cubic.
+
 0.5.4 (WSM)
 * Removed fortpy.f90 from the repository and from the makefile (since
   it's only needed for unit testing it doesn't make sense to keep it
