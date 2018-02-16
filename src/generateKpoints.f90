@@ -181,7 +181,7 @@ CONTAINS
     endif
 
     ! Check for valid inputs
-    if (determinant(K) > determinant(R)+eps) then
+    if (abs(determinant(K)) > abs(determinant(R))+eps) then
        write(*,*) "ERROR (generateFullKpointList in generateKpoints.f90):"
        write(*,*) "The k-point generating lattice vectors have a unit cell &
             &larger than the reciprocal lattice."
