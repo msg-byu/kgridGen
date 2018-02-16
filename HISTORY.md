@@ -1,3 +1,7 @@
+0.5.6 (GLWH)
+* Added a check to make sure that the length of each "orbit" of
+kpoints divided the order of the point group. 
+
 0.5.5 (JJ)
 * Made doc strings clearer by specifying the coordinate system of the
   k-points and clarifying that the lattice vector or grid generating
