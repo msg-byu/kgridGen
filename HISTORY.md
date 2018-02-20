@@ -1,3 +1,7 @@
+0.5.6 (JJ)
+* Updated organization of unittests so that fortpy would be able to
+  compile them.
+
 0.5.5 (JJ)
 * Made doc strings clearer by specifying the coordinate system of the
   k-points and clarifying that the lattice vector or grid generating
