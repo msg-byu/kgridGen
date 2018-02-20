@@ -1,6 +1,10 @@
-0.5.6 (JJ)
+0.5.7 (JJ)
 * Updated organization of unittests so that fortpy would be able to
   compile them.
+=======
+0.5.6 (GLWH)
+* Added a check to make sure that the length of each "orbit" of
+kpoints divided the order of the point group. 
 
 0.5.5 (JJ)
 * Made doc strings clearer by specifying the coordinate system of the

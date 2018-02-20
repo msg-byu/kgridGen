@@ -186,7 +186,7 @@ CONTAINS
     endif
 
     ! Check for valid inputs
-    if (determinant(K) > determinant(R)+eps) then
+    if (abs(determinant(K)) > abs(determinant(R))+eps) then
        write(*,*) "ERROR (generateFullKpointList in generateKpoints.f90):"
        write(*,*) "The k-point generating lattice vectors have a unit cell &
             &larger than the reciprocal lattice."
@@ -377,7 +377,6 @@ CONTAINS
        if (hashTable(idx)/=0) cycle ! This k-point is already on an orbit, skip it
        cOrbit = cOrbit + 1
        hashTable(idx) = cOrbit
-       ! iFirst(cOrbit) = idx
        iFirst(cOrbit) = iUnRdKpt
        iWt(cOrbit) = 1
        ! write(*,'("urKpt: ",3(f6.3,1x),i3)') urKpt
@@ -442,18 +441,30 @@ CONTAINS
     weights = iWt(1:cOrbit)
     do i = 1, cOrbit
        sum = sum + weights(i)
-
-       ! write(*,'("corbit: ", i3)') i
-       ! write(*,'("ifirst: ", i3)') iFirst(i)
-       ! write(*,'("rep kpt: ",3(f6.3,1x))') UnreducedKpList(iFirst(i),:)
        ReducedList(i,:) = UnreducedKpList(iFirst(i),:)
     enddo
+
+    
+    ! ******** Consistency checks ********   
+    ! Check that the orbit length divides the group order
+    do i = 1, cOrbit
+       if (mod(nOps, weights(i)) /= 0) then
+          write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
+          write(*,*) "The length of an orbit did not divide the group size"
+          write(*,'("Group size:",i3,"   Orbit length:",i3)') nOps, weights(i)
+          stop
+       endif
+    enddo
+
+    ! Check for closure on the orbits
+    !
+    ! Code still pending...
     
     ! Fail safe checks
     if (any(hashTable==0)) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
        write(*,*) "At least one k-point in the unreduced list was not included in &
-            &one of the orbits of the symmetry group."
+            &any of the orbits of the symmetry group."
        stop
     endif
     
@@ -463,6 +474,7 @@ CONTAINS
             &of the point group."
        stop
     endif
+    
     if (sum /= nUR) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
        write(*,*) "The weighted sum of reduced k-points is not equal to the number of&
@@ -470,12 +482,13 @@ CONTAINS
        write(*,'("Sum of irr kpoints: ",i7," # of Unred. points:",i7)') sum, nUR
        stop
     endif
+    
   CONTAINS
     ! This function takes a k-point in Cartesian coordinates and "hashes" it into a
     ! single number, corresponding to its place in the k-point list.
     function findKptIndex(kpt, InvK, L, D)
       integer              :: findKptIndex ! index of the k-point (base 10, 1..n)
-      ! The k-point, inverse of the k-grid generating vecs
+      ! The k-point, matrix inverse of the k-grid generating vecs
       real(dp), intent(in) :: kpt(3), InvK(3,3) 
       ! Left transform for SNF conversion, diagonal of SNF
       integer,  intent(in) :: L(3,3), D(3) 
