@@ -1,3 +1,6 @@
+0.5.5 (WSM)
+* Changed the point group finding to finding the space group.
+
 0.5.4 (WSM)
 * Removed fortpy.f90 from the repository and from the makefile (since
   it's only needed for unit testing it doesn't make sense to keep it

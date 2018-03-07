@@ -114,16 +114,17 @@ CONTAINS
   !!<parameter regular="true" name="weights"> "Weights" of k-points (length of each orbit).
   !!</parameter>
   !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
-  subroutine generateIrredKpointList(K, R, kLVshift, IrrKpList, weights, eps_)
-    real(dp), intent(in) :: K(3,3)
+  subroutine generateIrredKpointList(A,B_vecs,at,K, R, kLVshift, IrrKpList, weights, eps_)
+    real(dp), intent(in) :: K(3,3), A(3,3)
     real(dp), intent(in) :: R(3,3)
     real(dp), intent(in) :: kLVshift(3)
-    real(dp), pointer    :: IrrKpList(:,:)
+    real(dp), pointer    :: IrrKpList(:,:), B_vecs(:,:)
     integer, pointer     :: weights(:)
     real(dp), intent(in), optional:: eps_
+    integer, intent(inout)  :: at(:)
 
     real(dp), pointer    :: KpList(:,:)
-    real(dp), pointer    :: pgOps(:,:,:)
+    real(dp), pointer    :: pgOps(:,:,:), trans(:,:)
     real(dp)             :: eps
 
     if(.not. present(eps_)) then
@@ -132,7 +133,8 @@ CONTAINS
        eps =  eps_
     endif
     
-    call get_lattice_pointGroup(R, pgOps, eps)
+    ! call get_lattice_pointGroup(R, pgOps, eps)
+    call get_spaceGroup(A,at,B_vecs,pgOps,trans, .True., eps_=eps)
     call generateFullKpointList(K, R, kLVshift, KpList, eps)
     call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, eps)
   endsubroutine generateIrredKpointList
