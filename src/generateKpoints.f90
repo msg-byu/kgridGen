@@ -118,18 +118,22 @@ CONTAINS
   !!<parameter regular="true" name="IrrKpList"> List of symmetry-reduced k-points in
   !! Cartesian coordinates. </parameter>
   !!<parameter regular="true" name="weights"> "Weights" of k-points (length of each orbit).
-  !! </parameter>
-  !!<parameter regular="true" name="eps_"> Finite precision parameter (optional).
-  !! </parameter>
-  subroutine generateIrredKpointList(K, R, kLVshift, IrrKpList, weights, eps_)
-    real(dp), intent(in) :: K(3,3)
+  !!</parameter>
+  !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
+  !!<parameter regular="true" name="A">The real space lattice vectors.</parameter>
+  !!<parameter regular="true" name="AtBas">The atomic basis in lattice coordinates.</parameter>
+  !!<parameter regular="true" name="at">Atomic occupancy list.</parameter>
+  subroutine generateIrredKpointList(A,AtBas,at,K, R, kLVshift, IrrKpList, weights, eps_)
+    real(dp), intent(in) :: K(3,3), A(3,3)
     real(dp), intent(in) :: R(3,3)
     real(dp), intent(in) :: kLVshift(3)
-    real(dp), pointer    :: IrrKpList(:,:)
+    real(dp), pointer    :: IrrKpList(:,:), AtBas(:,:)
     integer, pointer     :: weights(:)
     real(dp), intent(in), optional:: eps_
+    integer, intent(inout)  :: at(:)
+
     real(dp), pointer    :: KpList(:,:)
-    real(dp), pointer    :: pgOps(:,:,:)
+    real(dp), pointer    :: pgOps(:,:,:), trans(:,:)
     real(dp)             :: eps
 
     if(.not. present(eps_)) then
@@ -138,7 +142,7 @@ CONTAINS
        eps =  eps_
     endif
     
-    call get_lattice_pointGroup(R, pgOps, eps)
+    call get_spaceGroup(A, at, AtBas, pgOps, trans, .True., eps_=eps)
     call generateFullKpointList(K, R, kLVshift, KpList, eps)
     call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, eps)
   endsubroutine generateIrredKpointList
