@@ -213,7 +213,7 @@ CONTAINS
     ! write(*,'(3("test2: ",3(1x,f11.7),/))') (test2(i,:),i=1,3)
 
     intMat = matmul(Kinv,R)
-    write(*,'(3("test1: ",3(1x,f11.7),/))') (intMat(i,:),i=1,3)
+    ! write(*,'(3("test1: ",3(1x,f11.7),/))') (intMat(i,:),i=1,3)
 
     
     if (.not. equal(matmul(Kinv,R), nint(matmul(Kinv,R)), eps)) then
