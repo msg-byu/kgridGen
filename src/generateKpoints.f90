@@ -8,7 +8,7 @@
 
   private
   public generateIrredKpointList, generateFullKpointList, symmetryReduceKpointList, &
-       & mapKptsIntoFirstBZ
+       & mapKptsIntoBZ
 CONTAINS
   !!<summary> Move a list of k-points into the first Brillioun zone: by applying
   !!translational symmetry, find the set of k-points equivalent to the input set that
@@ -20,7 +20,7 @@ CONTAINS
   !!<parameter regular="true" name="eps_"> A finite precision parameter. (optional)
   !!</parameter>
   !!<local name="minkedR"> The basis of the reciprocal lattice in Minkowski space. </local>
-  subroutine mapKptsIntoFirstBZ(R, KpList, eps_)
+  subroutine mapKptsIntoBZ(R, KpList, eps_)
     !! <local name="minkedR" dimension="(3,3)"> "The basis of the reciprocal lattice in Minkowski space. </local>
     Real(dp), intent(in)   :: R(3,3)
     real(dp), intent(inout):: KpList(:,:) ! First index over k-points, second coordinates
@@ -39,7 +39,7 @@ CONTAINS
  
     call matrix_inverse(R, Rinv, err)
     if (err) then
-       write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
+       write(*,*) "ERROR: (mapKptsIntoBZ in generateKpoints.f90):"
        write(*,*) "The reciprocal lattice vectors are linearly dependent."
        stop
     endif
@@ -47,7 +47,7 @@ CONTAINS
     call minkowski_reduce_basis(R, minkedR, eps)
     call matrix_inverse(minkedR, minkedRinv, err)
     if (err) then
-       write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
+       write(*,*) "ERROR: (mapKptsIntoBZ in generateKpoints.f90):"
        write(*,*) "The Minkowski reduced lattice vectors are linearly dependent."
        stop
     endif
@@ -56,7 +56,7 @@ CONTAINS
     call matrix_inverse(minkedR, minkedRinv, err)
     M = matmul(minkedRinv, R)
     if (.not. equal(M, nint(M), eps)) then
-       write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
+       write(*,*) "ERROR: (mapKptsIntoBZ in generateKpoints.f90):"
        write(*,*) "The Minkowski-reduced basis vectors and the reciprocal& 
             & lattice vectors define different lattices."
        write(*,*) "The Minkowski-reduced basis vectors should be integer& 
@@ -66,13 +66,13 @@ CONTAINS
     
     call matrix_inverse(M, Minv, err)
     if (err) then
-       write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
+       write(*,*) "ERROR: (mapKptsIntoBZ in generateKpoints.f90):"
        write(*,*) "The Minkowski transformation matrix is non-invertible."
        stop
     endif
     
     if (.not. equal(Minv, nint(Minv), eps)) then
-       write(*,*) "ERROR: (mapKptsIntoFirstBZ in generateKpoints.f90):"
+       write(*,*) "ERROR: (mapKptsIntoBZ in generateKpoints.f90):"
        write(*,*) "The Minkowski-reduced basis vectors and the reciprocal& 
             & lattice vectors define different lattices."
        write(*,*) "The reciprocal lattice vectors should be integer& 
@@ -104,7 +104,7 @@ CONTAINS
           enddo
        enddo
     enddo
-  endsubroutine mapKptsIntoFirstBZ
+  endsubroutine mapKptsIntoBZ
   
   !!<summary>Reduce k-points to irreducible set. Takes a list of translationally distinct,
   !! but not rotationally distinct, k-points and reduces them by the given point group.
@@ -142,7 +142,7 @@ CONTAINS
        eps =  eps_
     endif
     
-    call get_spaceGroup(A, at, AtBas, pgOps, trans, .True., eps_=eps)
+    call get_spaceGroup(A, at, AtBas, pgOps, trans, .true., eps)
     call generateFullKpointList(K, R, kLVshift, KpList, eps)
     call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, eps)
   endsubroutine generateIrredKpointList
@@ -213,7 +213,7 @@ CONTAINS
     ! write(*,'(3("test2: ",3(1x,f11.7),/))') (test2(i,:),i=1,3)
 
     intMat = matmul(Kinv,R)
-    write(*,'(3("test1: ",3(1x,f11.7),/))') (intMat(i,:),i=1,3)
+    ! write(*,'(3("test1: ",3(1x,f11.7),/))') (intMat(i,:),i=1,3)
 
     
     if (.not. equal(matmul(Kinv,R), nint(matmul(Kinv,R)), eps)) then
@@ -265,6 +265,9 @@ CONTAINS
        call bring_into_cell(KpList(iKP,:),Rinv,R,eps)
     enddo
 
+    ! call mapKptsIntoBZ(R, KpList, eps)
+
+    
   END subroutine generateFullKpointList
 
   !!<summary> Reduce k-points to irreducible set. Takes a list of translationally distinct,
@@ -326,7 +329,7 @@ CONTAINS
     if (err) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
        stop "The reciprocal lattice vectors are linearly dependent."
-    END if    
+    END if
     !! Check for valid inputs
     ! Make sure kgrid is commensurate with reciprocal cell
     ! if (any(matmul(InvK,R) -  nint(matmul(InvK,R)) > eps)) then
@@ -471,6 +474,15 @@ CONTAINS
             &any of the orbits of the symmetry group."
        stop
     endif
+
+    print *, "number of unreduced k-points"
+    print *, size(weights)
+
+    print *, "number of reduced k-points"
+    print *, size(UnreducedKpList, 1)
+
+    print *, "number of symmetry operators"
+    print *, size(SymOps, 3)
     
     if (size(UnreducedKpList,1)/real(size(weights)) > size(SymOps,3)) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
