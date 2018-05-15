@@ -177,7 +177,7 @@ CONTAINS
     logical  :: err ! flag for catching errors
 
     real(dp) :: intMat(3,3)
-    integer  :: i
+    ! integer  :: i
 
     ! real(dp) :: test1(3,3) ! Inverse of the k-grid cell
     ! real(dp) :: test2(3,3) ! Inverse of the k-grid cell
