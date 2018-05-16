@@ -22,7 +22,7 @@ CONTAINS
   !!<local name="minkedR"> The basis of the reciprocal lattice in Minkowski space. </local>
   subroutine mapKptsIntoBZ(R, KpList, eps_)
     !! <local name="minkedR" dimension="(3,3)"> "The basis of the reciprocal lattice in Minkowski space. </local>
-    Real(dp), intent(in)   :: R(3,3)
+    real(dp), intent(in)   :: R(3,3)
     real(dp), intent(inout):: KpList(:,:) ! First index over k-points, second coordinates
     real(dp), intent(in), optional :: eps_
     real(dp)  :: minkedR(3,3), kpt(3), shift_kpt(3), minkedRinv(3,3), Rinv(3,3), M(3,3)
@@ -213,8 +213,13 @@ CONTAINS
     ! write(*,'(3("test2: ",3(1x,f11.7),/))') (test2(i,:),i=1,3)
 
     intMat = matmul(Kinv,R)
-    ! write(*,'(3("test1: ",3(1x,f11.7),/))') (intMat(i,:),i=1,3)
-
+    ! write(*,'(3("K: ",3(1x,f11.4),/))') (K(i,:),i=1,3)
+    ! write(*,'(3("Kinv: ",3(1x,f11.4),/))') (Kinv(i,:),i=1,3)
+    ! write(*,'(3("R: ",3(1x,f11.4),/))') (R(i,:),i=1,3)        
+    ! write(*,'(3("test1: ",3(1x,f11.4),/))') (intMat(i,:),i=1,3)
+    ! print *, eps
+    ! print  *, equal(matmul(Kinv,R), nint(matmul(Kinv,R)), eps)
+    
     
     if (.not. equal(matmul(Kinv,R), nint(matmul(Kinv,R)), eps)) then
     ! if (any(matmul(Kinv,R) -  nint(matmul(Kinv,R)) > eps)) then
@@ -228,7 +233,7 @@ CONTAINS
        stop
     endif
     cartShift = matmul(K,kLVshift)
-    bicCartShift = cartShift ! The k-grid shift, but bring into cell
+    bicCartShift = cartShift ! The k-grid shift, but in the unit cell
     call bring_into_cell(bicCartShift, Kinv, K, eps)
     
     if (.not. equal(cartShift, bicCartShift, eps)) then
@@ -239,6 +244,7 @@ CONTAINS
     
     ! Integer transformation matrix that takes K to R, not necessarily HNF at the outset
     S = nint(matmul(Kinv,R))
+    
     ! Find the HNF of S, store it in H (B is the transformation matrix)
     call HermiteNormalForm(S,H,B)
 
@@ -308,7 +314,7 @@ CONTAINS
     real(dp):: shift(3) ! Shift of k-grid lattice in Cartesian coordinates
     integer :: N(3,3) ! Integer transformation that takes K to R
     ! HNF, SNF transform matrices, SNF, diag(SNF)
-    integer :: H(3,3), L(3,3), Ri(3,3), S(3,3), D(3) 
+    integer :: H(3,3), L(3,3), Ri(3,3), S(3,3), D(3)
     real(dp):: eps
     logical :: err
     integer zz
@@ -356,10 +362,13 @@ CONTAINS
     
     ! Put the shift in Cartesian coordinates.
     shift = matmul(K,kLVshift)
+    
     ! Integer transformation matrix that takes K to R, not necessarily HNF at the outset
     N = nint(matmul(InvK,R))
+    
     ! Find the HNF of N, store it in H (B is the transformation matrix)
     call HermiteNormalForm(N,H,L)
+    
     ! Left side of transform will be used later, right side (Ri) will not be.
     call SmithNormalForm(H,L,S,Ri)
 
@@ -380,7 +389,7 @@ CONTAINS
     do iUnRdKpt = 1,nUR ! Loop over each k-point and mark off its symmetry brothers
        zz = 0       
        urKpt = UnreducedKpList(iUnRdKpt,:) ! unrotated k-point (shorter name for clarity)
-       idx = findKptIndex(urKpt-shift, InvK, L, D)       
+       idx = findKptIndex(urKpt-shift, InvK, L, D, eps)
        if (hashTable(idx)/=0) cycle ! This k-point is already on an orbit, skip it
        cOrbit = cOrbit + 1
        hashTable(idx) = cOrbit
@@ -412,7 +421,7 @@ CONTAINS
           endif
           ! write(*,'(3(1x,f7.3))') (SymOps(i,:,iOp),i=1,3)          
           
-          idx = findKptIndex(roKpt, InvK, L, D)
+          idx = findKptIndex(roKpt, InvK, L, D, eps)
           ! write(*,'("rotated index: ",i7)') idx          
           ! Reshift the k-point before finding its index
           roKpt = roKpt + shift
@@ -437,10 +446,12 @@ CONTAINS
        ! print *,'zz ',zz
        ! write(*,'(/,"iWt: ",i4)') iWt(cOrbit)
     enddo
-    ! write(*,*) "Hash table:"
-    do i = 1, nUr
-       ! write(*,'("kpt#:",i3,3x,"index:",i3)') i, hashTable(i)
-    enddo
+    write(*,*) "Hash table:"
+    ! do i = 1, nUr
+    !    print *, "index", i
+    !    print *, "hash", hashTable(i)
+    !    ! write(*,'("kpt#:",i3,3x,"index:",i3)') i, hashTable(i)
+    ! enddo
     ! Now that we have the hash table populated, make a list of the irreducible k-points
     ! and their corresponding weights.
     sum = 0
@@ -499,30 +510,61 @@ CONTAINS
        stop
     endif
     
-  CONTAINS
+  CONTAINS    
     ! This function takes a k-point in Cartesian coordinates and "hashes" it into a
     ! single number, corresponding to its place in the k-point list.
-    function findKptIndex(kpt, InvK, L, D)
-      integer              :: findKptIndex ! index of the k-point (base 10, 1..n)
-      ! The k-point, matrix inverse of the k-grid generating vecs
-      real(dp), intent(in) :: kpt(3), InvK(3,3) 
-      ! Left transform for SNF conversion, diagonal of SNF
-      integer,  intent(in) :: L(3,3), D(3) 
-      real(dp) :: gpt(3)
+    function findKptIndex(kpt, InvK, L, D, rtol_, atol_)
 
-      gpt = matmul(InvK,kpt) ! k-point is now in lattice coordinates
-!!      if (.not. equal(gpt, nint(gpt), eps)) then ! kpt is not a lattice point of K
-!!         write(*,*) "ERROR: (findKptIndex in kpointGeneration)"
-!!         write(*,*) "The k-point is not a lattice point of the generating vectors."
-!!         stop
-!!      END if
-      ! Convert the k-point to group coordinates and bring into first unit cell
-      gpt = modulo(matmul(L,nint(gpt)),D)
+      ! Index of the k-point (base 10, 1..n)
+      integer              :: findKptIndex
+      
+      ! The k-point, matrix inverse of the k-grid generating vecs
+      real(dp), intent(in) :: kpt(3), InvK(3,3)
+      
+      ! Left transform for SNF conversion, diagonal of SNF
+      integer,  intent(in) :: L(3,3), D(3)
+
+      ! Rounding parameter that determines the amount of memory used
+      ! to store the number being rounded.
+      real(dp), intent(in), optional  :: rtol_, atol_
+
+      ! Relative and absolute tolerances
+      real(dp) :: rtol, atol
+
+      ! The k-point in lattice (grid) coordinates.
+      real(dp) :: gpt(3)
+      
+      ! Set the relative tolerance.
+      if(.not. present(rtol_)) then
+         rtol = 1e-5_dp
+      else
+         rtol =  rtol_
+      endif
+
+      ! Set the absolute tolerance.
+      if(.not. present(atol_)) then
+         atol = 1e-6_dp
+      else
+         atol =  atol_
+      endif      
+
+      ! Put the k-point in lattice (grid) coordinates.
+      gpt = matmul(InvK, kpt)
+
+      ! Make sure the k-point is a lattice point of K.
+      if (.not. equal(gpt, int(nint(gpt, 8)), rtol, atol)) then
+         write(*,*) "ERROR: (findKptIndex in kpointGeneration)"
+         write(*,*) "The k-point is not a lattice point of the generating vectors."
+         stop
+      END if
+
+      ! Convert the k-point to group coordinates and bring into the first unit cell.
+      gpt = modulo(matmul(L, nint(gpt, 8)),D)
+      
       ! Convert from "group" coordinates (a 3-vector) to single base-10 number
       ! between 1 and nUr
-      ! write(*,*) "index inside", int(gpt(1)*D(2)*D(3) + gpt(2)*D(3) + gpt(3) + 1)
-      
       findKptIndex = int(gpt(1)*D(2)*D(3) + gpt(2)*D(3) + gpt(3) + 1)  ! Hash of the kpt
+      
     END function findKptIndex
 
   END subroutine symmetryReduceKpointList

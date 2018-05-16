@@ -1,3 +1,7 @@
+0.5.9 (JJ)
+* Fixed a rounding bug when converting a k-point from Cartesian to
+  lattice coordinates.
+
 0.5.8 (WSM)
 * Changed the point group finding to finding the space group.
 
