@@ -314,7 +314,8 @@ CONTAINS
     real(dp):: shift(3) ! Shift of k-grid lattice in Cartesian coordinates
     integer :: N(3,3) ! Integer transformation that takes K to R
     ! HNF, SNF transform matrices, SNF, diag(SNF)
-    integer :: H(3,3), L(3,3), Ri(3,3), S(3,3), D(3)
+    integer :: H(3,3), L(3,3), Ri(3,3), S(3,3), B(3,3), D(3)
+    integer(li) :: L_long(3,3), D_long(3)
     real(dp):: eps
     logical :: err
     integer zz
@@ -367,7 +368,7 @@ CONTAINS
     N = nint(matmul(InvK,R))
     
     ! Find the HNF of N, store it in H (B is the transformation matrix)
-    call HermiteNormalForm(N,H,L)
+    call HermiteNormalForm(N,H,B)
     
     ! Left side of transform will be used later, right side (Ri) will not be.
     call SmithNormalForm(H,L,S,Ri)
@@ -375,6 +376,10 @@ CONTAINS
     ! Diagonal of the SNF.
     D = (/S(1,1),S(2,2),S(3,3)/)
 
+    ! Convert L and D to long integers.
+    L_long = int(L, 8)
+    D_long = int(D, 8)
+    
     ! write(*,'(3(1x,i3))') (H(i,:),i=1,3)
     ! write(*,*) 
     ! write(*,'(3(1x,i3))') (S(i,:),i=1,3)
@@ -389,7 +394,7 @@ CONTAINS
     do iUnRdKpt = 1,nUR ! Loop over each k-point and mark off its symmetry brothers
        zz = 0       
        urKpt = UnreducedKpList(iUnRdKpt,:) ! unrotated k-point (shorter name for clarity)
-       idx = findKptIndex(urKpt-shift, InvK, L, D, eps)
+       idx = findKptIndex(urKpt-shift, InvK, L_long, D_long, eps)
        if (hashTable(idx)/=0) cycle ! This k-point is already on an orbit, skip it
        cOrbit = cOrbit + 1
        hashTable(idx) = cOrbit
@@ -421,7 +426,7 @@ CONTAINS
           endif
           ! write(*,'(3(1x,f7.3))') (SymOps(i,:,iOp),i=1,3)          
           
-          idx = findKptIndex(roKpt, InvK, L, D, eps)
+          idx = findKptIndex(roKpt, InvK, L_long, D_long, eps)
           ! write(*,'("rotated index: ",i7)') idx          
           ! Reshift the k-point before finding its index
           roKpt = roKpt + shift
@@ -514,7 +519,7 @@ CONTAINS
     ! This function takes a k-point in Cartesian coordinates and "hashes" it into a
     ! single number, corresponding to its place in the k-point list.
     function findKptIndex(kpt, InvK, L, D, rtol_, atol_)
-
+      
       ! Index of the k-point (base 10, 1..n)
       integer              :: findKptIndex
       
@@ -522,17 +527,18 @@ CONTAINS
       real(dp), intent(in) :: kpt(3), InvK(3,3)
       
       ! Left transform for SNF conversion, diagonal of SNF
-      integer,  intent(in) :: L(3,3), D(3)
-
+      integer(li),  intent(in) :: L(3,3), D(3)
+      
       ! Rounding parameter that determines the amount of memory used
       ! to store the number being rounded.
       real(dp), intent(in), optional  :: rtol_, atol_
-
+      
       ! Relative and absolute tolerances
       real(dp) :: rtol, atol
-
+      
       ! The k-point in lattice (grid) coordinates.
       real(dp) :: gpt(3)
+      integer(li) ::int_gpt(3)
       
       ! Set the relative tolerance.
       if(.not. present(rtol_)) then
@@ -540,17 +546,17 @@ CONTAINS
       else
          rtol =  rtol_
       endif
-
+      
       ! Set the absolute tolerance.
       if(.not. present(atol_)) then
          atol = 1e-6_dp
       else
          atol =  atol_
       endif      
-
+      
       ! Put the k-point in lattice (grid) coordinates.
       gpt = matmul(InvK, kpt)
-
+      
       ! Make sure the k-point is a lattice point of K.
       if (.not. equal(gpt, int(nint(gpt, 8)), rtol, atol)) then
          write(*,*) "ERROR: (findKptIndex in kpointGeneration)"
@@ -558,15 +564,20 @@ CONTAINS
          stop
       END if
 
-      ! Convert the k-point to group coordinates and bring into the first unit cell.
-      gpt = modulo(matmul(L, nint(gpt, 8)),D)
+      ! Since this k-point is part of the grid, within some tolerance (which was verified
+      ! in the previous check), we can safely remove any finite precision errors in the
+      ! calculation of gpt and thereby avoid error propagation.
+      int_gpt = nint(gpt, 8)
+            
+      ! Convert the k-point to group coordinates and bring into the first unit cell.      
+      gpt = modulo(matmul(L, int_gpt), D)
       
       ! Convert from "group" coordinates (a 3-vector) to single base-10 number
-      ! between 1 and nUr
-      findKptIndex = int(gpt(1)*D(2)*D(3) + gpt(2)*D(3) + gpt(3) + 1)  ! Hash of the kpt
+      ! between 1 and nUr      
+      findKptIndex = int(gpt(1)*D(2)*D(3) + gpt(2)*D(3) + gpt(3) + 1, 4)  ! Hash of the kpt
       
     END function findKptIndex
-
+    
   END subroutine symmetryReduceKpointList
-  
+
 END MODULE kpointGeneration
