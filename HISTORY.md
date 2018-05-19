@@ -1,3 +1,15 @@
+0.5.10 (JJ)
+* The previous fix wasn't really a fix. In the calculation of the
+  k-point's unique index associated with its position on the grid,
+  errors were being introduced from `L` and `D` not having enough
+  digits. These were converted to long integers. Also the k-point in
+  grid coordinates had decimal portions removed to avoid error
+  propagation.
+
+0.5.9 (JJ)
+* Fixed a rounding bug when converting a k-point from Cartesian to
+  lattice coordinates.
+
 0.5.8 (WSM)
 * Changed the point group finding to finding the space group.
 
