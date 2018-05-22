@@ -265,14 +265,10 @@ CONTAINS
           enddo
        enddo
     enddo
-    
-    ! Bring each k-point into the first unit cell
-    do iKP = 1,n
-       call bring_into_cell(KpList(iKP,:),Rinv,R,eps)
-    enddo
-
-    ! call mapKptsIntoBZ(R, KpList, eps)
-
+ 
+    ! Bring each point in the list into the first BZ.
+    ! (Originally, each point was mapped into the first unit cell.)
+    call mapKptsIntoFirstBZ(R, KpList, eps)
     
   END subroutine generateFullKpointList
 
