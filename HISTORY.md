@@ -1,3 +1,9 @@
+0.5.11 (GLWH)
+* At the end of the generateFullKpointList routine, I
+removed the loop that knocked all the kpoints into the first unit
+cell. This seem pointless. Instead, there are now mapped into the
+first BZ
+
 0.5.10 (JJ)
 * The previous fix wasn't really a fix. In the calculation of the
   k-point's unique index associated with its position on the grid,
