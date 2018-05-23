@@ -416,6 +416,7 @@ CONTAINS
           ! write(*,'("roKpt: ",3(f6.3,1x),i3)') roKpt
           ! write(*,'("into cell: ",3(f6.3,1x),i3)') roKpt
           ! write(*,'("icKpt: ",3(f6.3,1x),i3)') roKpt
+          
           ! Unshift the k-point temporarily to check if it still is a member of the lattice
           roKpt = roKpt - shift
           ! write(*,'("no shift: ",3(f6.3,1x),i3)') roKpt          
@@ -424,10 +425,11 @@ CONTAINS
              zz = zz + 1
              cycle
           endif
-          ! write(*,'(3(1x,f7.3))') (SymOps(i,:,iOp),i=1,3)          
+          ! write(*,'(3(1x,f7.3))') (SymOps(i,:,iOp),i=1,3)
           
           idx = findKptIndex(roKpt, InvK, L_long, D_long, eps)
-          ! write(*,'("rotated index: ",i7)') idx          
+          ! write(*,'("rotated index: ",i7)') idx
+          
           ! Reshift the k-point before finding its index
           roKpt = roKpt + shift
           ! write(*,'("with shift: ",3(f6.3,1x),i3)') roKpt
