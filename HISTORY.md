@@ -1,3 +1,9 @@
+0.5.12 (JJ)
+* Removed print statements from code that were used for testing.
+* Since all we care about is the index, removed line that added 
+  shift back to the k-point in `symmetryReduceKpointList`.
+
+
 0.5.11 (GLWH)
 * At the end of the generateFullKpointList routine, I
 removed the loop that knocked all the kpoints into the first unit
