@@ -145,6 +145,7 @@ CONTAINS
     call get_spaceGroup(A, at, AtBas, pgOps, trans, .true., eps)
     call generateFullKpointList(K, R, kLVshift, KpList, eps)
     call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, eps)
+    deallocate(KpList,pgOps,trans)
   endsubroutine generateIrredKpointList
 
   !!<summary> Takes two lattices, a generating lattice (K) and the reciprocal lattice (R),
