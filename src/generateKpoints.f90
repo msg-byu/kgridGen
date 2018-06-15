@@ -4,6 +4,7 @@
   use vector_matrix_utilities
   use rational_mathematics, only: HermiteNormalForm, SmithNormalForm
   use symmetry
+  use group_theory
   implicit none
   private
   public generateIrredKpointList, generateFullKpointList, symmetryReduceKpointList, &
@@ -147,6 +148,68 @@ CONTAINS
     deallocate(KpList,pgOps,trans)
   endsubroutine generateIrredKpointList
 
+  !!<summary>Generates the full space group from the crystal space
+  !!group.</summary>
+  !!<usage>Pass in 3D array containing the matrices of the spcae
+  !!group. The operations will be taken in all possible pairs to
+  !!generate new group elements along with the inverse operation. The
+  !!array of operations will be added to until the list of
+  !!permutations has closure and constitutes a group.</usage>
+  !!<parameter name="g" regular="true">On entry contains the
+  !!generators, on exit contains the whole group </parameter>
+  subroutine get_fullSpaceGroup(g)
+    real(dp), pointer:: g(:,:,:)
+
+    real(dp) :: inv(3,3), new_op(3,3)
+    real(dp), allocatable :: new_group(:,:,:)
+    integer :: i, oG, j, nG
+    logical :: inc_inv, new
+
+    inv = reshape((/-1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp, -1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp, -1.0_dp/), (/3,3/))
+
+    oG = size(g,3)
+    ! Check if inversion symmetry is already in the group.
+    inc_inv = .False.
+    do i = 1, oG
+       if (equal(g(:,:,i), inv)) then
+          inc_inv = .True.
+          exit
+       end if
+    end do
+
+    if (.not. inc_inv) then
+       !If inversion symmetry isn't in the group then we need to add
+       !it and the inverse of each operator in the group, i.e., the
+       !group could potentially double in size.
+       nG = 0
+       allocate(new_group(3,3, oG*2))
+       new_group(:,:,1:oG) = g
+       do i=1, oG
+          new_op = matmul(g(:,:,i), inv)
+          new = .True.
+          do j=1, oG
+             if (equal(new_op, g(:,:,j))) then
+                new = .False.
+                exit
+             end if
+          end do
+
+          ! Verify that the new operator isn't already in the group
+          ! just to be safe.
+          if (new) then
+             nG = nG + 1
+             new_group(:,:,oG+nG) = new_op
+          end if
+       end do
+
+       ! replace the old group with the new one.
+       deallocate(g)
+       allocate(g(3,3,nO+nG))
+       g = new_group
+       deallocate(new_group)
+       
+    end if
+  
   !!<summary> Takes two lattices, a generating lattice (K) and the reciprocal lattice (R),
   !! and generates all the points of K that are inside one unit cell of R. </summary>
   !!<parameter name="K" regular="true"> 3x3 matrix. Columns are the generating vectors of
