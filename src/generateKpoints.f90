@@ -8,7 +8,7 @@
   implicit none
   private
   public generateIrredKpointList, generateFullKpointList, symmetryReduceKpointList, &
-       & mapKptsIntoBZ, findQpointsInZone
+       & mapKptsIntoBZ!, findQpointsInZone
 CONTAINS
   !!<summary> Move a list of k-points into the first Brillioun zone: by applying
   !!translational symmetry, find the set of k-points equivalent to the input set that
@@ -158,7 +158,7 @@ CONTAINS
   !!permutations has closure and constitutes a group.</usage>
   !!<parameter name="g" regular="true">On entry contains the
   !!generators, on exit contains the whole group </parameter>
-  !!<parameter name="eps_">Floating point tolerance for
+  !!<parameter name="eps_" regular="true">Floating point tolerance for
   !!comparisons.</parameter>
   subroutine get_fullSpaceGroup(g, eps_)
     real(dp), pointer:: g(:,:,:)
@@ -182,7 +182,7 @@ CONTAINS
     ! Check if inversion symmetry is already in the group.
     inc_inv = .False.
     do i = 1, oG
-       if (equal(g(:,:,i), inv)) then
+       if (equal(g(:,:,i), inv, eps)) then
           inc_inv = .True.
           exit
        end if
@@ -199,7 +199,7 @@ CONTAINS
           new_op = matmul(g(:,:,i), inv)
           new = .True.
           do j=1, oG
-             if (equal(new_op, g(:,:,j))) then
+             if (equal(new_op, g(:,:,j), eps)) then
                 new = .False.
                 exit
              end if
@@ -215,10 +215,11 @@ CONTAINS
 
        ! replace the old group with the new one.
        deallocate(g)
-       allocate(g(3,3,nO+nG))
+       allocate(g(3,3,oG+nG))
        g = new_group
        deallocate(new_group)       
     end if
+  end subroutine get_fullSpaceGroup
   
   !!<summary> Takes two lattices, a generating lattice (K) and the reciprocal lattice (R),
   !! and generates all the points of K that are inside one unit cell of R. </summary>
@@ -616,35 +617,35 @@ CONTAINS
   !!routine. It corresponds to the number of qpoints that we will return, so we need it to avoid an
   !!intent(out) variable with an unknown size. </parameter>
   !!<parameter regular="true" name="qPoints"> (output) The list of Q points </parameter>
-  SUBROUTINE findQpointsInZone(Avecs, Bvecs, n, qPoints, eps_)
-    real(dp), intent(in), dimension(3,3) :: Avecs, Bvecs
-    real(dp), intent(out)                :: qPoints(n, 3)
-    integer                              :: n
-    real(dp), optional                   :: eps_
+  ! SUBROUTINE findQpointsInZone(Avecs, Bvecs, n, qPoints, eps_)
+  !   real(dp), intent(in), dimension(3,3) :: Avecs, Bvecs
+  !   real(dp), intent(out)                :: qPoints(n, 3)
+  !   integer, intent(in)                  :: n
+  !   real(dp), optional                   :: eps_
 
-    real(dp) eps, shift(3)
-    real(dp), pointer    :: pgOps(:,:,:), trans(:,:)
-    real(dp), dimension(3,3)             :: Ainv, Binv
-    logical flag
-    real(dp), pointer :: qList(:,:)
+  !   real(dp) eps, shift(3)
+  !   real(dp), pointer    :: pgOps(:,:,:), trans(:,:)
+  !   real(dp), dimension(3,3)             :: Ainv, Binv
+  !   logical flag
+  !   real(dp), pointer :: qList(:,:)
     
-    if(.not. present(eps_)) then
-       eps = 1e-10_dp
-    else
-       eps =  eps_
-    endif
+  !   if(.not. present(eps_)) then
+  !      eps = 1e-10_dp
+  !   else
+  !      eps =  eps_
+  !   endif
     
-    if (.not. equal(determinant(Bvecs)/determinant(Avecs), n, eps)) then
-       stop "Number of q points expected, 'n', doesn't match the relative sizes of the two lattices."
-    end if
-    shift= (/0._dp, 0._dp, 0._dp/)
-    call matrix_inverse(Avecs, Ainv)
-    call matrix_inverse(Bvecs, Binv)
-    call generateFullKpointList(Binv, Ainv, shift, qList, eps)
-    call
-    if (size(qList,1)/= n) stop "Found the wrong number of q points (or 'n' was wrong)"
-    qPoints = qList
-    call mapKptsIntoBZ(Ainv, qpoints, eps)
-  END SUBROUTINE FindQpointsInZone
+  !   if (.not. equal(determinant(Bvecs)/determinant(Avecs), n, eps)) then
+  !      stop "Number of q points expected, 'n', doesn't match the relative sizes of the two lattices."
+  !   end if
+  !   shift= (/0._dp, 0._dp, 0._dp/)
+  !   call matrix_inverse(Avecs, Ainv)
+  !   call matrix_inverse(Bvecs, Binv)
+  !   call generateFullKpointList(Binv, Ainv, shift, qList, eps)
+  !   call
+  !   if (size(qList,1)/= n) stop "Found the wrong number of q points (or 'n' was wrong)"
+  !   qPoints = qList
+  !   call mapKptsIntoBZ(Ainv, qpoints, eps)
+  ! END SUBROUTINE FindQpointsInZone
   
 END MODULE kpointGeneration
