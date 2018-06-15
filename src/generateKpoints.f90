@@ -143,6 +143,7 @@ CONTAINS
     endif
     
     call get_spaceGroup(A, at, AtBas, pgOps, trans, .true., eps)
+    call get_fullSpaceGroup(pgOps, eps)
     call generateFullKpointList(K, R, kLVshift, KpList, eps)
     call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, eps)
     deallocate(KpList,pgOps,trans)
@@ -157,13 +158,23 @@ CONTAINS
   !!permutations has closure and constitutes a group.</usage>
   !!<parameter name="g" regular="true">On entry contains the
   !!generators, on exit contains the whole group </parameter>
-  subroutine get_fullSpaceGroup(g)
+  !!<parameter name="eps_">Floating point tolerance for
+  !!comparisons.</parameter>
+  subroutine get_fullSpaceGroup(g, eps_)
     real(dp), pointer:: g(:,:,:)
+    real(dp), optional :: eps_
 
     real(dp) :: inv(3,3), new_op(3,3)
     real(dp), allocatable :: new_group(:,:,:)
     integer :: i, oG, j, nG
     logical :: inc_inv, new
+    real(dp) :: eps
+
+    if(.not. present(eps_)) then
+       eps = 1e-10_dp
+    else
+       eps =  eps_
+    endif
 
     inv = reshape((/-1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp, -1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp, -1.0_dp/), (/3,3/))
 
@@ -206,8 +217,7 @@ CONTAINS
        deallocate(g)
        allocate(g(3,3,nO+nG))
        g = new_group
-       deallocate(new_group)
-       
+       deallocate(new_group)       
     end if
   
   !!<summary> Takes two lattices, a generating lattice (K) and the reciprocal lattice (R),
