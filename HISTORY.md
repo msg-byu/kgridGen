@@ -3,7 +3,6 @@
 crystal) and generate the unreduced kpoint list. The utility is that
 this allows us to see which "q-points" in phonon calculation will be
 calculated explicitly due to the supercell size and shape.
-
 * The function added is currently at the bottom of the file and is
   called "FindQpointsInZone". The function returns the entire list of
   points but moves them into the first BZ.
