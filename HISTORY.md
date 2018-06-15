@@ -1,3 +1,7 @@
+0.6.1 (WSM)
+* Added the functionality to add inversion symmetry back into the
+  spcae group when it's not already in the crystal symmetry group.
+
 0.6.0 (GLWH)
 * Added the functionality to pass in a superlattice (not
 crystal) and generate the unreduced kpoint list. The utility is that
