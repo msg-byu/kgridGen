@@ -1,3 +1,13 @@
+0.6.0 (GLWH)
+* Added the functionality to pass in a superlattice (not
+crystal) and generate the unreduced kpoint list. The utility is that
+this allows us to see which "q-points" in phonon calculation will be
+calculated explicitly due to the supercell size and shape.
+
+* The function added is currently at the bottom of the file and is
+  called "FindQpointsInZone". The function returns the entire list of
+  points but moves them into the first BZ.
+
 0.5.12 (JJ)
 * Removed print statements from code that were used for testing.
 * Since all we care about is the index, removed line that added 
