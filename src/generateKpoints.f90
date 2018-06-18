@@ -5,9 +5,7 @@
   use rational_mathematics, only: HermiteNormalForm, SmithNormalForm
   use symmetry
   implicit none
-  private
-  public generateIrredKpointList, generateFullKpointList, symmetryReduceKpointList, &
-       & mapKptsIntoBZ, findQpointsInZone
+  public generateIrredKpointList, generateFullKpointList, symmetryReduceKpointList, mapKptsIntoBZ, FindQpointsInZone
 CONTAINS
   !!<summary> Move a list of k-points into the first Brillioun zone: by applying
   !!translational symmetry, find the set of k-points equivalent to the input set that
@@ -533,11 +531,8 @@ CONTAINS
   END subroutine symmetryReduceKpointList
   !!<summary> Find which Q points in a phonon calculation are specified ("pinned down") by the
   !! supercell calculation. </summary>
-  !!<parameter regular="true" name="A"> Lattice vectors of the primitive cell </parameter>
-  !!<parameter regular="true" name="atBas"> Atomic basis vectors</parameter>
-  !!<parameter regular="true" name="atTypes"> Type of each atom in the cell</parameter>
-  !!<parameter regular="true" name="Bvecs"> Basis vectors of the supercell</parameter>
-
+  !!<parameter regular="true" name="Avecs"> Lattice vectors of the primitive cell </parameter>
+  !!<parameter regular="true" name="Bvecs"> Lattice vectors of the supercell</parameter>
   !!<parameter regular="true" name="n"> The number of q points in the reciprocal cell of Avecs. This
   !!is det(B)/det(A) but we need to know it ahead of time if we are going to f90-wrap this
   !!routine. It corresponds to the number of qpoints that we will return, so we need it to avoid an
@@ -545,9 +540,9 @@ CONTAINS
   !!<parameter regular="true" name="qPoints"> (output) The list of Q points </parameter>
   SUBROUTINE findQpointsInZone(Avecs, Bvecs, n, qPoints, eps_)
     real(dp), intent(in), dimension(3,3) :: Avecs, Bvecs
-    real(dp), intent(out)                :: qPoints(n, 3)
-    integer                              :: n
-    real(dp), optional                   :: eps_
+    real(dp), intent(inout)              :: qPoints(n, 3)
+    integer, intent(in)                  :: n
+    real(dp), intent(in), optional       :: eps_
 
     real(dp) eps, shift(3)
     real(dp), pointer    :: pgOps(:,:,:), trans(:,:)
@@ -568,7 +563,7 @@ CONTAINS
     call matrix_inverse(Avecs, Ainv)
     call matrix_inverse(Bvecs, Binv)
     call generateFullKpointList(Binv, Ainv, shift, qList, eps)
-    call
+
     if (size(qList,1)/= n) stop "Found the wrong number of q points (or 'n' was wrong)"
     qPoints = qList
     call mapKptsIntoBZ(Ainv, qpoints, eps)
