@@ -1,12 +1,10 @@
-<<<<<<< HEAD
-0.6.1 (WSM)
+0.7.3 (WSM)
 * Added the functionality to add inversion symmetry back into the
   spcae group when it's not already in the crystal symmetry group.
-=======
+
 0.7.2 (CWR)
 - Python wrapping available for the q-point finder.
 - Minor bug fixes so that the code could be wrapped and work in python correctly.
->>>>>>> 29034b1397f8bdfac8b94eebc0ad73ec54269374
 
 0.6.0 (GLWH)
 * Added the functionality to pass in a superlattice (not
