@@ -154,6 +154,37 @@
       
     </group>
   </decorates>
+
+  <decorates name="kpointgeneration.findQpointsInZone">
+    <group name="find_qpoints" purpose="testing"
+	   staging="../unittests/">
+      <test identifier="find_qpoints_sc" cases="[1-2]"
+	    description="Simple cubic lattice vectors." timed="true" >
+	<output identifier="find_qpoints_sc"
+		folder="../tests/find_qpoints"
+		file="sc.out.{}" template="float.xml" />
+	<target name="qpoints" compareto="find_qpoints_sc"
+		varfile="qpoints.out" when="each" />
+      </test>
+      <global name="qpoints" type="real" kind="dp" dimensions=":,:" allocatable="true"/>
+      <assignment name="Avecs" value="Afile" allocate="true">
+	<value identifier="Afile" file="sc_A.in.{}"
+	       folder="../tests/find_qpoints" rename="Avecs.in"/>
+      </assignment>
+      <assignment name="Bvecs" value="Bfile" allocate="true">
+	<value identifier="Bfile" file="sc_B.in.{}"
+	       folder="../tests/find_qpoints" rename="Bvecs.in"/>
+      </assignment>
+      <assignment name="n" value="nfile" allocate="true">
+	<value identifier="nfile" file="sc_n.in.{}"
+	       folder="../tests/find_qpoints" rename="n.in"/>
+      </assignment>
+      <assignment name="qpoints" constant="0" allocate="n, 3" />
+      <global name="n" type="integer" />
+      <global name="eps_" ignore="true" />
+    </group>
+  </decorates>
+
 </fortpy>
 
 

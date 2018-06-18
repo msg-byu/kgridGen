@@ -3,21 +3,18 @@
 \#*#
 \#*
 
-# executable
-kptgen.x
-
 # Unit Testing
 staging/
 unittests/
 
-# Prerequisites
-*.d
-
 # Compiled Object files
+src/compile.log
+wrap/compile.log
 *.slo
 *.lo
 *.o
 *.obj
+*.pyc
 
 # Precompiled Headers
 *.gch
@@ -30,7 +27,6 @@ unittests/
 
 # Fortran module files
 *.mod
-*.smod
 
 # Compiled Static libraries
 *.lai

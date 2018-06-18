@@ -1,12 +1,18 @@
+<<<<<<< HEAD
 0.6.1 (WSM)
 * Added the functionality to add inversion symmetry back into the
   spcae group when it's not already in the crystal symmetry group.
+=======
+0.7.2 (CWR)
+- Python wrapping available for the q-point finder.
+- Minor bug fixes so that the code could be wrapped and work in python correctly.
+>>>>>>> 29034b1397f8bdfac8b94eebc0ad73ec54269374
 
 0.6.0 (GLWH)
 * Added the functionality to pass in a superlattice (not
-crystal) and generate the unreduced kpoint list. The utility is that
-this allows us to see which "q-points" in phonon calculation will be
-calculated explicitly due to the supercell size and shape.
+  crystal) and generate the unreduced kpoint list. The utility is that
+  this allows us to see which "q-points" in phonon calculation will be
+  calculated explicitly due to the supercell size and shape.
 * The function added is currently at the bottom of the file and is
   called "FindQpointsInZone". The function returns the entire list of
   points but moves them into the first BZ.
