@@ -568,7 +568,6 @@ CONTAINS
     call matrix_inverse(Avecs, Ainv)
     call matrix_inverse(Bvecs, Binv)
     call generateFullKpointList(Binv, Ainv, shift, qList, eps)
-    call
     if (size(qList,1)/= n) stop "Found the wrong number of q points (or 'n' was wrong)"
     qPoints = qList
     call mapKptsIntoBZ(Ainv, qpoints, eps)
