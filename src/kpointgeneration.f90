@@ -1,4 +1,4 @@
-  MODULE kpointGeneration
+  MODULE kpointgeneration
   use num_types
   use numerical_utilities, only: equal
   use vector_matrix_utilities
@@ -540,8 +540,8 @@ CONTAINS
   !!<parameter regular="true" name="qPoints"> (output) The list of Q points </parameter>
   SUBROUTINE findQpointsInZone(Avecs, Bvecs, n, qPoints, eps_)
     real(dp), intent(in), dimension(3,3) :: Avecs, Bvecs
-    real(dp), intent(inout)              :: qPoints(n, 3)
     integer, intent(in)                  :: n
+    real(dp), intent(inout)              :: qPoints(n, 3)
     real(dp), intent(in), optional       :: eps_
 
     real(dp) eps, shift(3)
@@ -569,4 +569,4 @@ CONTAINS
     call mapKptsIntoBZ(Ainv, qpoints, eps)
   END SUBROUTINE FindQpointsInZone
   
-END MODULE kpointGeneration
+END MODULE kpointgeneration
