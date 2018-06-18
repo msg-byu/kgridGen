@@ -7,7 +7,7 @@ class Kpointgeneration(f90wrap.runtime.FortranModule):
     Module kpointgeneration
     
     
-    Defined at ../src/generateKpoints.f90 lines 1-573
+    Defined at ../src/kpointgeneration.f90 lines 1-570
     
     """
     @staticmethod
@@ -16,7 +16,7 @@ class Kpointgeneration(f90wrap.runtime.FortranModule):
         mapkptsintobz(r, kplist[, eps_])
         
         
-        Defined at ../src/generateKpoints.f90 lines 20-105
+        Defined at ../src/kpointgeneration.f90 lines 20-105
         
         Parameters
         ----------
@@ -33,7 +33,7 @@ class Kpointgeneration(f90wrap.runtime.FortranModule):
         findqpointsinzone(avecs, bvecs, n, qpoints[, eps_])
         
         
-        Defined at ../src/generateKpoints.f90 lines 544-573
+        Defined at ../src/kpointgeneration.f90 lines 541-570
         
         Parameters
         ----------

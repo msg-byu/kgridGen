@@ -4,10 +4,10 @@ LOG		= compile.log
 
 # sources
 WSRCF90		=  \
-		f90wrap_generateKpoints.f90 \
+		f90wrap_kpointgeneration.f90 \
 
 SRCF90		=  \
-		../src/generateKpoints.f90 \
+		../src/kpointgeneration.f90 \
 
 OBJSF90		= $(SRCF90:.f90=.o)
 

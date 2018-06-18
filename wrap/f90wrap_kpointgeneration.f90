@@ -1,4 +1,4 @@
-! Module kpointgeneration defined in file ../src/generateKpoints.f90
+! Module kpointgeneration defined in file ../src/kpointgeneration.f90
 
 subroutine f90wrap_mapkptsintobz(r, kplist, eps_, n0, n1)
     use kpointgeneration, only: mapkptsintobz
@@ -31,5 +31,5 @@ subroutine f90wrap_findqpointsinzone(avecs, bvecs, n, qpoints, eps_, n0, n1)
         eps_=eps_)
 end subroutine f90wrap_findqpointsinzone
 
-! End of module kpointgeneration defined in file ../src/generateKpoints.f90
+! End of module kpointgeneration defined in file ../src/kpointgeneration.f90
 
