@@ -621,9 +621,7 @@ CONTAINS
     real(dp), intent(in), optional       :: eps_
 
     real(dp) eps, shift(3)
-    real(dp), pointer    :: pgOps(:,:,:), trans(:,:)
     real(dp), dimension(3,3)             :: Ainv, Binv
-    logical flag
     real(dp), pointer :: qList(:,:)
     
     if(.not. present(eps_)) then
