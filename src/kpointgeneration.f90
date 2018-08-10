@@ -1,4 +1,4 @@
-  MODULE kpointgeneration
+MODULE kpointgeneration
   use num_types
   use numerical_utilities, only: equal
   use vector_matrix_utilities
@@ -261,6 +261,7 @@ CONTAINS
        write(*,*) "ERROR (generateFullKpointList in generateKpoints.f90):"
        write(*,*) "The k-point generating lattice vectors have a unit cell &
             &larger than the reciprocal lattice."
+       write(*,*) abs(determinant(K)), abs(determinant(R))
        stop
     endif
     call matrix_inverse(K,Kinv,err)
@@ -301,15 +302,12 @@ CONTAINS
     
     ! Integer transformation matrix that takes K to R, not necessarily HNF at the outset
     S = nint(matmul(Kinv,R))
-    
     ! Find the HNF of S, store it in H (B is the transformation matrix)
     call HermiteNormalForm(S,H,B)
-
     ! This the volume ratio between R and K, i.e., the number of unreduced k-points
     n = determinant(H) 
     a = H(1,1); c = H(2,2); f = H(3,3)    
     allocate(KpList(n,3))
-    
     ! Generate a list of k-points (not necessarily all in one unit cell but)
     ! which are unique under lattice translations
     do iK = 0, a-1
@@ -381,7 +379,7 @@ CONTAINS
     else
        eps =  eps_
     endif
-        
+
     call matrix_inverse(K, InvK, err, eps)
     if (err) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
@@ -511,7 +509,7 @@ CONTAINS
           write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
           write(*,*) "The length of an orbit did not divide the group size"
           write(*,'("Group size:",i3,"   Orbit length:",i3)') nOps, weights(i)
-          stop
+          ! stop
        endif
     enddo
 

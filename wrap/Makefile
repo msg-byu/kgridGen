@@ -8,6 +8,7 @@ WSRCF90		=  \
 
 SRCF90		=  \
 		../src/kpointgeneration.f90 \
+                ../src/wrap_kpoints.f90 \
 
 OBJSF90		= $(SRCF90:.f90=.o)
 
@@ -33,7 +34,13 @@ all: pre_comp $(WSRCF90) $(OBJSF90)
 	-f2py-f90wrap -c -m _kgridgen $(WSRCF90) ../src/*.o ${LBD1}/*.a -I${LBD2} -I. >> /dev/null
 	echo "done."
 
-pre_comp:
+	-rm _kpoints.so
+	echo "Creating shared library _kpoints.so"
+	echo ${LIBS}
+	-f2py-f90wrap -c -m _kpoints f90wrap_wrap_kpoints.f90 ../src/*.o ${LBD1}/*.a -I${LBD2} -I. >> /dev/null
+	echo "done."
+
+pre_comp:$(WSRCF90)
 	+$(MAKE) -C ../../symlib/src
 	+$(MAKE) -C ../src/
 
