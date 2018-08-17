@@ -17,25 +17,32 @@ CONTAINS
   !!<parameter regular="true" name="R"> Matrix of reciprocal lattice vectors as columns of
   !!a 3x3 array. </parameter>
   !!<parameter regular="true" name="KpList"> The list of k-points. </parameter>
-  !!<parameter regular="true" name="eps_"> A finite precision parameter. (optional)
-  !!</parameter>
+  !!<parameter regular="true" name="reps_"> A finite precision
+  !!parameter for relative tolerances. (optional) </parameter>
+  !!<parameter regular="true" name="aeps_"> A finite precision
+  !!parameter for absolute tolerances. (optional) </parameter>
   !!<local name="minkedR"> The basis of the reciprocal lattice in Minkowski space. </local>
-  subroutine mapKptsIntoBZ(R, KpList, eps_)
+  subroutine mapKptsIntoBZ(R, KpList, reps_, aeps_)
     !! <local name="minkedR" dimension="(3,3)"> "The basis of the reciprocal lattice in
     !! Minkowski space. </local>
     real(dp), intent(in)   :: R(3,3)
     real(dp), intent(inout):: KpList(:,:) ! First index over k-points, second coordinates
-    real(dp), intent(in), optional :: eps_
+    real(dp), intent(in), optional :: reps_, aeps_
     real(dp)  :: minkedR(3,3), kpt(3), shift_kpt(3), minkedRinv(3,3), Rinv(3,3), M(3,3)
     real(dp)  :: Minv(3,3)
-    real(dp)  :: minLength, length, eps
+    real(dp)  :: minLength, length, reps, aeps
     integer   :: ik, nk, i, j, k
     logical   :: err ! flag for catching errors
     
-    if(.not. present(eps_)) then
-       eps = 1e-10_dp
+    if(.not. present(reps_)) then
+       reps = 1e-10_dp
     else
-       eps =  eps_
+       reps =  reps_
+    endif
+    if(.not. present(aeps_)) then
+       aeps = 1e-10_dp
+    else
+       aeps =  aeps_
     endif
 
     call matrix_inverse(R, Rinv, err)
@@ -45,7 +52,7 @@ CONTAINS
        stop
     endif
     
-    call minkowski_reduce_basis(R, minkedR, eps)
+    call minkowski_reduce_basis(R, minkedR, reps)
     call matrix_inverse(minkedR, minkedRinv, err)
     if (err) then
        write(*,*) "ERROR: (mapKptsIntoBZ in generateKpoints.f90):"
@@ -57,7 +64,7 @@ CONTAINS
     call matrix_inverse(minkedR, minkedRinv, err)
     M = matmul(minkedRinv, R)
     
-    if (.not. equal(M, nint(M), eps)) then
+    if (.not. equal(M, nint(M), reps, aeps)) then
        write(*,*) "ERROR: (mapKptsIntoBZ in generateKpoints.f90):"
        write(*,*) "The Minkowski-reduced basis vectors and the reciprocal& 
             & lattice vectors define different lattices."
@@ -73,7 +80,7 @@ CONTAINS
        stop
     endif
     
-    if (.not. equal(Minv, nint(Minv), eps)) then
+    if (.not. equal(Minv, nint(Minv), reps, aeps)) then
        write(*,*) "ERROR: (mapKptsIntoBZ in generateKpoints.f90):"
        write(*,*) "The Minkowski-reduced basis vectors and the reciprocal& 
             & lattice vectors define different lattices."
@@ -85,7 +92,7 @@ CONTAINS
     do ik = 1, nk
        kpt = KpList(ik,:)
        ! Move the k-point into the first unit cell in the Minkowski basis.
-       call bring_into_cell(kpt, minkedRinv, minkedR, eps)
+       call bring_into_cell(kpt, minkedRinv, minkedR, aeps)
        KpList(ik,:) = kpt
        minLength = norm(kpt)
        
@@ -97,7 +104,7 @@ CONTAINS
                 shift_kpt = i*minkedR(:,1) + j*minkedR(:,2) + k*minkedR(:,3) + kpt
                 length = norm(shift_kpt)
                 
-                if((length + eps) < minLength) then
+                if((length + aeps) < minLength) then
                    minLength = length
                    KpList(ik,:) = shift_kpt
                 endif
@@ -120,32 +127,41 @@ CONTAINS
   !! Cartesian coordinates. </parameter>
   !!<parameter regular="true" name="weights"> "Weights" of k-points (length of each orbit).
   !!</parameter>
-  !!<parameter regular="true" name="eps_">Finite precision parameter (optional)</parameter>
+  !!<parameter regular="true" name="reps_"> A finite precision
+  !!parameter for relative tolerances. (optional) </parameter>
+  !!<parameter regular="true" name="aeps_"> A finite precision
+  !!parameter for absolute tolerances. (optional) </parameter>
   !!<parameter regular="true" name="A">The real space lattice vectors.</parameter>
   !!<parameter regular="true" name="AtBas">The atomic basis in lattice coordinates.</parameter>
   !!<parameter regular="true" name="at">Atomic occupancy list.</parameter>
-  subroutine generateIrredKpointList(A,AtBas,at,K, R, kLVshift, IrrKpList, weights, eps_)
+  subroutine generateIrredKpointList(A,AtBas,at,K, R, kLVshift, IrrKpList, weights, reps_, aeps_)
     real(dp), intent(in) :: K(3,3), A(3,3)
     real(dp), intent(in) :: R(3,3)
     real(dp), intent(in) :: kLVshift(3)
     real(dp), pointer    :: IrrKpList(:,:), AtBas(:,:)
     integer, pointer     :: weights(:)
-    real(dp), intent(in), optional:: eps_
+    real(dp), intent(in), optional:: reps_, aeps_
     integer, intent(inout)  :: at(:)
     real(dp), pointer    :: KpList(:,:)
     real(dp), pointer    :: pgOps(:,:,:), trans(:,:)
-    real(dp)             :: eps
+    real(dp)             :: reps, aeps
 
-    if(.not. present(eps_)) then
-       eps = 1e-10_dp
+    if(.not. present(reps_)) then
+       reps = 1e-10_dp
     else
-       eps =  eps_
+       reps =  reps_
+    endif
+    if(.not. present(aeps_)) then
+       aeps = 1e-10_dp
+    else
+       aeps =  aeps_
     endif
     
-    call get_spaceGroup(A, at, AtBas, pgOps, trans, .true., eps)
-    call get_fullSpaceGroup(pgOps, eps)
-    call generateFullKpointList(K, R, kLVshift, KpList, eps)
-    call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, eps)
+    call get_spaceGroup(A, at, AtBas, pgOps, trans, .true., reps)
+    call get_fullSpaceGroup(pgOps, reps, aeps)
+    call generateFullKpointList(K, R, kLVshift, KpList, reps_=reps, aeps_=aeps)
+    call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, &
+         reps_=reps, aeps_=aeps)
     deallocate(KpList,pgOps,trans)
   endsubroutine generateIrredKpointList
 
@@ -158,22 +174,28 @@ CONTAINS
   !!permutations has closure and constitutes a group.</usage>
   !!<parameter name="g" regular="true">On entry contains the
   !!generators, on exit contains the whole group </parameter>
-  !!<parameter name="eps_" regular="true">Floating point tolerance for
-  !!comparisons.</parameter>
-  subroutine get_fullSpaceGroup(g, eps_)
+  !!<parameter regular="true" name="reps_"> A finite precision
+  !!parameter for relative tolerances. (optional) </parameter>
+  !!<parameter regular="true" name="aeps_"> A finite precision
+  subroutine get_fullSpaceGroup(g, reps_, aeps_)
     real(dp), pointer:: g(:,:,:)
-    real(dp), optional :: eps_
+    real(dp), optional :: reps_, aeps_
 
     real(dp) :: inv(3,3), new_op(3,3)
     real(dp), allocatable :: new_group(:,:,:)
     integer :: i, oG, j, nG
     logical :: inc_inv, new
-    real(dp) :: eps
+    real(dp) :: reps, aeps
 
-    if(.not. present(eps_)) then
-       eps = 1e-10_dp
+    if(.not. present(reps_)) then
+       reps = 1e-10_dp
     else
-       eps =  eps_
+       reps =  reps_
+    endif
+    if(.not. present(aeps_)) then
+       aeps = 1e-10_dp
+    else
+       aeps =  aeps_
     endif
 
     inv = reshape((/-1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp, -1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp, -1.0_dp/), (/3,3/))
@@ -182,7 +204,7 @@ CONTAINS
     ! Check if inversion symmetry is already in the group.
     inc_inv = .False.
     do i = 1, oG
-       if (equal(g(:,:,i), inv, eps)) then
+       if (equal(g(:,:,i), inv, reps, aeps)) then
           inc_inv = .True.
           exit
        end if
@@ -199,7 +221,7 @@ CONTAINS
           new_op = matmul(g(:,:,i), inv)
           new = .True.
           do j=1, oG
-             if (equal(new_op, g(:,:,j), eps)) then
+             if (equal(new_op, g(:,:,j), reps, aeps)) then
                 new = .False.
                 exit
              end if
@@ -231,16 +253,20 @@ CONTAINS
   !! fractions of the generating k-grid vectors. </parameter> 
   !!<parameter name="KpList" regular="true"> List of unreduced k-points in Cartesian
   !! coordinates. </parameter>
-  subroutine generateFullKpointList(K, R, kLVshift, KpList, eps_)
+  !!<parameter regular="true" name="reps_"> A finite precision
+  !!parameter for relative tolerances. (optional) </parameter>
+  !!<parameter regular="true" name="aeps_"> A finite precision
+  !!parameter for absolute tolerances. (optional) </parameter>
+  subroutine generateFullKpointList(K, R, kLVshift, KpList, reps_, aeps_)
     real(dp), intent(in) :: K(3,3)
     real(dp), intent(in) :: R(3,3)
     real(dp), intent(in) :: kLVshift(3)
     real(dp), pointer    :: KpList(:,:)
-    real(dp), intent(in), optional:: eps_   
+    real(dp), intent(in), optional:: reps_, aeps_
 
     real(dp) :: Kinv(3,3) ! Inverse of the k-grid cell 
     real(dp) :: Rinv(3,3) ! Inverse of reciprocal cell
-    real(dp) :: eps ! Finite precision parameter
+    real(dp) :: reps, aeps ! Finite precision parameter
     real(dp) :: cartShift(3), bicCartShift(3) ! k-grid shifts in Cartesian coordinates
     integer  :: S(3,3), H(3,3), B(3,3) ! Integer matrices for HNF conversion
     integer  :: n ! Number of k-points (i.e., index of kgrid lattice, a.k.a. volume factor)
@@ -250,14 +276,19 @@ CONTAINS
     logical  :: err ! flag for catching errors
     real(dp) :: intMat(3,3)
     
-    if(.not. present(eps_)) then
-       eps = 1e-10_dp
+    if(.not. present(reps_)) then
+       reps = 1e-10_dp
     else
-       eps =  eps_
+       reps =  reps_
+    endif
+    if(.not. present(aeps_)) then
+       aeps = 1e-10_dp
+    else
+       aeps =  aeps_
     endif
 
     ! Check for valid inputs
-    if (abs(determinant(K)) > abs(determinant(R))+eps) then
+    if (abs(determinant(K)) > abs(determinant(R))+aeps) then
        write(*,*) "ERROR (generateFullKpointList in generateKpoints.f90):"
        write(*,*) "The k-point generating lattice vectors have a unit cell &
             &larger than the reciprocal lattice."
@@ -272,7 +303,7 @@ CONTAINS
 
     intMat = matmul(Kinv,R)
     
-    if (.not. equal(matmul(Kinv,R), nint(matmul(Kinv,R)), eps)) then
+    if (.not. equal(matmul(Kinv,R), nint(matmul(Kinv,R)), reps, aeps)) then
        write(*,*) "ERROR: (generateFullKpointList in generateKpoints.f90):"
        stop "The point generating vectors and the reciprocal lattice are incommensurate."
     endif
@@ -291,9 +322,9 @@ CONTAINS
     ! The k-grid shift, but in the unit cell
     bicCartShift = cartShift 
     
-    call bring_into_cell(bicCartShift, Kinv, K, eps)
+    call bring_into_cell(bicCartShift, Kinv, K, aeps)
     
-    if (.not. equal(cartShift, bicCartShift, eps)) then
+    if (.not. equal(cartShift, bicCartShift, reps, aeps)) then
        write(*,*) "WARNING: (generateFullKpointList in generateKpoints.f90)"
        write(*,*) "The given shift was outside the first k-grid cell. By translational"
        write(*,*) "symmetry, this is always equivalent to a shift inside the cell."
@@ -327,7 +358,7 @@ CONTAINS
  
     ! Bring each point in the list into the first BZ.
     ! (Originally, each point was mapped into the first unit cell.)
-    call mapKptsIntoBZ(R, KpList, eps)
+    call mapKptsIntoBZ(R, KpList, reps_=reps, aeps_=aeps)
     
   END subroutine generateFullKpointList
 
@@ -348,17 +379,19 @@ CONTAINS
   !! Cartesian coordinates. </parameter>
   !!<parameter regular="true" name="weights"> "Weights" of k-points (length of each orbit).
   !! </parameter>
-  !!<parameter regular="true" name="eps_"> Finite precision parameter (optional).
-  !! </parameter>
+  !!<parameter regular="true" name="reps_"> A finite precision
+  !!parameter for relative tolerances. (optional) </parameter>
+  !!<parameter regular="true" name="aeps_"> A finite precision
+  !!parameter for absolute tolerances. (optional) </parameter>
   subroutine symmetryReduceKpointList(K, R, kLVshift, UnreducedKpList, SymOps, &
-       ReducedList, weights, eps_)
+       ReducedList, weights, reps_, aeps_)
     real(dp), intent(in) :: K(3,3), R(3,3) 
     real(dp), intent(in) :: kLVshift(3) 
     real(dp), intent(in) :: UnreducedKpList(:,:) 
     real(dp), intent(in) :: SymOps(:,:,:) ! Last slot is op # index, first two are 3x3
     real(dp), pointer    :: ReducedList(:,:)
     integer, pointer     :: weights(:) 
-    real(dp), optional   :: eps_
+    real(dp), optional   :: reps_, aeps_
 
     integer :: iOp, nOps, iUnRdKpt, nUR, cOrbit, idx, i, sum
     integer :: hashTable(size(UnreducedKpList,1))
@@ -372,30 +405,35 @@ CONTAINS
     ! HNF, SNF transform matrices, SNF, diag(SNF)
     integer :: H(3,3), L(3,3), Ri(3,3), S(3,3), B(3,3), D(3)
     integer(li) :: L_long(3,3), D_long(3)
-    real(dp):: eps
+    real(dp):: reps, aeps
     logical :: err
     integer zz
     
-    if(.not. present(eps_)) then
-       eps = 1e-10_dp
+    if(.not. present(reps_)) then
+       reps = 1e-10_dp
     else
-       eps =  eps_
+       reps =  reps_
+    endif
+    if(.not. present(aeps_)) then
+       aeps = 1e-10_dp
+    else
+       aeps =  aeps_
     endif
         
-    call matrix_inverse(K, InvK, err, eps)
+    call matrix_inverse(K, InvK, err, aeps)
     if (err) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
        stop "The k-grid vectors that were passed in are linearly dependent."
     END if
 
-    call matrix_inverse(R, InvR, err, eps)
+    call matrix_inverse(R, InvR, err, aeps)
     if (err) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
        stop "The reciprocal lattice vectors are linearly dependent."
     END if
     
     ! Make sure kgrid is commensurate with reciprocal cell
-    if (.not. equal(matmul(InvK,R), nint(matmul(InvK,R)), eps)) then
+    if (.not. equal(matmul(InvK,R), nint(matmul(InvK,R)), reps, aeps)) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90):"
        write(*,*) "The point generating vectors and the reciprocal lattice are &
             &incommensurate."
@@ -407,7 +445,7 @@ CONTAINS
     ! Make sure that kgrid is no bigger than the reciprocal cell.
     ! This determinant check could cause problems for 1-kpoint cases because
     ! eps isn't scaled by the size of the elements the matrices K or R.
-    If (abs(determinant(K)) > abs(determinant(R))+eps) then
+    If (abs(determinant(K)) > abs(determinant(R))+aeps) then
        write(*,*) "ERROR (symmetryReduceKpointList in generateKpoints.f90):"
        write(*,*) "The k-point generating lattice vectors define a unit cell larger&
             & than the reciprocal lattice."
@@ -455,7 +493,7 @@ CONTAINS
     do iUnRdKpt = 1,nUR ! Loop over each k-point and mark off its symmetry brothers
        zz = 0       
        urKpt = UnreducedKpList(iUnRdKpt,:) ! unrotated k-point (shorter name for clarity)
-       idx = findKptIndex(urKpt-shift, InvK, L_long, D_long, eps)
+       idx = findKptIndex(urKpt-shift, InvK, L_long, D_long, rtol_=reps, atol_=aeps)
        
        if (hashTable(idx)/=0) cycle ! This k-point is already on an orbit, skip it
        cOrbit = cOrbit + 1
@@ -469,19 +507,19 @@ CONTAINS
           roKpt = matmul(SymOps(:,:,iOp),urKpt)
           
           ! Make sure the rotated k-point is still part of the kgrid. If not, cycle
-          call bring_into_cell(roKpt, InvR, R, eps)
+          call bring_into_cell(roKpt, InvR, R, aeps)
           
           ! Unshift the k-point to check if it still is a member of the lattice. The
           ! reason for removing the shift is our indexing method doesn't work if the
           ! grid is moved off the origin.
           roKpt = roKpt - shift
           
-          if (.not. equal(matmul(invK,roKpt), nint(matmul(invK,roKpt)), eps)) then
+          if (.not. equal(matmul(invK,roKpt), nint(matmul(invK,roKpt)), reps, aeps)) then
              cycle
           endif
 
           ! Find the index of this k-point.
-          idx = findKptIndex(roKpt, InvK, L_long, D_long, eps)
+          idx = findKptIndex(roKpt, InvK, L_long, D_long, rtol_=reps, atol_=aeps)
           
           ! Is this a new addition to the orbit?
           if (hashTable(idx)==0) then
@@ -605,44 +643,59 @@ CONTAINS
     END function findKptIndex
     
   END subroutine symmetryReduceKpointList
-  !!<summary> Find which Q points in a phonon calculation are specified ("pinned down") by the
-  !! supercell calculation. </summary>
-  !!<parameter regular="true" name="Avecs"> Lattice vectors of the primitive cell </parameter>
-  !!<parameter regular="true" name="Bvecs"> Lattice vectors of the supercell</parameter>
-  !!<parameter regular="true" name="n"> The number of q points in the reciprocal cell of Avecs. This
-  !!is det(B)/det(A) but we need to know it ahead of time if we are going to f90-wrap this
-  !!routine. It corresponds to the number of qpoints that we will return, so we need it to avoid an
-  !!intent(out) variable with an unknown size. </parameter>
-  !!<parameter regular="true" name="qPoints"> (output) The list of Q points </parameter>
-  SUBROUTINE findQpointsInZone(Avecs, Bvecs, n, qPoints, eps_)
+
+  !!<summary> Find which Q points in a phonon calculation are
+  !! specified ("pinned down") by the supercell
+  !! calculation. </summary>
+  !!<parameter regular="true" name="Avecs"> Lattice vectors of the
+  !!primitive cell </parameter>
+  !!<parameter regular="true" name="Bvecs"> Lattice vectors of the
+  !!supercell</parameter>
+  !!<parameter regular="true" name="n"> The number of q points in the
+  !!reciprocal cell of Avecs. This is det(B)/det(A) but we need to
+  !!know it ahead of time if we are going to f90-wrap this routine. It
+  !!corresponds to the number of qpoints that we will return, so we
+  !!need it to avoid an intent(out) variable with an unknown
+  !!size. </parameter>
+    !!<parameter regular="true" name="qPoints"> (output) The list of Q points </parameter>
+  !!<parameter regular="true" name="reps_"> A finite precision
+  !!parameter for relative tolerances. (optional) </parameter>
+  !!<parameter regular="true" name="aeps_"> A finite precision
+  !!parameter for absolute tolerances. (optional) </parameter>
+  SUBROUTINE findQpointsInZone(Avecs, Bvecs, n, qPoints, reps_, aeps_)
     real(dp), intent(in), dimension(3,3) :: Avecs, Bvecs
     integer, intent(in)                  :: n
     real(dp), intent(inout)              :: qPoints(n, 3)
-    real(dp), intent(in), optional       :: eps_
+    real(dp), intent(in), optional       :: reps_, aeps_
 
-    real(dp) eps, shift(3)
+    real(dp) :: reps, aeps, shift(3)
     real(dp), pointer    :: pgOps(:,:,:), trans(:,:)
     real(dp), dimension(3,3)             :: Ainv, Binv
     logical flag
     real(dp), pointer :: qList(:,:)
     
-    if(.not. present(eps_)) then
-       eps = 1e-10_dp
+    if(.not. present(reps_)) then
+       reps = 1e-10_dp
     else
-       eps =  eps_
+       reps =  reps_
+    endif
+    if(.not. present(aeps_)) then
+       aeps = 1e-10_dp
+    else
+       aeps =  aeps_
     endif
     
-    if (.not. equal(determinant(Bvecs)/determinant(Avecs), n, eps)) then
+    if (.not. equal(determinant(Bvecs)/determinant(Avecs), n, reps, aeps)) then
        stop "Number of q points expected, 'n', doesn't match the relative sizes of the two lattices."
     end if
     shift= (/0._dp, 0._dp, 0._dp/)
     call matrix_inverse(Avecs, Ainv)
     call matrix_inverse(Bvecs, Binv)
-    call generateFullKpointList(Binv, Ainv, shift, qList, eps)
+    call generateFullKpointList(Binv, Ainv, shift, qList, reps_=reps, aeps_=aeps)
     
     if (size(qList,1)/= n) stop "Found the wrong number of q points (or 'n' was wrong)"
     qPoints = qList
-    call mapKptsIntoBZ(Ainv, qpoints, eps)
+    call mapKptsIntoBZ(Ainv, qpoints, reps_=reps, aeps_=aeps)
   END SUBROUTINE findQpointsInZone
   
 END MODULE kpointgeneration
