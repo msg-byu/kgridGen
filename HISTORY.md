@@ -1,3 +1,7 @@
+0.7.3 (WSM)
+* Added the functionality to add inversion symmetry back into the
+  spcae group when it's not already in the crystal symmetry group.
+
 0.7.2 (CWR)
 - Python wrapping available for the q-point finder.
 - Minor bug fixes so that the code could be wrapped and work in python correctly.
