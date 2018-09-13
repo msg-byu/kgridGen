@@ -1,3 +1,7 @@
+0.7.4 (WSM)
+* Changed the code so that it uses integer rotation matrices instead
+  of floats.
+
 0.7.3 (WSM)
 * Added the functionality to add inversion symmetry back into the
   spcae group when it's not already in the crystal symmetry group.

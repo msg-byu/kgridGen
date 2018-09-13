@@ -1,4 +1,4 @@
-  MODULE kpointgeneration
+MODULE kpointgeneration
   use num_types
   use numerical_utilities, only: equal
   use vector_matrix_utilities
@@ -156,9 +156,10 @@ CONTAINS
     else
        aeps =  aeps_
     endif
-    
+
     call get_spaceGroup(A, at, AtBas, pgOps, trans, .true., reps)
     call get_fullSpaceGroup(pgOps, reps, aeps)
+
     call generateFullKpointList(K, R, kLVshift, KpList, reps_=reps, aeps_=aeps)
     call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, &
          reps_=reps, aeps_=aeps)
@@ -407,7 +408,8 @@ CONTAINS
     integer(li) :: L_long(3,3), D_long(3)
     real(dp):: reps, aeps
     logical :: err
-    integer zz
+    integer :: zz
+    integer :: intSymOp(3,3,size(SymOps,3))
     
     if(.not. present(reps_)) then
        reps = 1e-10_dp
@@ -419,7 +421,7 @@ CONTAINS
     else
        aeps =  aeps_
     endif
-        
+
     call matrix_inverse(K, InvK, err, aeps)
     if (err) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
@@ -489,13 +491,20 @@ CONTAINS
     iFirst = 0
 
     ! Count the number of members of each orbit.
-    iWt = 0 
+    iWt = 0
+
+    ! Convert the rotation matrix to integer form
+    do zz=1,size(SymOps,3)
+       intSymOp(:,:,zz) = nint(matmul(InvR, matmul(SymOps(:,:,zz), R)))
+    end do
+    
     do iUnRdKpt = 1,nUR ! Loop over each k-point and mark off its symmetry brothers
        zz = 0       
        urKpt = UnreducedKpList(iUnRdKpt,:) ! unrotated k-point (shorter name for clarity)
        idx = findKptIndex(urKpt-shift, InvK, L_long, D_long, rtol_=reps, atol_=aeps)
        
        if (hashTable(idx)/=0) cycle ! This k-point is already on an orbit, skip it
+
        cOrbit = cOrbit + 1
        hashTable(idx) = cOrbit
        iFirst(cOrbit) = iUnRdKpt
@@ -504,7 +513,7 @@ CONTAINS
        do iOp = 1,nOps ! Loop over each symmetry operator, applying it to each k-point
           
           ! Rotate the k-point
-          roKpt = matmul(SymOps(:,:,iOp),urKpt)
+          roKpt = matmul(R, matmul(intSymOp(:,:,iOp), matmul(InvR, urKpt)))
           
           ! Make sure the rotated k-point is still part of the kgrid. If not, cycle
           call bring_into_cell(roKpt, InvR, R, aeps)
@@ -513,7 +522,6 @@ CONTAINS
           ! reason for removing the shift is our indexing method doesn't work if the
           ! grid is moved off the origin.
           roKpt = roKpt - shift
-          
           if (.not. equal(matmul(invK,roKpt), nint(matmul(invK,roKpt)), reps, aeps)) then
              cycle
           endif
@@ -603,7 +611,7 @@ CONTAINS
       ! The k-point in lattice (grid) coordinates.
       real(dp) :: gpt(3)
       integer(li) ::int_gpt(3)
-      
+
       ! Set the relative tolerance.
       if(.not. present(rtol_)) then
          rtol = 1e-5_dp
