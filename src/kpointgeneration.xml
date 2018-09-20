@@ -1,25 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fortpy mode="docstring">
-  <decorates name="kpointgeneration.get_fullSpaceGroup">
-    <group name="get_fullSpaceGroup" purpose="testing"
-    	   staging="../unittests/">
-      <test identifier="test_get_fullSpaceGroup"
-      	    description="Unit test for adding inversion symmetry back to the space Group."
-      	    timed="true" cases="[1-10]">
-      	<output identifier="g.out"
-      		folder="../tests/get_full_group" file="g.out.{}"
-      		template="float.xml" />
-      	<target name="g" compareto="g.out"
-      		varfile="g.out" when="each" />
-      </test>
-      <assignment name="g" value="gops" allocate="true">
-      	<value identifier="gops" file="g.in.{}"
-      	       folder="../tests/get_full_group" rename="g.in"/>
-      </assignment>
-      <assignment name="eps_" constant="1E-3"/>
-    </group>
-  </decorates>
-
   <decorates name="kpointgeneration.symmetryReduceKpointList">
     <group name="simple_cubic" purpose="testing"
     	   staging="../unittests/">
