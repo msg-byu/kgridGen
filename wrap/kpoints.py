@@ -169,10 +169,7 @@ class Wrap_Kpoints(f90wrap.runtime.FortranModule):
         
         """
         _kpoints.f90wrap_getirredkpoints(a=a, atbas=atbas, at=at, k=k, r=r, \
-            klvshift=klvshift, irrkplist=irrkplisimport _kpoints
-import f90wrap.runtime
-import logging
-eps_)
+            klvshift=klvshift, irrkplist=irrkplist, weights=weights, reps_=reps_, aeps_=aeps_)
     
     _dt_array_initialisers = []
     
