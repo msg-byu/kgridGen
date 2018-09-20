@@ -178,6 +178,7 @@ CONTAINS
   !!<parameter regular="true" name="reps_"> A finite precision
   !!parameter for relative tolerances. (optional) </parameter>
   !!<parameter regular="true" name="aeps_"> A finite precision
+  !!parameter for absolute tolerances. (optional) </parameter>
   subroutine get_fullSpaceGroup(g, reps_, aeps_)
     real(dp), pointer:: g(:,:,:)
     real(dp), optional :: reps_, aeps_
@@ -665,7 +666,7 @@ CONTAINS
   !!corresponds to the number of qpoints that we will return, so we
   !!need it to avoid an intent(out) variable with an unknown
   !!size. </parameter>
-    !!<parameter regular="true" name="qPoints"> (output) The list of Q points </parameter>
+  !!<parameter regular="true" name="qPoints"> (output) The list of Q points </parameter>
   !!<parameter regular="true" name="reps_"> A finite precision
   !!parameter for relative tolerances. (optional) </parameter>
   !!<parameter regular="true" name="aeps_"> A finite precision
