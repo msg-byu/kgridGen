@@ -11,7 +11,7 @@ class Kpointgeneration(f90wrap.runtime.FortranModule):
     
     """
     @staticmethod
-    def mapkptsintobz(r, kplist, eps_=None):
+    def mapkptsintobz(r, kplist, reps_=None, aeps_=None):
         """
         mapkptsintobz(r, kplist[, eps_])
         
@@ -25,10 +25,10 @@ class Kpointgeneration(f90wrap.runtime.FortranModule):
         eps_ : float
         
         """
-        _kgridgen.f90wrap_mapkptsintobz(r=r, kplist=kplist, eps_=eps_)
+        _kgridgen.f90wrap_mapkptsintobz(r=r, kplist=kplist, reps_=reps_, aeps_=aeps_)
     
     @staticmethod
-    def findqpointsinzone(avecs, bvecs, n, qpoints, eps_=None):
+    def findqpointsinzone(avecs, bvecs, n, qpoints, reps_=None, aeps_=None):
         """
         findqpointsinzone(avecs, bvecs, n, qpoints[, eps_])
         
@@ -45,10 +45,9 @@ class Kpointgeneration(f90wrap.runtime.FortranModule):
         
         """
         _kgridgen.f90wrap_findqpointsinzone(avecs=avecs, bvecs=bvecs, n=n, \
-            qpoints=qpoints, eps_=eps_)
+                                            qpoints=qpoints, reps_=reps_, aeps_=aeps_)
     
     _dt_array_initialisers = []
     
 
 kpointgeneration = Kpointgeneration()
-
