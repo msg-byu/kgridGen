@@ -1,3 +1,7 @@
+0.8.0 (WSM)
+* Added code that allows for the entire k-point folding routine to be
+  python wrapped.
+
 0.7.3 (WSM)
 * Added the functionality to add inversion symmetry back into the
   spcae group when it's not already in the crystal symmetry group.

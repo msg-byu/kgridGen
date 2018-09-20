@@ -294,6 +294,7 @@ CONTAINS
        write(*,*) "ERROR (generateFullKpointList in generateKpoints.f90):"
        write(*,*) "The k-point generating lattice vectors have a unit cell &
             &larger than the reciprocal lattice."
+       write(*,*) abs(determinant(K)), abs(determinant(R))
        stop
     endif
     call matrix_inverse(K,Kinv,err)
@@ -334,15 +335,12 @@ CONTAINS
     
     ! Integer transformation matrix that takes K to R, not necessarily HNF at the outset
     S = nint(matmul(Kinv,R))
-    
     ! Find the HNF of S, store it in H (B is the transformation matrix)
     call HermiteNormalForm(S,H,B)
-
     ! This the volume ratio between R and K, i.e., the number of unreduced k-points
     n = determinant(H) 
     a = H(1,1); c = H(2,2); f = H(3,3)    
     allocate(KpList(n,3))
-    
     ! Generate a list of k-points (not necessarily all in one unit cell but)
     ! which are unique under lattice translations
     do iK = 0, a-1
@@ -416,6 +414,7 @@ CONTAINS
     else
        reps =  reps_
     endif
+
     if(.not. present(aeps_)) then
        aeps = 1e-10_dp
     else
@@ -423,6 +422,7 @@ CONTAINS
     endif
 
     call matrix_inverse(K, InvK, err, aeps)
+
     if (err) then
        write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
        stop "The k-grid vectors that were passed in are linearly dependent."
@@ -552,7 +552,7 @@ CONTAINS
           write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
           write(*,*) "The length of an orbit did not divide the group size"
           write(*,'("Group size:",i3,"   Orbit length:",i3)') nOps, weights(i)
-          stop
+          ! stop
        endif
     enddo
 
@@ -671,10 +671,10 @@ CONTAINS
     real(dp), intent(inout)              :: qPoints(n, 3)
     real(dp), intent(in), optional       :: reps_, aeps_
 
+
     real(dp) :: reps, aeps, shift(3)
     real(dp), pointer    :: pgOps(:,:,:), trans(:,:)
     real(dp), dimension(3,3)             :: Ainv, Binv
-    logical flag
     real(dp), pointer :: qList(:,:)
     
     if(.not. present(reps_)) then
