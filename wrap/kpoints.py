@@ -3,7 +3,7 @@ import f90wrap.runtime
 import logging
 import numpy as np
 
-def get_irr_kpoints(atoms, grid=None, HNF=None, shift=None, eps=None):
+def get_irr_kpoints(atoms, grid=None, HNF=None, shift=None, eps=None, aeps=None):
     """Generates the irreducible k-point set for the system defined by the
     atoms object and either the grid or the HNF given. If both the HNF
     and grid are provided then the grid will be used and the HNF ignored.
@@ -23,7 +23,9 @@ def get_irr_kpoints(atoms, grid=None, HNF=None, shift=None, eps=None):
     if shift is None:
         shift = [0,0,0]
     if eps is None:
-        eps = 1E-10
+        reps = 1E-10
+    if aeps is None:
+        aeps = 1E-10
     
     if HNF is None and grid is None:
         raise ValueError("Either the HNF or the grid generating vectors must "
@@ -58,13 +60,13 @@ def get_irr_kpoints(atoms, grid=None, HNF=None, shift=None, eps=None):
     print("grid",grid)
     print("grid det", np.linalg.det(grid))
     Wrap_Kpoints.getirredkpoints(cell, at_base, at, grid, reciprocal_cell,
-                                            shift, irr_kpoint_list, weights, eps_=eps)
+                                            shift, irr_kpoint_list, weights, reps_=eps, aeps_=aeps)
 
     keep = np.where(weights != 0)[0]
 
     return irr_kpoint_list[keep], weights[keep]
     
-def get_all_kpoints(atoms, HNF=None, grid=None, shift=None, eps=None):
+def get_all_kpoints(atoms, HNF=None, grid=None, shift=None, eps=None, aeps=None):
     """Generates the full k-points list for the system defined by the
     atoms object and either the grid or the HNF given. If both the HNF
     and grid are provided then the grid will be used and the HNF ignored.
@@ -84,7 +86,9 @@ def get_all_kpoints(atoms, HNF=None, grid=None, shift=None, eps=None):
     if shift is None:
         shift = [0,0,0]
     if eps is None:
-        eps = 1E-10
+        reps = 1E-10
+    if aeps is None:
+        aeps = 1E-10
     
     if HNF is None and grid is None:
         raise ValueError("Either the HNF or the grid generating vectors must "
@@ -107,25 +111,26 @@ def get_all_kpoints(atoms, HNF=None, grid=None, shift=None, eps=None):
     kpoint_list = np.zeros((vol,3), dtype=float, order='F')
 
     Wrap_Kpoints.getfullkpointlist(grid, reciprocal_cell,
-                                   shift, kpoint_list, eps_=eps)
+                                   shift, kpoint_list, reps_=reps, aeps_=aeps)
 
     return kpoint_list
+
 
 class Wrap_Kpoints(f90wrap.runtime.FortranModule):
     """
     Module wrap_kpoints
     
     
-    Defined at ../src/wrap_kpoints.f90 lines 1-78
+    Defined at ../src/wrap_kpoints.f90 lines 1-92
     
     """
     @staticmethod
-    def getfullkpointlist(k, r, klvshift, kplist, eps_=None):
+    def getfullkpointlist(k, r, klvshift, kplist, reps_, aeps_):
         """
-        getfullkpointlist(k, r, klvshift, kplist[, eps_])
+        getfullkpointlist(k, r, klvshift, kplist, reps_, aeps_)
         
         
-        Defined at ../src/wrap_kpoints.f90 lines 17-40
+        Defined at ../src/wrap_kpoints.f90 lines 17-46
         
         Parameters
         ----------
@@ -133,20 +138,21 @@ class Wrap_Kpoints(f90wrap.runtime.FortranModule):
         r : float array
         klvshift : float array
         kplist : float array
-        eps_ : float
+        reps_ : float
+        aeps_ : float
         
         """
         _kpoints.f90wrap_getfullkpointlist(k=k, r=r, klvshift=klvshift, kplist=kplist, \
-            eps_=eps_)
+            reps_=reps_, aeps_=aeps_)
     
     @staticmethod
-    def getirredkpoints(a, atbas, at, k, r, klvshift, irrkplist, weights, \
-        eps_=None):
+    def getirredkpoints(a, atbas, at, k, r, klvshift, irrkplist, weights, reps_, \
+        aeps_):
         """
-        getirredkpoints(a, atbas, at, k, r, klvshift, irrkplist, weights[, eps_])
+        getirredkpoints(a, atbas, at, k, r, klvshift, irrkplist, weights, reps_, aeps_)
         
         
-        Defined at ../src/wrap_kpoints.f90 lines 52-78
+        Defined at ../src/wrap_kpoints.f90 lines 59-92
         
         Parameters
         ----------
@@ -158,14 +164,12 @@ class Wrap_Kpoints(f90wrap.runtime.FortranModule):
         klvshift : float array
         irrkplist : float array
         weights : int array
-        eps_ : float
+        reps_ : float
+        aeps_ : float
         
         """
         _kpoints.f90wrap_getirredkpoints(a=a, atbas=atbas, at=at, k=k, r=r, \
-                                         klvshift=klvshift,
-                                         irrkplist=irrkplist,
-                                         weights=weights,
-                                         eps_=eps_)
+            klvshift=klvshift, irrkplist=irrkplist, weights=weights, reps_=reps_, aeps_=aeps_)
     
     _dt_array_initialisers = []
     

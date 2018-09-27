@@ -16,12 +16,13 @@
       	<value identifier="gops" file="g.in.{}"
       	       folder="../tests/get_full_group" rename="g.in"/>
       </assignment>
-      <assignment name="eps_" constant="1E-3"/>
+      <assignment name="reps_" constant="1E-3"/>
+      <assignment name="aeps_" constant="1E-6"/>
     </group>
   </decorates>
 
   <decorates name="kpointgeneration.symmetryReduceKpointList">
-    <group name="simple_cubic" purpose="testing"
+    <group name="symmetry_reduction" purpose="testing"
     	   staging="../unittests/">
      
       <!-- simple cubic -->
@@ -48,24 +49,11 @@
       </test>
 
       <!-- body-centered cubic -->
-      <test identifier="body-centered_cubic_symmetry_reduction"
+      <test identifier="body_centered_cubic_symmetry_reduction"
       	    description="Unit tests for a k-point
       			 grid with a body-centered cubic
       			 real-space lattice."
-      	    timed="true" cases="bcc[1-10]">
-      	<output identifier="klist.out"
-      		folder="../tests/symmetry-reduction" file="klist.out.{}"
-      		template="float.xml" />
-      	<target name="ReducedList" compareto="klist.out"
-      		varfile="klist.out" when="each" />
-      </test>
-
-      <!-- face-centered cubic -->
-      <test identifier="face-centered_cubic_symmetry_reduction"
-      	    description="Unit tests for a k-point
-      			 grid with a face-centered cubic
-      			 real-space lattice."
-      	    timed="true" cases="fcc[1-9]">
+      	    timed="true" cases="bcc[1-10], bcc_2_[1-5]">
       	<output identifier="klist.out"
       		folder="../tests/symmetry-reduction" file="klist.out.{}"
       		template="float.xml" />
@@ -73,12 +61,47 @@
       		varfile="klist.out" when="each" />
       </test>
       
+      <test identifier="body_centered_cubic_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 body-centered cubic real-space lattice."
+      	    timed="true" cases="bcc_2_[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
+
       <!-- face-centered cubic -->
+      <test identifier="face_centered_cubic_symmetry_reduction"
+      	    description="Unit tests for a k-point
+      			 grid with a face-centered cubic
+      			 real-space lattice."
+      	    timed="true" cases="fcc[1-9], fcc_2_[1-10], fcc_vasp[1-6]">
+      	<output identifier="klist.out"
+      		folder="../tests/symmetry-reduction" file="klist.out.{}"
+      		template="float.xml" />
+      	<target name="ReducedList" compareto="klist.out"
+      		varfile="klist.out" when="each" />
+      </test>
+      
+      <test identifier="face_centered_cubic_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 face-centered cubic real-space lattice."
+      	    timed="true" cases="fcc_2_[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
+      
+      <!-- simple tetragonal -->
       <test identifier="tetragonal_symmetry_reduction"
       	    description="Unit tests for a k-point
       			 grid with a tetragonal
       			 real-space lattice."
-      	    timed="true" cases="tet[1-2]">
+      	    timed="true" cases="tet[1-5], tet_2_[1-10], tet_vasp[1-10]">
       	<output identifier="klist.out"
       		folder="../tests/symmetry-reduction" file="klist.out.{}"
       		template="float.xml" />
@@ -86,43 +109,257 @@
       		varfile="klist.out" when="each" />
       </test>      
       
-
-      <!-- <test identifier="body-centered_cubic_vasp_reduced_weights" -->
-      <!-- 	    description="Unit tests for k-point grid weights with a -->
-      <!-- 			 simple cubic real-space lattice." -->
-      <!-- 	    timed="true" cases="bcc_vasp[1-10]"> -->
-      <!-- 	<output identifier="weights.out" -->
-      <!-- 		folder="../tests/temp" file="weights.out.{}" -->
-      <!-- 		template="float.xml" /> -->
-      <!-- 	<target name="weights" compareto="weights.out" -->
-      <!-- 		varfile="weights.out" when="each" /> -->
-      <!-- </test> -->
-
-      <!-- <!-\- face-centered cubic -\->       -->
-      <!-- <group name="fcc" purpose="doesntRunNow" staging="../unittests/"> -->
-      <!-- 	<test identifier="kpts-fcc" description="Unit tests for a k-point -->
-      <!-- 						 grid with a -->
-      <!-- 						 face-centered cubic -->
-      <!-- 						 real-space lattice."	     -->
-      <!-- 	      <output identifier="klist.out" -->
-      <!-- 		      folder="../tests/face-centered_cubic" file="klist.out.{}" -->
-      <!-- 		      template="float.xml" /> -->
-      <!-- 	      <target name="ReducedList" compareto="klist.out" -->
-      <!-- 		      varfile="klist.out" when="each" />	       -->
-      <!-- 	    </test> -->
+      <test identifier="tetragonal_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 tetragonal real-space lattice."
+      	    timed="true" cases="tet_2_[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
       
-      <!-- 	    <test identifier="wts-fcc" description="Unit tests for k-point -->
-      <!-- 					      grid weights with a -->
-      <!-- 					      face-centered cubic -->
-      <!-- 					      real-space lattice." -->
-      <!-- 	    timed="true" cases="[1-10]"> -->
-      <!-- 	<output identifier="weights.out" -->
-      <!-- 		folder="../tests/face-centered_cubic" file="weights.out.{}" -->
-      <!-- 		template="float.xml" /> -->
-      <!-- 	<target name="weights" compareto="weights.out" -->
-      <!-- 		varfile="weights.out" when="each" />	       -->
-      <!-- </test> -->      
+      <!-- body-centered tetragonal -->
+      <test identifier="body_centered_tetragonal_symmetry_reduction"
+      	    description="Unit tests for a k-point
+      			 grid with a body-centered tetragonal
+      			 real-space lattice."
+      	    timed="true" cases="bct_2_[1-10], bct_vasp[1-10]">
+      	<output identifier="klist.out"
+      		folder="../tests/symmetry-reduction" file="klist.out.{}"
+      		template="float.xml" />
+      	<target name="ReducedList" compareto="klist.out"
+      		varfile="klist.out" when="each" />
+      </test>      
+      
+      <test identifier="body_centered_tetragonal_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 body-centered tetragonal real-space lattice."
+      	    timed="true" cases="bct_2_[1-10], bct_vasp[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
 
+      <!-- hexagonal -->
+      <test identifier="hexagonal_symmetry_reduction"
+      	    description="Unit tests for a k-point
+      			 grid with a hexagonal
+      			 real-space lattice."
+      	    timed="true" cases="hex_2_[1-10], hex_vasp[1-10]">
+      	<output identifier="klist.out"
+      		folder="../tests/symmetry-reduction" file="klist.out.{}"
+      		template="float.xml" />
+      	<target name="ReducedList" compareto="klist.out"
+      		varfile="klist.out" when="each" />
+      </test>      
+      
+      <test identifier="hexagonal_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 hexagonal real-space lattice."
+      	    timed="true" cases="hex_2_[1-10], hex_vasp[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
+
+      <!-- rhombohedral -->
+      <test identifier="rhombohedral_symmetry_reduction"
+      	    description="Unit tests for a k-point
+      			 grid with a rhombohedral
+      			 real-space lattice."
+      	    timed="true" cases="rhm_2_[1-10], rhm_vasp[1-10]">
+      	<output identifier="klist.out"
+      		folder="../tests/symmetry-reduction" file="klist.out.{}"
+      		template="float.xml" />
+      	<target name="ReducedList" compareto="klist.out"
+      		varfile="klist.out" when="each" />
+      </test>      
+      
+      <test identifier="rhombohedral_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 rhombohedral real-space lattice."
+      	    timed="true" cases="rhm_2_[1-10], rhm_vasp[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
+
+      <!-- orthorhombic -->
+      <test identifier="orthorhombic_symmetry_reduction"
+      	    description="Unit tests for a k-point
+      			 grid with a orthorhombic
+      			 real-space lattice."
+      	    timed="true" cases="ort_2_[1-10], ort_vasp[1-10]">
+      	<output identifier="klist.out"
+      		folder="../tests/symmetry-reduction" file="klist.out.{}"
+      		template="float.xml" />
+      	<target name="ReducedList" compareto="klist.out"
+      		varfile="klist.out" when="each" />
+      </test>      
+      
+      <test identifier="orthorhombic_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 orthorhombic real-space lattice."
+      	    timed="true" cases="ort_2_[1-10], ort_vasp[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
+
+      <!-- base-centered orthorhombic -->
+      <test identifier="base_centered_orthorhombic_symmetry_reduction"
+      	    description="Unit tests for a k-point
+      			 grid with a base-centered orthorhombic
+      			 real-space lattice."
+      	    timed="true" cases="cco_2_[1-10], cco_vasp[1-10]">
+      	<output identifier="klist.out"
+      		folder="../tests/symmetry-reduction" file="klist.out.{}"
+      		template="float.xml" />
+      	<target name="ReducedList" compareto="klist.out"
+      		varfile="klist.out" when="each" />
+      </test>      
+      
+      <test identifier="base_centered_orthorhombic_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 base-centered orthorhombic real-space lattice."
+      	    timed="true" cases="cco_2_[1-10], cco_vasp[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
+
+      <!-- body-centered orthorhombic -->
+      <test identifier="body_centered_orthorhombic_symmetry_reduction"
+      	    description="Unit tests for a k-point
+      			 grid with a body-centered orthorhombic
+      			 real-space lattice."
+      	    timed="true" cases="bco_2_[1-10], bco_vasp[1-10]">
+      	<output identifier="klist.out"
+      		folder="../tests/symmetry-reduction" file="klist.out.{}"
+      		template="float.xml" />
+      	<target name="ReducedList" compareto="klist.out"
+      		varfile="klist.out" when="each" />
+      </test>      
+      
+      <test identifier="body_centered_orthorhombic_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 body-centered orthorhombic real-space lattice."
+      	    timed="true" cases="bco_2_[1-10], bco_vasp[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
+
+      <!-- face-centered orthorhombic -->
+      <test identifier="face_centered_orthorhombic_symmetry_reduction"
+      	    description="Unit tests for a k-point
+      			 grid with a face-centered orthorhombic
+      			 real-space lattice."
+      	    timed="true" cases="fco_2_[2-4], fco_2_[6-10], fco_vasp[1-10]">
+      	<output identifier="klist.out"
+      		folder="../tests/symmetry-reduction" file="klist.out.{}"
+      		template="float.xml" />
+      	<target name="ReducedList" compareto="klist.out"
+      		varfile="klist.out" when="each" />
+      </test>      
+      
+      <test identifier="face_centered_orthorhombic_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 face-centered orthorhombic real-space lattice."
+      	    timed="true" cases="fco_2_[2-4], fco_2_[6-10], fco_vasp[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
+
+      <!-- monoclinic -->
+      <test identifier="monoclinic_symmetry_reduction"
+      	    description="Unit tests for a k-point
+      			 grid with a monoclinic
+      			 real-space lattice."
+      	    timed="true" cases="mon_2_[1-10], mon_vasp[1-10]">
+      	<output identifier="klist.out"
+      		folder="../tests/symmetry-reduction" file="klist.out.{}"
+      		template="float.xml" />
+      	<target name="ReducedList" compareto="klist.out"
+      		varfile="klist.out" when="each" />
+      </test>      
+      
+      <test identifier="monoclinic_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 monoclinic real-space lattice."
+      	    timed="true" cases="mon_2_[1-10], mon_vasp[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
+
+      <!-- base-centered monoclinic -->
+      <test identifier="base_centered_monoclinic_symmetry_reduction"
+      	    description="Unit tests for a k-point
+      			 grid with a base-centered monoclinic
+      			 real-space lattice."
+      	    timed="true" cases="ccm_2_[1-10], ccm_vasp[1-10]">
+      	<output identifier="klist.out"
+      		folder="../tests/symmetry-reduction" file="klist.out.{}"
+      		template="float.xml" />
+      	<target name="ReducedList" compareto="klist.out"
+      		varfile="klist.out" when="each" />
+      </test>      
+      
+      <test identifier="base_centered_monoclinic_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 monoclinic real-space lattice."
+      	    timed="true" cases="ccm_2_[1-10], ccm_vasp[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
+
+      <!-- triclinic -->
+      <test identifier="triclinic_symmetry_reduction"
+      	    description="Unit tests for a k-point
+      			 grid with a triclinic
+      			 real-space lattice."
+      	    timed="true" cases="tri_2_[1-10], tri_vasp[1-10]">
+      	<output identifier="klist.out"
+      		folder="../tests/symmetry-reduction" file="klist.out.{}"
+      		template="float.xml" />
+      	<target name="ReducedList" compareto="klist.out"
+      		varfile="klist.out" when="each" />
+      </test>      
+      
+      <test identifier="triclinic_reduced_weights"
+      	    description="Unit tests for k-point grid weights with a
+      			 triclinic real-space lattice."
+      	    timed="true" cases="tri_2_[1-10], tri_vasp[1-10]">
+      	<output identifier="weights.out"
+      		folder="../tests/symmetry-reduction" file="weights.out.{}"
+      		template="float.xml" />
+      	<target name="weights" compareto="weights.out"
+      		varfile="weights.out" when="each" />
+      </test>
+      
       <assignment name="SymOps" value="symops" allocate="true">
       	<value identifier="symops" file="symops.in.{}"
       	       folder="../tests/symmetry-reduction" rename="symops.in"/>
@@ -148,8 +385,12 @@
       	       folder="../tests/symmetry-reduction" rename="klist.in"/>
       </assignment>
       
-      <assignment name="eps_" value="const">
+      <assignment name="reps_" value="const">
       	<value identifier="const" constant="1E-6_dp"/>
+      </assignment>
+
+      <assignment name="aeps_" value="const">
+      	<value identifier="const" constant="1E-10_dp"/>
       </assignment>
       
     </group>
@@ -157,1416 +398,501 @@
 
   <decorates name="kpointgeneration.findQpointsInZone">
     <group name="find_qpoints" purpose="testing"
-	   staging="../unittests/">
+  	   staging="../unittests/">
       <test identifier="find_qpoints_sc" cases="[1-2]"
-	    description="Simple cubic lattice vectors." timed="true" >
-	<output identifier="find_qpoints_sc"
-		folder="../tests/find_qpoints"
-		file="sc.out.{}" template="float.xml" />
-	<target name="qpoints" compareto="find_qpoints_sc"
-		varfile="qpoints.out" when="each" />
+  	    description="Simple cubic lattice vectors." timed="true" >
+  	<output identifier="find_qpoints_sc"
+  		folder="../tests/find_qpoints"
+  		file="sc.out.{}" template="float.xml" />
+  	<target name="qpoints" compareto="find_qpoints_sc"
+  		varfile="qpoints.out" when="each" />
       </test>
-      <global name="qpoints" type="real" kind="dp" dimensions=":,:" allocatable="true"/>
       <assignment name="Avecs" value="Afile" allocate="true">
-	<value identifier="Afile" file="sc_A.in.{}"
-	       folder="../tests/find_qpoints" rename="Avecs.in"/>
+  	<value identifier="Afile" file="sc_A.in.{}"
+  	       folder="../tests/find_qpoints" rename="Avecs.in"/>
       </assignment>
       <assignment name="Bvecs" value="Bfile" allocate="true">
-	<value identifier="Bfile" file="sc_B.in.{}"
-	       folder="../tests/find_qpoints" rename="Bvecs.in"/>
+  	<value identifier="Bfile" file="sc_B.in.{}"
+  	       folder="../tests/find_qpoints" rename="Bvecs.in"/>
       </assignment>
       <assignment name="n" value="nfile" allocate="true">
-	<value identifier="nfile" file="sc_n.in.{}"
-	       folder="../tests/find_qpoints" rename="n.in"/>
+  	<value identifier="nfile" file="sc_n.in.{}"
+  	       folder="../tests/find_qpoints" rename="n.in"/>
       </assignment>
       <assignment name="qpoints" constant="0" allocate="n, 3" />
-      <global name="n" type="integer" />
-      <global name="eps_" ignore="true" />
+      <global name="reps_" ignore="true" />
+      <global name="aeps_" ignore="true" />
     </group>
   </decorates>
 
-</fortpy>
+  <!-- <decorates name="kpointgeneration.mapKptsIntoFirstBZ"> -->
+  <!--   <group name="simple_cubic" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-simple_cubic" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a simple cubic -->
+  <!-- 						       real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brillouin zone." -->
+  <!-- 	    timed="true" cases="BZM_sc[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/simple_cubic" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
 
+  <!--     </test> -->
+      
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/simple_cubic" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
 
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/simple_cubic" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
+      
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
+
+  <!--   <group name="body-centered_cubic" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-body-centered_cubic" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a body-centered -->
+  <!-- 						       cubic real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brillouin zone." -->
+  <!-- 	    timed="true" cases="BZM_bcc[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/body-centered_cubic" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
+
+  <!--     </test> -->
+      
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/body-centered_cubic" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
+
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/body-centered_cubic" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
+      
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
+
+  <!--   <group name="face-centered_cubic" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-face-centered_cubic" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a face-centered -->
+  <!-- 						       cubic real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brillouin zone." -->
+  <!-- 	    timed="true" cases="BZM_fcc[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/face-centered_cubic" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
+
+  <!--     </test> -->
+      
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/face-centered_cubic" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
+
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/face-centered_cubic" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
+      
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
+
+  <!--   <group name="orthorhombic" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-orthorhombic" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a orthorhombic -->
+  <!-- 						       real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brilloin zone." -->
+  <!-- 	    timed="true" cases="BZM_orth[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/orthorhombic" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
+
+  <!--     </test> -->
+      
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/orthorhombic" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
+
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/orthorhombic" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
+      
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
     
+  <!--   <group name="base-centered_orthorhombic" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-base-centered_orthorhombic" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a base-centered -->
+  <!-- 						       orthorhombic -->
+  <!-- 						       real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brilloin zone." -->
+  <!-- 	    timed="true" cases="BZM_base_orth[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/base-centered_orthorhombic" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
+
+  <!--     </test> -->
+      
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/base-centered_orthorhombic" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
+
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/base-centered_orthorhombic" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
+      
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
+
+  <!--   <group name="body-centered_orthorhombic" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-body-centered_orthorhombic" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a body-centered -->
+  <!-- 						       orthorhombic -->
+  <!-- 						       real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brilloin zone." -->
+  <!-- 	    timed="true" cases="BZM_body_orth[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/body-centered_orthorhombic" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
+
+  <!--     </test> -->
+      
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/body-centered_orthorhombic" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
+
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/body-centered_orthorhombic" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
+      
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
+
+  <!--   <group name="face-centered_orthorhombic" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-face-centered_orthorhombic" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a face-centered -->
+  <!-- 						       orthorhombic -->
+  <!-- 						       real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brilloin zone." -->
+  <!-- 	    timed="true" cases="BZM_face_orth[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/face-centered_orthorhombic" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
+
+  <!--     </test> -->
+      
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/face-centered_orthorhombic" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
+
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/face-centered_orthorhombic" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
+      
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
+
+  <!--   <group name="hexagonal" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-hexagonal" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a hexagonal -->
+  <!-- 						       real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brilloin zone." -->
+  <!-- 	    timed="true" cases="BZM_hex[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/hexagonal" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
+
+  <!--     </test> -->
+      
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/hexagonal" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
+
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/hexagonal" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
+      
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
+
+  <!--   <group name="rhombohedral" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-rhombohedral" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a rhombohedral -->
+  <!-- 						       real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brilloin zone." -->
+  <!-- 	    timed="true" cases="BZM_rhom[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/rhombohedral" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
+
+  <!--     </test> -->
+      
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/rhombohedral" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
+
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/rhombohedral" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
+      
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
+
+  <!--   <group name="monoclinic" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-monoclinic" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a monoclinic -->
+  <!-- 						       real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brilloin zone." -->
+  <!-- 	    timed="true" cases="BZM_mono[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/monoclinic" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
+
+  <!--     </test> -->
+      
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/monoclinic" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
+
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/monoclinic" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
+      
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
     
-<!--     <!-\- body-centered cubic -\-> -->
-<!--     <group name="body-centered_cubic" purpose="doesnotrun" staging="../unittests/"> -->
-<!--       <test identifier="kpts-bcc" description="Unit tests for a -->
-<!-- 					       k-point grid with a -->
-<!-- 					       body-centered cubic -->
-<!-- 					       real-space lattice." -->
-<!--   	    timed="true" cases="[1-10], vasp[1-10]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/body-centered_cubic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
+  <!--   <group name="base-centered_monoclinic" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-base-centered_monoclinic" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a base-centered -->
+  <!-- 						       monoclinic -->
+  <!-- 						       real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brilloin zone." -->
+  <!-- 	    timed="true" cases="BZM_base_mono[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/base-centered_monoclinic" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
 
-<!--       </test> -->
+  <!--     </test> -->
       
-<!--       <test identifier="wts-bcc" description="Unit tests for k-point -->
-<!-- 					      grid weights with a -->
-<!-- 					      body-centered cubic -->
-<!-- 					      real-space lattice." -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/body-centered_cubic" file="simple-cubic_wts.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/base-centered_monoclinic" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
 
-<!--       </test> -->
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/body-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/body-centered_cubic" rename="K.in"/> -->
-<!-- 	</assignment> -->
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/base-centered_monoclinic" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
       
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/body-centered_cubic" rename="R.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/body-centered_cubic" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/body-centered_cubic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
     
-<!--     <!-\- face-centered cubic -\-> -->
-<!--     <group name="fcc" purpose="doesntRunNow" staging="../unittests/"> -->
-<!--       <test identifier="kpts-fcc" description="Unit tests for a k-point -->
-<!-- 					      grid with a -->
-<!-- 					      face-centered cubic -->
-<!-- 					      real-space lattice." -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/face-centered_cubic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-	      
-<!--       </test> -->
+  <!--   <group name="tetragonal" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-tetragonal" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a tetragonal -->
+  <!-- 						       real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brilloin zone." -->
+  <!-- 	    timed="true" cases="BZM_tet[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/tetragonal" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
+
+  <!--     </test> -->
       
-<!--       <test identifier="wts-fcc" description="Unit tests for k-point -->
-<!-- 					      grid weights with a -->
-<!-- 					      face-centered cubic -->
-<!-- 					      real-space lattice." -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/face-centered_cubic" file="weights.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
-	      
-<!--       </test> -->
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/tetragonal" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
 
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/tetragonal" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
       
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-	
-<!--         <assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="K.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="R.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group>     -->
-
-<!--     <!-\- hexagonal -\-> -->
-<!--     <group name="hex" purpose="doesntRunNow" staging="../unittests/"> -->
-<!--       <test identifier="kpts-hex" description="Unit tests for a k-point -->
-<!-- 					      grid with a hexagonal -->
-<!-- 					      real-space lattice." -->
-<!--   	    timed="true" cases="[1-10], vasp[1-10]">	     -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/hexagonal" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-	      
-<!--       </test> -->
-      
-<!--       <test identifier="wts-hex" description="Unit tests for k-point -->
-<!-- 					      grid weights with a -->
-<!-- 					      hexagonal real-space lattice." -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/hexagonal" file="weights.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
-	      
-<!--       </test> -->
-
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-	
-<!--         <assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/hexagonal" rename="K.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/hexagonal" rename="R.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/hexagonal" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/hexagonal" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/hexagonal" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group>     -->
-
-
-<!--     <!-\- rhombohedral -\-> -->
-<!--     <group name="rhom" purpose="doesntRunNow" staging="../unittests/"> -->
-<!--       <test identifier="kpts-rhom" description="Unit tests for a k-point -->
-<!-- 					      grid with a rhombohedral -->
-<!-- 					      real-space lattice." -->
-<!--   	    timed="true" cases="[1-10], vasp[1-10]">	     -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/rhombohedral" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-	      
-<!--       </test> -->
-      
-<!--       <test identifier="wts-rhom" description="Unit tests for k-point -->
-<!-- 					      grid weights with a rhombohedral -->
-<!-- 					      real-space lattice." -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/rhombohedral" file="weights.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
-	      
-<!--       </test> -->
-
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-	
-<!--         <assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/rhombohedral" rename="K.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/rhombohedral" rename="R.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/rhombohedral" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/rhombohedral" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/rhombohedral" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-    
-
-<!--     <!-\- tetragonal -\-> -->
-<!--     <group name="tet" purpose="doesntRunNow" staging="../unittests/"> -->
-<!--       <test identifier="kpts-tet" description="Unit tests for a k-point -->
-<!-- 					      grid with a tetragonal -->
-<!-- 					      real-space lattice." -->
-<!--   	    timed="true" cases="[1-10], vasp[1-10]">	    	     -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/tetragonal" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-	      
-<!--       </test> -->
-      
-<!--       <test identifier="wts-tet" description="Unit tests for k-point -->
-<!-- 					      grid weights with a -->
-<!-- 					      tetragonal real-space -->
-<!-- 					      lattice." -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/tetragonal" file="weights.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
-	      
-<!--       </test> -->
-
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-	
-<!--         <assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/tetragonal" rename="K.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/tetragonal" rename="R.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/tetragonal" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/tetragonal" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/tetragonal" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-
-
-<!--     <!-\- body-centered_tetragonal -\-> -->
-<!--     <group name="bcc_tet" purpose="doesntRunNow" staging="../unittests/"> -->
-<!--       <test identifier="kpts-bcc_tet" description="Unit tests for a k-point -->
-<!-- 						   grid with a -->
-<!-- 						   body-centered -->
-<!-- 						   tetragonal -->
-<!-- 						   real-space -->
-<!-- 						   lattice." -->
-<!--   	    timed="true" cases="[1-10], vasp[1-10]">	    	     -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/body-centered_tetragonal" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-	      
-<!--       </test> -->
-      
-<!--       <test identifier="wts-bcc_tet" description="Unit tests for k-point -->
-<!-- 						  grid weights with a -->
-<!-- 						  body-centered -->
-<!-- 						  tetragonal -->
-<!-- 						  real-space -->
-<!-- 						  lattice." -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/body-centered_tetragonal" file="weights.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
-	      
-<!--       </test> -->
-
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-	
-<!--         <assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/body-centered_tetragonal" rename="K.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/body-centered_tetragonal" rename="R.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/body-centered_tetragonal" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/body-centered_tetragonal" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/body-centered_tetragonal" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-
-
-<!--     <!-\- orthorhombic -\-> -->
-<!--     <group name="orth" purpose="doesntRunNow" staging="../unittests/"> -->
-<!--       <test identifier="kpts-orth" description="Unit tests for a -->
-<!-- 						k-point grid with an -->
-<!-- 						orthorhombic -->
-<!-- 						real-space lattice." -->
-<!--   	    timed="true" cases="[1-10], vasp[1-10]">	    	     -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/orthorhombic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-	      
-<!--       </test> -->
-      
-<!--       <test identifier="wts-orth" description="Unit tests for -->
-<!-- 					       k-point grid weights with an -->
-<!-- 					       orthorhombic real-space lattice." -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/orthorhombic" file="weights.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
-	      
-<!--       </test> -->
-
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-	
-<!--         <assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/orthorhombic" rename="K.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/orthorhombic" rename="R.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/orthorhombic" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/orthorhombic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/orthorhombic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-
-
-<!--     <!-\- base-centered_orthorhombic -\-> -->
-<!--     <group name="base_orth" purpose="doesntRunNow" staging="../unittests/"> -->
-<!--       <test identifier="kpts-base_orth" description="Unit tests for -->
-<!-- 						     a k-point grid -->
-<!-- 						     with a -->
-<!-- 						     base-centered -->
-<!-- 						     orthorhombic -->
-<!-- 						     real-space -->
-<!-- 						     lattice." -->
-<!--   	    timed="true" cases="[1-10], vasp[1-10]">	    	     -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/base-centered_orthorhombic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-	      
-<!--       </test> -->
-      
-<!--       <test identifier="wts-base_orth" description="Unit tests for -->
-<!-- 						    k-point grid -->
-<!-- 						    weights -->
-<!-- 						    with a -->
-<!-- 						    base-centered -->
-<!-- 						    orthorhombic -->
-<!-- 						    real-space -->
-<!-- 						    lattice." -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/base-centered_orthorhombic" file="weights.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
-	      
-<!--       </test> -->
-
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-	
-<!--         <assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/base-centered_orthorhombic" rename="K.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/base-centered_orthorhombic" rename="R.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/base-centered_orthorhombic" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/base-centered_orthorhombic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/base-centered_orthorhombic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group>     -->
-
-
-<!--     <!-\- body-centered_orthorhombic -\-> -->
-<!--     <group name="bcc_orth" purpose="doesntRunNow" staging="../unittests/"> -->
-<!--       <test identifier="kpts-bcc_orth" description="Unit tests for a -->
-<!-- 						    k-point grid -->
-<!-- 						    with a -->
-<!-- 						    body-centered -->
-<!-- 						    orthorhombic -->
-<!-- 						    real-space -->
-<!-- 						    lattice." -->
-<!--   	    timed="true" cases="[1-10], vasp[1-10]">	    	     -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/body-centered_orthorhombic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-	      
-<!--       </test> -->
-      
-<!--       <test identifier="wts-bcc_orth" description="Unit tests for -->
-<!-- 						   k-point grid -->
-<!-- 						   weights with a -->
-<!-- 						   body-centered -->
-<!-- 						   orthorhombic -->
-<!-- 						   real-space -->
-<!-- 						   lattice." -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/body-centered_orthorhombic" file="weights.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
-	      
-<!--       </test> -->
-
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-	
-<!--         <assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/body-centered_orthorhombic" rename="K.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/body-centered_orthorhombic" rename="R.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/body-centered_orthorhombic" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/body-centered_orthorhombic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/body-centered_orthorhombic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group>     -->
-    
-    
-<!--     <!-\- face-centered_orthorhombic -\-> -->
-<!--     <group name="fcc_orth" purpose="doesntRunNow" staging="../unittests/"> -->
-<!--       <test identifier="kpts-fcc_orth" description="Unit tests for a  -->
-<!-- 						    k-point grid with a -->
-<!-- 						    face-centered -->
-<!-- 						    orthorhombic -->
-<!-- 						    real-space -->
-<!-- 						    lattice." -->
-<!--   	    timed="true" cases="[1-10], vasp[1-10]">	    	     -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/face-centered_orthorhombic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-	      
-<!--       </test> -->
-      
-<!--       <test identifier="wts-fcc_orth" description="Unit tests for -->
-<!-- 						    k-point grid -->
-<!-- 						    weights with a -->
-<!-- 						    face-centered -->
-<!-- 						    orthorhombic -->
-<!-- 						    real-space -->
-<!-- 						    lattice." -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/face-centered_orthorhombic" file="weights.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
-	      
-<!--       </test> -->
-
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-	
-<!--         <assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/face-centered_orthorhombic" rename="K.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/face-centered_orthorhombic" rename="R.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/face-centered_orthorhombic" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/face-centered_orthorhombic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_orthorhombic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group>     -->
-
-
-<!--     <!-\- monoclinic -\-> -->
-<!--     <group name="mono" purpose="doesntRunNow" staging="../unittests/"> -->
-<!--       <test identifier="kpts-mono" description="Unit tests for a -->
-<!-- 						k-point grid -->
-<!-- 						with a -->
-<!-- 						monoclinic -->
-<!-- 						real-space -->
-<!-- 						lattice." -->
-<!--   	    timed="true" cases="[1-10], vasp[1-10]">	    	     -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/monoclinic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-	      
-<!--       </test> -->
-      
-<!--       <test identifier="wts-mono" description="Unit tests for -->
-<!-- 					       k-point grid weights -->
-<!-- 					       with a monoclinic -->
-<!-- 					       real-space lattice." -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/monoclinic" file="weights.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
-	      
-<!--       </test> -->
-
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-	
-<!--         <assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/monoclinic" rename="K.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/monoclinic" rename="R.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/monoclinic" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/monoclinic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/monoclinic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group>     -->
-
-
-<!--     <!-\- base-centered monoclinic -\-> -->
-<!--     <group name="base_mono" purpose="doesntRunNow" staging="../unittests/"> -->
-<!--       <test identifier="kpts-base_mono" description="Unit tests for a -->
-<!-- 						     k-point grid with -->
-<!-- 						     a base-centered -->
-<!-- 						     monoclinic -->
-<!-- 						     real-space -->
-<!-- 						     lattice." -->
-<!--   	    timed="true" cases="[1-10], vasp[1-10]">	    	     -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/base-centered_monoclinic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-	      
-<!--       </test> -->
-      
-<!--       <test identifier="wts-base_mono" description="Unit tests for -->
-<!-- 						    k-point grid -->
-<!-- 						    weights with -->
-<!-- 						    a base-centered -->
-<!-- 						    monoclinic -->
-<!-- 						    real-space -->
-<!-- 						    lattice." -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/base-centered_monoclinic" file="weights.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
-	      
-<!--       </test> -->
-
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-	
-<!--         <assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/base-centered_monoclinic" rename="K.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/base-centered_monoclinic" rename="R.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/base-centered_monoclinic" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/base-centered_monoclinic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/base-centered_monoclinic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group>     -->
-
-
-<!--     <!-\- Triclinic -\-> -->
-<!--     <group name="tri" purpose="doesntRunNow" staging="../unittests/"> -->
-<!--       <test identifier="kpts-tri" description="Unit tests for a -->
-<!-- 					       k-point grid with a -->
-<!-- 					       triclinic real-space lattice" -->
-<!--   	    timed="true" cases="[1-10], vasp[1-10]">	    	     -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/triclinic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="ReducedList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-	      
-<!--       </test> -->
-      
-<!--       <test identifier="wts-tri" description="Unit tests for k-point -->
-<!-- 					      grid weights with a -->
-<!-- 					      triclinic real-space -->
-<!-- os					      lattice" -->
-<!--   	    timed="true" cases="[1-10]"> -->
-<!--   	<output identifier="weights.out" -->
-<!-- 		folder="../tests/triclinic" file="weights.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="weights" compareto="weights.out" -->
-<!-- 		varfile="weights.out" when="each" /> -->
-	      
-<!--       </test> -->
-
-<!--     	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-	
-<!--         <assignment name="K" value="Kfile"> -->
-<!--   	  <value identifier="Kfile" file="K.in.{}" -->
-<!--   		 folder="../tests/triclinic" rename="K.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="R" value="Rfile"> -->
-<!--   	  <value identifier="Rfile" file="R.in.{}" -->
-<!--   		 folder="../tests/triclinic" rename="R.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="kLVshift" value="shift_file"> -->
-<!--   	  <value identifier="shift_file" file="shift.in.{}" -->
-<!--   		 folder="../tests/triclinic" rename="shift.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="UnreducedKpList" value="klist" allocate="true"> -->
-<!--   	  <value identifier="klist" file="klist.in.{}" -->
-<!--   		 folder="../tests/triclinic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-	
-<!-- 	<assignment name="SymOps" value="symops" allocate="true"> -->
-<!--   	  <value identifier="symops" file="symops.in.{}" -->
-<!--   		 folder="../tests/triclinic" rename="symops.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group>     -->
-<!--   </decorates> -->
-  
-
-<!--   <decorates name="kpointgeneration.mapKptsIntoFirstBZ"> -->
-<!--     <!-\- simple cubic -\-> -->
-<!--     <group name="simple_cubic" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-simple_cubic" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a simple cubic -->
-<!-- 						       real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brillouin zone." -->
-<!--   	    timed="true" cases="BZM_sc[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/simple_cubic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-
-<!--       </test> -->
-      
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/simple_cubic" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/simple_cubic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-
-
-<!--     <!-\- body-centered cubic -\-> -->
-<!--     <group name="body-centered_cubic" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-body-centered_cubic" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a body-centered -->
-<!-- 						       cubic real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brillouin zone." -->
-<!--   	    timed="true" cases="BZM_bcc[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/body-centered_cubic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-
-<!--       </test> -->
-      
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/body-centered_cubic" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/body-centered_cubic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-
-<!--     <!-\- face-centered cubic -\-> -->
-<!--     <group name="face-centered_cubic" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-face-centered_cubic" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a face-centered -->
-<!-- 						       cubic real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brillouin zone." -->
-<!--   	    timed="true" cases="BZM_fcc[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/face-centered_cubic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-
-<!--       </test> -->
-      
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/face-centered_cubic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-
-<!--     <!-\- orthorhombic -\-> -->
-<!--     <group name="orthorhombic" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-orthorhombic" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a orthorhombic -->
-<!-- 						       real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brilloin zone." -->
-<!--   	    timed="true" cases="BZM_orth[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/orthorhombic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-
-<!--       </test> -->
-      
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/orthorhombic" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/orthorhombic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-    
-<!--     <!-\- base-centered_orthorhombic -\-> -->
-<!--     <group name="base-centered_orthorhombic" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-base-centered_orthorhombic" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a base-centered -->
-<!-- 						       orthorhombic -->
-<!-- 						       real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brilloin zone." -->
-<!--   	    timed="true" cases="BZM_base_orth[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/base-centered_orthorhombic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-
-<!--       </test> -->
-      
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/base-centered_orthorhombic" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/base-centered_orthorhombic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-
-<!--     <!-\- body-centered_orthorhombic -\-> -->
-<!--     <group name="body-centered_orthorhombic" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-body-centered_orthorhombic" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a body-centered -->
-<!-- 						       orthorhombic -->
-<!-- 						       real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brilloin zone." -->
-<!--   	    timed="true" cases="BZM_body_orth[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/body-centered_orthorhombic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-
-<!--       </test> -->
-      
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/body-centered_orthorhombic" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/body-centered_orthorhombic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-
-<!--     <!-\- face-centered_orthorhombic -\-> -->
-<!--     <group name="face-centered_orthorhombic" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-face-centered_orthorhombic" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a face-centered -->
-<!-- 						       orthorhombic -->
-<!-- 						       real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brilloin zone." -->
-<!--   	    timed="true" cases="BZM_face_orth[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/face-centered_orthorhombic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-
-<!--       </test> -->
-      
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/face-centered_orthorhombic" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/face-centered_orthorhombic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-
-<!--     <!-\- hexagonal -\-> -->
-<!--     <group name="hexagonal" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-hexagonal" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a hexagonal -->
-<!-- 						       real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brilloin zone." -->
-<!--   	    timed="true" cases="BZM_hex[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/hexagonal" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-
-<!--       </test> -->
-      
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/hexagonal" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/hexagonal" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-
-
-<!--     <!-\- rhombohedral -\-> -->
-<!--     <group name="rhombohedral" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-rhombohedral" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a rhombohedral -->
-<!-- 						       real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brilloin zone." -->
-<!--   	    timed="true" cases="BZM_rhom[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/rhombohedral" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-
-<!--       </test> -->
-      
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/rhombohedral" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/rhombohedral" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-
-<!--     <!-\- monoclinic -\-> -->
-<!--     <group name="monoclinic" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-monoclinic" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a monoclinic -->
-<!-- 						       real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brilloin zone." -->
-<!--   	    timed="true" cases="BZM_mono[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/monoclinic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-
-<!--       </test> -->
-      
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/monoclinic" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/monoclinic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-    
-<!--     <!-\- base-centered_monoclinic -\-> -->
-<!--     <group name="base-centered_monoclinic" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-base-centered_monoclinic" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a base-centered -->
-<!-- 						       monoclinic -->
-<!-- 						       real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brilloin zone." -->
-<!--   	    timed="true" cases="BZM_base_mono[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/base-centered_monoclinic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-
-<!--       </test> -->
-      
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/base-centered_monoclinic" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/base-centered_monoclinic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
-    
-<!--     <!-\- tetragonal -\-> -->
-<!--     <group name="tetragonal" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-tetragonal" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a tetragonal -->
-<!-- 						       real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brilloin zone." -->
-<!--   	    timed="true" cases="BZM_tet[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/tetragonal" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
-
-<!--       </test> -->
-      
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/tetragonal" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
-
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/tetragonal" rename="klist.in"/> -->
-<!-- 	</assignment> -->
-      
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
      
-<!--     <!-\- body-centered_tetragonal -\-> -->
-<!--     <group name="body-centered_tetragonal" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-body-centered_tetragonal" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a body-centered -->
-<!-- 						       tetragonal -->
-<!-- 						       real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brilloin zone." -->
-<!--   	    timed="true" cases="BZM_body_tet[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/body-centered_tetragonal" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
+  <!--   <group name="body-centered_tetragonal" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-body-centered_tetragonal" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a body-centered -->
+  <!-- 						       tetragonal -->
+  <!-- 						       real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brilloin zone." -->
+  <!-- 	    timed="true" cases="BZM_body_tet[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/body-centered_tetragonal" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
 
-<!--       </test> -->
+  <!--     </test> -->
       
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/body-centered_tetragonal" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/body-centered_tetragonal" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
 
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/body-centered_tetragonal" rename="klist.in"/> -->
-<!-- 	</assignment> -->
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/body-centered_tetragonal" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
       
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group> -->
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
 
-<!--     <!-\- triclinic -\-> -->
-<!--     <group name="triclinic" purpose="testing" staging="../unittests/"> -->
-<!--       <test identifier="BZM-triclinic" description="Unit tests for -->
-<!-- 						       mapping the -->
-<!-- 						       k-point grid of -->
-<!-- 						       a triclinic -->
-<!-- 						       real-space -->
-<!-- 						       lattice into -->
-<!-- 						       the first -->
-<!-- 						       Brilloin zone." -->
-<!--   	    timed="true" cases="BZM_tri[1-5]"> -->
-<!--   	<output identifier="klist.out" -->
-<!-- 		folder="../tests/triclinic" file="klist.out.{}" -->
-<!-- 		template="float.xml" /> -->
-<!--   	<target name="KpList" compareto="klist.out" -->
-<!-- 		varfile="klist.out" when="each" /> -->
+  <!--   <!-\- triclinic -\-> -->
+  <!--   <group name="triclinic" purpose="testing" staging="../unittests/"> -->
+  <!--     <test identifier="BZM-triclinic" description="Unit tests for -->
+  <!-- 						       mapping the -->
+  <!-- 						       k-point grid of -->
+  <!-- 						       a triclinic -->
+  <!-- 						       real-space -->
+  <!-- 						       lattice into -->
+  <!-- 						       the first -->
+  <!-- 						       Brilloin zone." -->
+  <!-- 	    timed="true" cases="BZM_tri[1-5]"> -->
+  <!-- 	<output identifier="klist.out" -->
+  <!-- 		folder="../tests/triclinic" file="klist.out.{}" -->
+  <!-- 		template="float.xml" /> -->
+  <!-- 	<target name="KpList" compareto="klist.out" -->
+  <!-- 		varfile="klist.out" when="each" /> -->
 
-<!--       </test> -->
+  <!--     </test> -->
       
-<!--     	<assignment name="R" value="reciprocal_lattice_vectors"> -->
-<!--   	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
-<!--   		 folder="../tests/triclinic" rename="rlatvecs.in"/> -->
-<!-- 	</assignment> -->
+  <!--   	<assignment name="R" value="reciprocal_lattice_vectors"> -->
+  <!-- 	  <value identifier="reciprocal_lattice_vectors" file="rlatvecs.in.{}" -->
+  <!-- 		 folder="../tests/triclinic" rename="rlatvecs.in"/> -->
+  <!-- 	</assignment> -->
 
-<!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
-<!--   	  <value identifier="k-point_list" file="klist.in.{}" -->
-<!--   		 folder="../tests/triclinic" rename="klist.in"/> -->
-<!-- 	</assignment> -->
+  <!-- 	<assignment name="KpList" value="k-point_list" allocate="true"> -->
+  <!-- 	  <value identifier="k-point_list" file="klist.in.{}" -->
+  <!-- 		 folder="../tests/triclinic" rename="klist.in"/> -->
+  <!-- 	</assignment> -->
       
-<!-- 	<assignment name="eps_" value="const"> -->
-<!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
-<!-- 	</assignment> -->
-<!--     </group>     -->
-<!--   </decorates>     -->
-<!-- </fortpy> -->
+  <!-- 	<assignment name="eps_" value="const"> -->
+  <!-- 	  <value identifier="const" constant="1E-10_dp"/> -->
+  <!-- 	</assignment> -->
+  <!--   </group> -->
+  <!-- </decorates> -->
+
+</fortpy>

@@ -1,3 +1,7 @@
+0.9.0 (WSM)
+* Added relative and absolute tolerances to the calling interfaces of
+  the subroutines.
+
 0.8.0 (WSM)
 * Added code that allows for the entire k-point folding routine to be
   python wrapped.
