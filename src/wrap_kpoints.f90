@@ -19,7 +19,7 @@ CONTAINS
     real(dp), intent(in) :: R(3,3)
     real(dp), intent(in) :: kLVshift(3)
     real(dp), intent(out)    :: KpList(:,:)
-    real(dp), intent(in), optional:: eps_
+    real(dp), intent(in), optional:: reps_, aeps_
 
     real(dp), pointer :: temp_KpList(:,:)
     real(dp) :: aeps, reps
@@ -63,7 +63,7 @@ CONTAINS
     integer, intent(inout) :: at(:)
     real(dp), intent(out)    :: IrrKpList(:,:)
     integer, intent(out)     :: weights(:)
-    real(dp), intent(in), optional:: eps_
+    real(dp), intent(in), optional:: reps_, aeps_
 
     real(dp), pointer :: temp_IrrKpList(:,:), temp_AtBas(:,:)
     integer, pointer :: temp_weights(:)
