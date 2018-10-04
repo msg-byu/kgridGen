@@ -1,3 +1,7 @@
+0.9.1 (WSM)
+* Changed all integer comparisons to be absolute with an eps value
+  that changes with the number of k-points.
+
 0.9.0 (WSM)
 * Added relative and absolute tolerances to the calling interfaces of
   the subroutines.
