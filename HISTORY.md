@@ -1,3 +1,9 @@
+0.8.0  (WSM)
+* Changed the code to use `SmithNormalForm_li` so that we have greater
+  numerical stability.
+* Added an optional output flag so that if the `SmithNormalForm`
+  algorithm overflows the code won't die.
+
 0.7.4 (WSM)
 * Changed the code so that it uses integer rotation matrices instead
   of floats.
