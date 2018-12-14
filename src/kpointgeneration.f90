@@ -2,7 +2,7 @@ MODULE kpointgeneration
   use num_types
   use numerical_utilities, only: equal
   use vector_matrix_utilities
-  use rational_mathematics, only: HermiteNormalForm, SmithNormalForm
+  use rational_mathematics, only: HermiteNormalForm, SmithNormalForm_li
   use symmetry
   use group_theory
   implicit none
@@ -134,17 +134,22 @@ CONTAINS
   !!<parameter regular="true" name="A">The real space lattice vectors.</parameter>
   !!<parameter regular="true" name="AtBas">The atomic basis in lattice coordinates.</parameter>
   !!<parameter regular="true" name="at">Atomic occupancy list.</parameter>
-  subroutine generateIrredKpointList(A,AtBas,at,K, R, kLVshift, IrrKpList, weights, reps_, aeps_)
+  !!<parameter name="err_" regular="true">Only present if SNF
+  !!overfolws are being checked for, returns 1 in case of
+  !!overflow.</parameter>
+  subroutine generateIrredKpointList(A,AtBas,at,K, R, kLVshift, IrrKpList, weights, reps_, &
+       aeps_, err_)
     real(dp), intent(in) :: K(3,3), A(3,3)
     real(dp), intent(in) :: R(3,3)
     real(dp), intent(in) :: kLVshift(3)
     real(dp), pointer    :: IrrKpList(:,:), AtBas(:,:)
     integer, pointer     :: weights(:)
-    real(dp), intent(in), optional:: reps_, aeps_
+    real(dp), intent(in), optional :: reps_, aeps_
     integer, intent(inout)  :: at(:)
     real(dp), pointer    :: KpList(:,:)
     real(dp), pointer    :: pgOps(:,:,:), trans(:,:)
     real(dp)             :: reps, aeps
+    integer, intent(out), optional :: err_
 
     if(.not. present(reps_)) then
        reps = 1e-10_dp
@@ -161,8 +166,13 @@ CONTAINS
     call get_fullSpaceGroup(pgOps, reps, aeps)
 
     call generateFullKpointList(K, R, kLVshift, KpList, reps_=reps, aeps_=aeps)
-    call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, &
-         reps_=reps, aeps_=aeps)
+    if (present(err_)) then
+       call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, &
+            reps_=reps, aeps_=aeps, err_=err_)
+    else 
+       call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, &
+            reps_=reps, aeps_=aeps)
+    end if
     deallocate(KpList,pgOps,trans)
   endsubroutine generateIrredKpointList
 
@@ -264,7 +274,7 @@ CONTAINS
     real(dp), intent(in) :: R(3,3)
     real(dp), intent(in) :: kLVshift(3)
     real(dp), pointer    :: KpList(:,:)
-    real(dp), intent(in), optional:: reps_, aeps_
+    real(dp), intent(in), optional :: reps_, aeps_
 
     real(dp) :: Kinv(3,3) ! Inverse of the k-grid cell 
     real(dp) :: Rinv(3,3) ! Inverse of reciprocal cell
@@ -383,8 +393,11 @@ CONTAINS
   !!parameter for relative tolerances. (optional) </parameter>
   !!<parameter regular="true" name="aeps_"> A finite precision
   !!parameter for absolute tolerances. (optional) </parameter>
+  !!<parameter name="err_" regular="true">Only present if SNF
+  !!overfolws are being checked for, returns 1 in case of
+  !!overflow.</parameter>
   subroutine symmetryReduceKpointList(K, R, kLVshift, UnreducedKpList, SymOps, &
-       ReducedList, weights, reps_, aeps_)
+       ReducedList, weights, reps_, aeps_, err_)
     real(dp), intent(in) :: K(3,3), R(3,3) 
     real(dp), intent(in) :: kLVshift(3) 
     real(dp), intent(in) :: UnreducedKpList(:,:) 
@@ -392,6 +405,7 @@ CONTAINS
     real(dp), pointer    :: ReducedList(:,:)
     integer, pointer     :: weights(:) 
     real(dp), optional   :: reps_, aeps_
+    integer, intent(out), optional :: err_
 
     integer :: iOp, nOps, iUnRdKpt, nUR, cOrbit, idx, i, sum
     integer :: hashTable(size(UnreducedKpList,1))
@@ -403,11 +417,12 @@ CONTAINS
     integer :: N(3,3) ! Integer transformation that takes K to R
 
     ! HNF, SNF transform matrices, SNF, diag(SNF)
-    integer :: H(3,3), L(3,3), Ri(3,3), S(3,3), B(3,3), D(3)
-    integer(li) :: L_long(3,3), D_long(3)
-    real(dp):: reps, aeps, int_eps
+    integer :: H(3,3), S(3,3), B(3,3)
+    integer(li) :: L(3,3), D(3), Ri(3,3)
+    real(dp):: reps, aeps
     logical :: err
-    integer :: zz, n_pnts
+    integer :: zz
+    integer :: intSymOp(3,3,size(SymOps,3))
     
     if(.not. present(reps_)) then
        reps = 1e-10_dp
@@ -461,30 +476,22 @@ CONTAINS
     
     ! Integer transformation matrix that takes K to R, not necessarily HNF at the outset
     N = nint(matmul(InvK,R))
-    n_pnts = determinant(N)
-
-    if (n_pnts < 1000) then
-       int_eps = 1E-3_dp
-    else if ((n_pnts >= 1000) .and. (n_pnts < 10000)) then
-       int_eps = 1E-3_dp
-    else if ((n_pnts >= 10000) .and. (n_pnts < 100000)) then
-       int_eps = 1E-2_dp
-    else if (n_pnts >= 100000) then
-       int_eps = 1E-1_dp
-    end if
     
     ! Find the HNF of N, store it in H (B is the transformation matrix)
     call HermiteNormalForm(N,H,B)
     
     ! Left side of transform will be used later, right side (Ri) will not be.
-    call SmithNormalForm(H,L,S,Ri)
+    if (present(err_)) then
+       call SmithNormalForm_li(H,L,S,Ri,err_=err_)
+       if (err_ == 1) then
+          return
+       end if
+    else
+       call SmithNormalForm_li(H,L,S,Ri)       
+    end if
 
     ! Diagonal of the SNF.
     D = (/S(1,1),S(2,2),S(3,3)/)
-
-    ! Convert L and D to long integers.
-    L_long = int(L, 8)
-    D_long = int(D, 8)
 
     ! Count how many unique orbits there are. I.e., the number of unique kpoints
     cOrbit = 0
@@ -503,11 +510,15 @@ CONTAINS
 
     ! Count the number of members of each orbit.
     iWt = 0
+    ! Convert the rotation matrix to integer form
+    do zz=1,size(SymOps,3)
+       intSymOp(:,:,zz) = nint(matmul(InvR, matmul(SymOps(:,:,zz), R)))
+    end do
 
     do iUnRdKpt = 1,nUR ! Loop over each k-point and mark off its symmetry brothers
        zz = 0       
        urKpt = UnreducedKpList(iUnRdKpt,:) ! unrotated k-point (shorter name for clarity)
-       idx = findKptIndex(urKpt-shift, InvK, L_long, D_long, rtol_=reps, atol_=int_eps)
+       idx = findKptIndex(urKpt-shift, InvK, L, D, rtol_=reps, atol_=aeps)
        
        if (hashTable(idx)/=0) cycle ! This k-point is already on an orbit, skip it
 
@@ -519,7 +530,7 @@ CONTAINS
        do iOp = 1,nOps ! Loop over each symmetry operator, applying it to each k-point
           
           ! Rotate the k-point
-          roKpt = matmul(SymOps(:,:,iOp), urKpt)
+          roKpt = matmul(R, matmul(intSymOp(:,:,iOp), matmul(InvR, urKpt)))
           
           ! Make sure the rotated k-point is still part of the kgrid. If not, cycle
           call bring_into_cell(roKpt, InvR, R, aeps)
@@ -528,12 +539,12 @@ CONTAINS
           ! reason for removing the shift is our indexing method doesn't work if the
           ! grid is moved off the origin.
           roKpt = roKpt - shift
-          if (.not. all(abs(matmul(invK,roKpt) - nint(matmul(invK,roKpt))) < int_eps)) then
+          if (.not. equal(matmul(invK,roKpt), nint(matmul(invK,roKpt)), reps, aeps)) then
              cycle
           endif
 
           ! Find the index of this k-point.
-          idx = findKptIndex(roKpt, InvK, L_long, D_long, rtol_=reps, atol_=int_eps)
+          idx = findKptIndex(roKpt, InvK, L, D, rtol_=reps, atol_=aeps)
           
           ! Is this a new addition to the orbit?
           if (hashTable(idx)==0) then
@@ -636,7 +647,7 @@ CONTAINS
       gpt = matmul(InvK, kpt)
       
       ! Make sure the k-point is a lattice point of K.
-      if (.not. all(abs(gpt - int(nint(gpt, 8))) < atol)) then
+      if (.not. equal(gpt, int(nint(gpt, 8)), rtol, atol)) then
          write(*,*) "ERROR: (findKptIndex in kpointGeneration)"
          write(*,*) "The k-point is not a lattice point of the generating vectors."
          stop
@@ -684,7 +695,6 @@ CONTAINS
 
 
     real(dp) :: reps, aeps, shift(3)
-    real(dp), pointer    :: pgOps(:,:,:), trans(:,:)
     real(dp), dimension(3,3)             :: Ainv, Binv
     real(dp), pointer :: qList(:,:)
     
