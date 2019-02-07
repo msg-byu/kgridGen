@@ -65,7 +65,8 @@ CONTAINS
     integer, intent(out)     :: weights(:)
     real(dp), intent(in), optional:: reps_, aeps_
 
-    real(dp), pointer :: temp_IrrKpList(:,:), temp_AtBas(:,:)
+    real(dp), pointer :: temp_IrrKpList(:,:)
+    real(dp), allocatable :: temp_AtBas(:,:)
     integer, pointer :: temp_weights(:)
     real(dp) :: aeps, reps
 

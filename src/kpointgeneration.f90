@@ -142,12 +142,13 @@ CONTAINS
     real(dp), intent(in) :: K(3,3), A(3,3)
     real(dp), intent(in) :: R(3,3)
     real(dp), intent(in) :: kLVshift(3)
-    real(dp), pointer    :: IrrKpList(:,:), AtBas(:,:)
+    real(dp), pointer    :: IrrKpList(:,:)
+    real(dp), allocatable :: AtBas(:,:)
     integer, pointer     :: weights(:)
     real(dp), intent(in), optional :: reps_, aeps_
     integer, intent(inout)  :: at(:)
     real(dp), pointer    :: KpList(:,:)
-    real(dp), pointer    :: pgOps(:,:,:), trans(:,:)
+    real(dp), allocatable    :: pgOps(:,:,:), trans(:,:)
     real(dp)             :: reps, aeps
     integer, intent(out), optional :: err_
 
@@ -190,7 +191,7 @@ CONTAINS
   !!<parameter regular="true" name="aeps_"> A finite precision
   !!parameter for absolute tolerances. (optional) </parameter>
   subroutine get_fullSpaceGroup(g, reps_, aeps_)
-    real(dp), pointer:: g(:,:,:)
+    real(dp), allocatable :: g(:,:,:)
     real(dp), optional :: reps_, aeps_
 
     real(dp) :: inv(3,3), new_op(3,3)
