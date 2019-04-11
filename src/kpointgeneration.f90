@@ -134,11 +134,15 @@ CONTAINS
   !!<parameter regular="true" name="A">The real space lattice vectors.</parameter>
   !!<parameter regular="true" name="AtBas">The atomic basis in lattice coordinates.</parameter>
   !!<parameter regular="true" name="at">Atomic occupancy list.</parameter>
+  !!<parameter regular="true" name="symm_">A flag to control the
+  !!symmetries to include. 0 means use all symmetries, 1 means only
+  !!use the space group, 2 means only use time reversal symmetry, and
+  !!3 means use no symmetry.</parameter>
   !!<parameter name="err_" regular="true">Only present if SNF
   !!overfolws are being checked for, returns 1 in case of
   !!overflow.</parameter>
   subroutine generateIrredKpointList(A,AtBas,at,K, R, kLVshift, IrrKpList, weights, reps_, &
-       aeps_, err_)
+       aeps_, symm_, err_)
     real(dp), intent(in) :: K(3,3), A(3,3)
     real(dp), intent(in) :: R(3,3)
     real(dp), intent(in) :: kLVshift(3)
@@ -151,6 +155,8 @@ CONTAINS
     real(dp), allocatable    :: pgOps(:,:,:), trans(:,:)
     real(dp)             :: reps, aeps
     integer, intent(out), optional :: err_
+    integer, intent(in) , optional :: symm_
+    integer :: symm
 
     if(.not. present(reps_)) then
        reps = 1e-10_dp
@@ -162,9 +168,25 @@ CONTAINS
     else
        aeps =  aeps_
     endif
+    if (.not. present(symm_)) then
+       symm = 0
+    else
+       symm = symm_
+    end if
 
-    call get_spaceGroup(A, at, AtBas, pgOps, trans, .true., reps)
-    call get_fullSpaceGroup(pgOps, reps, aeps)
+    if (symm == 0) then
+       call get_spaceGroup(A, at, AtBas, pgOps, trans, .true., reps)
+       call get_fullSpaceGroup(pgOps, reps, aeps)
+    else if (symm == 1) then
+       call get_spaceGroup(A, at, AtBas, pgOps, trans, .true., reps)
+    else if (symm == 2) then
+       allocate(pgOps(3,3,2))
+       pgOps(:,:,1) = reshape((/1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp, 1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp, 1.0_dp/), (/3,3/))
+       pgOps(:,:,2) = reshape((/-1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp, -1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp, -1.0_dp/), (/3,3/))
+    else
+       allocate(pgOps(3,3,1))
+       pgOps(:,:,1) = reshape((/1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp, 1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp, 1.0_dp/), (/3,3/))
+    end if
 
     call generateFullKpointList(K, R, kLVshift, KpList, reps_=reps, aeps_=aeps)
     if (present(err_)) then
