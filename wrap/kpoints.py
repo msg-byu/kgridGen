@@ -3,7 +3,7 @@ import f90wrap.runtime
 import logging
 import numpy as np
 
-def get_irr_kpoints(atoms, grid=None, HNF=None, shift=None, eps=None, aeps=None):
+def get_irr_kpoints(atoms, grid=None, HNF=None, shift=None, reps=None, aeps=None):
     """Generates the irreducible k-point set for the system defined by the
     atoms object and either the grid or the HNF given. If both the HNF
     and grid are provided then the grid will be used and the HNF ignored.
@@ -22,7 +22,7 @@ def get_irr_kpoints(atoms, grid=None, HNF=None, shift=None, eps=None, aeps=None)
 
     if shift is None:
         shift = [0,0,0]
-    if eps is None:
+    if reps is None:
         reps = 1E-10
     if aeps is None:
         aeps = 1E-10
@@ -60,7 +60,7 @@ def get_irr_kpoints(atoms, grid=None, HNF=None, shift=None, eps=None, aeps=None)
     print("grid",grid)
     print("grid det", np.linalg.det(grid))
     Wrap_Kpoints.getirredkpoints(cell, at_base, at, grid, reciprocal_cell,
-                                            shift, irr_kpoint_list, weights, reps_=eps, aeps_=aeps)
+                                            shift, irr_kpoint_list, weights, reps_=reps, aeps_=aeps)
 
     keep = np.where(weights != 0)[0]
 
