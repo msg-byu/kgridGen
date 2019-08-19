@@ -9,8 +9,8 @@ subroutine f90wrap_getfullkpointlist(k, r, klvshift, kplist, reps_, aeps_, n0, &
     real(8), intent(in), dimension(3,3) :: r
     real(8), intent(in), dimension(3) :: klvshift
     real(8), intent(inout), dimension(n0,n1) :: kplist
-    real :: reps_
-    real :: aeps_
+    real(8) :: reps_
+    real(8) :: aeps_
     integer :: n0
     !f2py intent(hide), depend(kplist) :: n0 = shape(kplist,0)
     integer :: n1
@@ -32,8 +32,8 @@ subroutine f90wrap_getirredkpoints(a, atbas, at, k, r, klvshift, irrkplist, &
     real(8), intent(in), dimension(3) :: klvshift
     real(8), intent(inout), dimension(n3,n4) :: irrkplist
     integer, intent(inout), dimension(n5) :: weights
-    real :: reps_
-    real :: aeps_
+    real(8) :: reps_
+    real(8) :: aeps_
     integer :: n0
     !f2py intent(hide), depend(atbas) :: n0 = shape(atbas,0)
     integer :: n1

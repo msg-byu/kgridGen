@@ -1,3 +1,8 @@
+0.10.0 (WSM)
+* Added an input flag that changes the way the space group is
+  generated allowing the user to specify if the space_group or
+  time_reversal symmetries are to be used.
+
 0.9.1  (WSM)
 * Changed the code to use `SmithNormalForm_li` so that we have greater
   numerical stability.
