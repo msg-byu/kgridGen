@@ -1,17 +1,18 @@
 PROGRAM kpoint_driver
-  use kpointGeneration
-  use num_types
-  use vector_matrix_utilities
-  use symmetry, only : get_lattice_pointGroup
-  use rational_mathematics, only: HermiteNormalForm
-  implicit none  
-  real(dp)              :: K(3,3), R(3,3), Hinv(3,3), eps, shift(3), H(3,3)
-  real(dp), pointer     :: klist(:,:)
-  real(dp), pointer     :: pgOps(:,:,:), rdKlist(:,:)
-  integer, pointer      :: weights(:)
-  integer i
+  USE kpointGeneration
+  USE num_types
+  USE vector_matrix_utilities
+  USE symmetry, ONLY : get_lattice_pointGroup
+  USE rational_mathematics, ONLY: HermiteNormalForm
+  IMPLICIT NONE
+  REAL(dp)              :: K(3,3), R(3,3), Hinv(3,3), reps, aeps, shift(3)
+  REAL(dp)              :: H(3,3)
+  REAL(dp), POINTER     :: klist(:,:)
+  REAL(dp), POINTER     :: pgOps(:,:,:), rdKlist(:,:)
+  INTEGER, POINTER      :: weights(:)
+  INTEGER i
   ! integer H(3,3), i
-  
+
   ! shift = (/ 0.0_dp, 0.0_dp, 0.0_dp /)
   ! R = transpose(reshape((/ -0.0_dp, 1.0_dp, 1.0_dp, &
   !                         1.0_dp, 0.0_dp, 1.0_dp, &
@@ -24,11 +25,11 @@ PROGRAM kpoint_driver
   ! eps = 1e-10_dp
   ! H = real(H,dp)
   ! call matrix_inverse(real(H,dp), Hinv, eps_=eps)
-  
+
   ! Columns of K are the grid generating vectors.
   ! K = matmul(R,Hinv)
 
-  
+
   ! Reciprocal lattice vectors
   ! R = transpose(reshape((/ 1.98520863_dp,    0.00000000_dp,   0.00000000_dp, &
   !                          0.0_dp,           1.44640546_dp,   0.00000000_dp, &
@@ -38,10 +39,10 @@ PROGRAM kpoint_driver
   ! H = transpose(reshape((/ 2, 0, 0, &
   !                          0, 2, 0, &
   !                          0, 0, 2 /),(/3,3/)))
-  
+
   ! Shift of grid in grid coordinates.
-  ! shift = (/ 5.8_dp, 5.8_dp, 5.8_dp /)  
-  
+  ! shift = (/ 5.8_dp, 5.8_dp, 5.8_dp /)
+
   ! write(*,'(3("R: ",3(1x,f7.3),/))') (R(i,:),i=1,3)
   ! write(*,'(3("H: ",3(1x,i3),/))') (H(i,:),i=1,3)
   ! write(*,'(3("Hinv: ",3(1x,f7.3),/))') (Hinv(i,:),i=1,3)
@@ -83,44 +84,45 @@ PROGRAM kpoint_driver
 
 
   ! Map into first Brillouin zone tests
-  eps = 1e-10_dp
+  reps = 1e-8_dp
+  aeps = 1e-10_dp
 
   shift = (/ 0.0_dp, -1.5_dp, 0.5_dp /)
-  R = transpose(reshape((/ 0.0_dp, 0.86172861889_dp, 0.86172861889_dp, &
-                          0.86172861889_dp, 0.0_dp, 0.86172861889_dp, &
-                          0.86172861889_dp, 0.86172861889_dp, 0.0_dp /),(/3,3/)))
-  H = transpose(reshape((/ 2, 0, 0, &
-                          2, 3, 0, &
-                          3, 1, 4 /),(/3,3/)))
-  
-  call matrix_inverse(real(H,dp), Hinv, eps_=eps)  
-  ! Columns of K are the grid generating vectors.
-  K = matmul(R,Hinv)
-  write(*,'(3("K: ",3(1x,f11.7),/))') (K(i,:),i=1,3)
-  call get_lattice_pointGroup(R, pgOps, eps)    
-  call generateFullKpointList(K, R, shift, klist, eps)
-  write(*,'("shift: ",3(f6.3,1x))') shift 
-  call symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, &
-       eps_=eps)
-  
-  
-  write(*,'(//"**********")')
-  do i = 1,size(rdKlist,1)
-     write(*,'(3(1x,f9.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
-  end do
+  R = TRANSPOSE(RESHAPE((/ 0.0_dp, 0.86172861889_dp, 0.86172861889_dp, &
+       0.86172861889_dp, 0.0_dp, 0.86172861889_dp, &
+       0.86172861889_dp, 0.86172861889_dp, 0.0_dp /),(/3,3/)))
+  H = TRANSPOSE(RESHAPE((/ 2, 0, 0, &
+       2, 3, 0, &
+       3, 1, 4 /),(/3,3/)))
 
-  write(*,'(//)')
-  write(*,'("Unrd kpts: ",i7)') size(klist,1)
-  write(*,'("Rdcd kpts: ",i7)') size(rdKlist,1)
-  write(*,'("Rdn ratio: ",3x,f4.1)') size(klist,1)/real(size(weights))
-  
-  call mapKptsIntoFirstBZ(R, rdKlist, eps)
-   
-  write(*,'(//"**********")')  
-  do i = 1,size(rdKlist,1)
-     write(*,'(3(1x,f9.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
-  end do  
-  write(*,'(//"**********")')
-  
-  
+  CALL matrix_inverse(REAL(H,dp), Hinv, eps_=aeps)
+  ! Columns of K are the grid generating vectors.
+  K = MATMUL(R,Hinv)
+  WRITE(*,'(3("K: ",3(1x,f11.7),/))') (K(i,:),i=1,3)
+  CALL get_lattice_pointGroup(R, pgOps, eps_=aeps)
+  CALL generateFullKpointList(K, R, shift, klist, reps_=reps,aeps_=aeps)
+  WRITE(*,'("shift: ",3(f6.3,1x))') shift
+  CALL symmetryReduceKpointList(K, R, shift,  klist, pgOps, rdKlist, weights, &
+       reps_=reps,aeps_=aeps)
+
+
+  WRITE(*,'(//"**********")')
+  DO i = 1,SIZE(rdKlist,1)
+     WRITE(*,'(3(1x,f9.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
+  END DO
+
+  WRITE(*,'(//)')
+  WRITE(*,'("Unrd kpts: ",i7)') SIZE(klist,1)
+  WRITE(*,'("Rdcd kpts: ",i7)') SIZE(rdKlist,1)
+  WRITE(*,'("Rdn ratio: ",3x,f4.1)') SIZE(klist,1)/REAL(SIZE(weights))
+
+  CALL mapKptsIntoBZ(R, rdKlist, reps_=reps, aeps_=aeps)
+
+  WRITE(*,'(//"**********")')
+  DO i = 1,SIZE(rdKlist,1)
+     WRITE(*,'(3(1x,f9.3),3x,"w:",i5)') rdKlist(i,:),weights(i)
+  END DO
+  WRITE(*,'(//"**********")')
+
+
 END PROGRAM kpoint_driver
