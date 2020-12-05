@@ -45,7 +45,7 @@ CONTAINS
        aeps =  aeps_
     endif
 
-    call matrix_inverse(R, Rinv, err)
+    call matrix_inverse(R, Rinv, err, reps)
     if (err) then
        write(*,*) "ERROR: (mapKptsIntoBZ in generateKpoints.f90):"
        write(*,*) "The reciprocal lattice vectors are linearly dependent."
@@ -53,7 +53,7 @@ CONTAINS
     endif
     
     call minkowski_reduce_basis(R, minkedR, reps)
-    call matrix_inverse(minkedR, minkedRinv, err)
+    call matrix_inverse(minkedR, minkedRinv,err)
     if (err) then
        write(*,*) "ERROR: (mapKptsIntoBZ in generateKpoints.f90):"
        write(*,*) "The Minkowski reduced lattice vectors are linearly dependent."
@@ -669,8 +669,10 @@ CONTAINS
       ! Put the k-point in lattice (grid) coordinates.
       gpt = matmul(InvK, kpt)
       
-      ! Make sure the k-point is a lattice point of K.
-      if (.not. equal(gpt, int(nint(gpt, 8)), rtol, atol)) then
+      ! Make sure the k-point is a lattice point of K. 
+      ! The value of eps, 1E-3, here was empirically chosen when the code was initially tested.
+      ! If eps is too tight, this check often fail for very fine meshes. 
+      if (.not. equal(gpt, int(nint(gpt,dp)), 1E-3_dp, atol)) then
          write(*,*) "ERROR: (findKptIndex in kpointGeneration)"
          write(*,*) "The k-point is not a lattice point of the generating vectors."
          stop
@@ -679,7 +681,7 @@ CONTAINS
       ! Since this k-point is part of the grid, within some tolerance (which was verified
       ! in the previous check), we can safely remove any finite precision errors in the
       ! calculation of gpt and thereby avoid error propagation.
-      int_gpt = nint(gpt, 8)
+      int_gpt = nint(gpt,dp)
             
       ! Convert the k-point to group coordinates and bring into the first unit cell.      
       gpt = modulo(matmul(L, int_gpt), D)
