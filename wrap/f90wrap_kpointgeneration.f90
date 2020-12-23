@@ -28,7 +28,7 @@ subroutine f90wrap_findqpointsinzone(avecs, bvecs, n, qpoints, reps_, aeps_, n0,
     integer :: n1
     !f2py intent(hide), depend(qpoints) :: n1 = shape(qpoints,1)
     call findqpointsinzone(Avecs=avecs, Bvecs=bvecs, n=n, qPoints=qpoints, &
-        reps_=reps_, aeps_=aeps)
+        reps_=reps_, aeps_=aeps_)
 end subroutine f90wrap_findqpointsinzone
 
 ! End of module kpointgeneration defined in file ../src/kpointgeneration.f90
