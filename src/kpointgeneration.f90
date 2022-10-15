@@ -53,7 +53,8 @@ CONTAINS
     endif
     
     call minkowski_reduce_basis(R, minkedR, reps)
-    call matrix_inverse(minkedR, minkedRinv, err)
+    call matrix_inverse(minkedR, minkedRinv, err, reps)
+
     if (err) then
        write(*,*) "ERROR: (mapKptsIntoBZ in generateKpoints.f90):"
        write(*,*) "The Minkowski reduced lattice vectors are linearly dependent."
@@ -330,10 +331,10 @@ CONTAINS
        write(*,*) abs(determinant(K)), abs(determinant(R))
        stop
     endif
-    call matrix_inverse(K,Kinv,err)
+    call matrix_inverse(K,Kinv,err,reps)
     if (err) then
        write(*,*) "ERROR: (generateFullKpointList in generateKpoints.f90):"
-       write(*,*) "The kgrid generating vectors are linearly dependent."
+       write(*,*) "The kgrid generating vectors are linearly dependent"
        stop
     endif
 
@@ -348,7 +349,7 @@ CONTAINS
     
     if (err) then       
        write(*,*) "ERROR: (generateFullKpointList in generateKpoints.f90):"
-       write(*,*) "The reciprocal lattice vectors are linearly dependent."
+       write(*,*) "The reciprocal lattice vectors are linearly dependent"
        stop
     endif
 
@@ -452,7 +453,7 @@ CONTAINS
     else
        reps =  reps_
     endif
-
+    
     if(.not. present(aeps_)) then
        aeps = 1e-10_dp
     else
@@ -597,7 +598,7 @@ CONTAINS
           write(*,*) "ERROR: (symmetryReduceKpointList in generateKpoints.f90)"
           write(*,*) "The length of an orbit did not divide the group size"
           write(*,'("Group size:",i3,"   Orbit length:",i3)') nOps, weights(i)
-          ! stop
+          write(*,'("Tolerances in this routine may be too tight for the precision of the given cell.")')
        endif
     enddo
 
@@ -670,7 +671,7 @@ CONTAINS
       gpt = matmul(InvK, kpt)
       
       ! Make sure the k-point is a lattice point of K.
-      if (.not. equal(gpt, int(nint(gpt, 8)), rtol, atol)) then
+      if (.not. equal(gpt, int(nint(gpt, 8)), 1E-3_dp, atol)) then
          write(*,*) "ERROR: (findKptIndex in kpointGeneration)"
          write(*,*) "The k-point is not a lattice point of the generating vectors."
          stop
