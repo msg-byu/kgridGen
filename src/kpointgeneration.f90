@@ -196,7 +196,8 @@ CONTAINS
        call symmetryReduceKpointList(K, R, kLVshift, KpList, pgOps, IrrKpList, weights, &
             reps_=reps, aeps_=aeps)
     end if
-    deallocate(KpList,pgOps,trans)
+    deallocate(KpList,pgOps)
+    if (allocated(trans)) deallocate(trans)
   endsubroutine generateIrredKpointList
 
   !!<summary>Generates the full space group from the crystal space
